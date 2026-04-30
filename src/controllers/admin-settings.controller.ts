@@ -2,6 +2,7 @@ import { Controller, Get, Post, Param, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from '../services/auth.service';
 import { SettingsService } from '../services/settings.service';
+import { UploadService } from '../services/upload.service';
 import { getAuthFromRequest } from '../common/auth.helper';
 
 const SETTING_KEYS = [
@@ -12,6 +13,7 @@ const SETTING_KEYS = [
   'seo_title', 'seo_description',
   'ai_base_url', 'ai_api_key', 'ai_model', 'ai_enabled',
   'rajaongkir_enabled', 'shipping_mode',
+  's3_endpoint', 's3_region', 's3_bucket', 's3_access_key', 's3_secret_key', 's3_enabled',
 ];
 
 const COURIERS = [
@@ -26,6 +28,7 @@ export class AdminSettingsController {
   constructor(
     private readonly authService: AuthService,
     private readonly settingsService: SettingsService,
+    private readonly uploadService: UploadService,
   ) {}
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
@@ -65,6 +68,12 @@ export class AdminSettingsController {
         aiEnabled: s.ai_enabled === 'true',
         rajaOngkirEnabled: s.rajaongkir_enabled === 'true',
         shippingMode: s.shipping_mode || 'custom',
+        s3Endpoint: s.s3_endpoint,
+        s3Region: s.s3_region,
+        s3Bucket: s.s3_bucket,
+        s3AccessKey: s.s3_access_key,
+        s3SecretKey: s.s3_secret_key,
+        s3Enabled: s.s3_enabled === 'true',
       },
       couriers: COURIERS.map((c) => ({ ...c, enabled: enabledCouriers.includes(c.code) })),
     });
@@ -82,17 +91,7 @@ export class AdminSettingsController {
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'logo') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : part.mimetype === 'image/svg+xml' ? '.svg' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'logos');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          logoUrl = `/uploads/logos/${filename}`;
-        }
+        logoUrl = await this.uploadService.uploadBuffer(buffer, 'logos', part.mimetype || 'image/png');
       } else if (part.type === 'field') {
         // Accumulate array fields (couriers[])
         if (part.fieldname === 'couriers[]') {
@@ -123,6 +122,12 @@ export class AdminSettingsController {
       ai_model: fields.aiModel || '', ai_enabled: fields.aiEnabled ? 'true' : 'false',
       rajaongkir_enabled: fields.rajaOngkirEnabled ? 'true' : 'false',
       shipping_mode: fields.shippingMode || 'custom',
+      s3_endpoint: fields.s3Endpoint || '',
+      s3_region: fields.s3Region || 'us-east-1',
+      s3_bucket: fields.s3Bucket || '',
+      s3_access_key: fields.s3AccessKey || '',
+      s3_secret_key: fields.s3SecretKey || '',
+      s3_enabled: fields.s3Enabled ? 'true' : 'false',
     };
 
     const courierArr = fields['couriers[]'] || [];
@@ -164,17 +169,7 @@ export class AdminSettingsController {
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'logo') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'bank-logos');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          logoUrl = `/uploads/bank-logos/${filename}`;
-        }
+        logoUrl = await this.uploadService.uploadBuffer(buffer, 'bank-logos', part.mimetype || 'image/png');
       } else if (part.type === 'field') {
         fields[part.fieldname] = part.value;
       }
@@ -199,17 +194,7 @@ export class AdminSettingsController {
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'logo') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'bank-logos');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          logoUrl = `/uploads/bank-logos/${filename}`;
-        }
+        logoUrl = await this.uploadService.uploadBuffer(buffer, 'bank-logos', part.mimetype || 'image/png');
       } else if (part.type === 'field') {
         fields[part.fieldname] = part.value;
       }

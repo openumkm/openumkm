@@ -29,7 +29,8 @@ var courierList = typeof couriers !== 'undefined' ? couriers : [];
       <%- include('./partials/settings-api-keys', { s: s }) %>
       <%- include('./partials/settings-smtp', { s: s }) %>
       <%- include('./partials/settings-payment', { s: s }) %>
-      <%- include('./partials/settings-shipping', { couriers: courierList }) %>
+      <%- include('./partials/settings-shipping', { couriers: courierList, s: s }) %>
+      <%- include('./partials/settings-s3', { s: s }) %>
       <%- include('./partials/settings-seo', { s: s }) %>
       <%- include('./partials/settings-ai', { s: s }) %>
 

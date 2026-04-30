@@ -9,6 +9,7 @@ import { EmailService } from '../services/email.service';
 import { ShippingService } from '../services/shipping.service';
 import { AddressService } from '../services/address.service';
 import { XenditService } from '../services/xendit.service';
+import { UploadService } from '../services/upload.service';
 import { getAuthFromRequest } from '../common/auth.helper';
 import { i18nContext } from '../common/view.helper';
 
@@ -24,6 +25,7 @@ export class StorefrontController {
     private readonly shippingService: ShippingService,
     private readonly addressService: AddressService,
     private readonly xenditService: XenditService,
+    private readonly uploadService: UploadService,
   ) {}
 
   private getAuth(req: FastifyRequest) {
@@ -578,17 +580,7 @@ export class StorefrontController {
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'receiptImage') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'receipts');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          receiptImageUrl = `/uploads/receipts/${filename}`;
-        }
+        receiptImageUrl = await this.uploadService.uploadBuffer(buffer, 'receipts', part.mimetype || 'image/jpeg');
       } else if (part.type === 'field') {
         fields[part.fieldname] = part.value;
       }

@@ -14,6 +14,7 @@ import { AuthService } from './services/auth.service';
 import { SettingsService } from './services/settings.service';
 import { preloadTranslations, createTranslator, detectLanguage } from './common/i18n';
 import { generateToken, setCsrfCookie, validateCsrf } from './common/csrf';
+import { UploadService } from './services/upload.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -75,6 +76,7 @@ async function bootstrap() {
   let activeCurrencies: any[] | null = null;
   const authService = app.get(AuthService);
   const settingsService = app.get(SettingsService);
+  const uploadService = app.get(UploadService);
 
   fastify.addHook('onRequest', async (request: any, reply: any) => {
     const url = request.url as string;
@@ -138,6 +140,13 @@ async function bootstrap() {
 
     (request as any).currency = currencyCode;
     (request as any).currencies = currencies;
+
+    // URL resolver for S3 files
+    (request as any).resolveUrl = async (path: string) => {
+      if (!path) return '';
+      if (path.startsWith('s3://')) return uploadService.getPublicUrl(path);
+      return path;
+    };
 
     // CSRF token: read from cookie
     const csrfToken = request.cookies?._csrf || '';

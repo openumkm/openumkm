@@ -185,10 +185,10 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 |---|------|--------|--------|
 | 12.1 | `@fastify/multipart` registration | ✅ | Registered di `main.ts` |
 | 12.2 | Local storage handler (save to `./uploads`) | ✅ | `UploadService` + inline upload di controllers |
-| 12.3 | S3 storage handler | ❌ | Config ada tapi tidak ada S3 client |
+| 12.3 | S3 storage handler | ✅ | `UploadService.uploadBuffer()` — auto-detect S3 config, fallback ke local |
 | 12.4 | Static serving untuk uploads | ✅ | `/uploads/` prefix di `main.ts` |
 | 12.5 | Max file size validation (5MB) | ✅ | Limit di multipart config + buffer check |
-| 12.6 | Image serving (local static / S3 presigned URL) | 🟡 | Local serving ✅, S3 belum |
+| 12.6 | Image serving (local static / S3 presigned URL) | ✅ | `resolveUrl()` — S3 presigned URL auto-resolution, local fallback |
 
 ---
 
@@ -352,7 +352,7 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Admin Dashboard | 6 | 0 | 0 | 6 |
 | Admin Products | 8 | 0 | 0 | 8 |
 | Admin Settings | 10 | 0 | 0 | 10 |
-| File Upload | 4 | 1 | 1 | 6 |
+| File Upload | 6 | 0 | 0 | 6 |
 | Shipping (RajaOngkir) | 5 | 0 | 0 | 5 |
 | Shipping (Custom Methods) | 5 | 0 | 0 | 5 |
 | Payment (Xendit) | 3 | 0 | 2 | 5 |
@@ -360,9 +360,9 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
 | Misc / Polish | 6 | 0 | 0 | 6 |
-| **TOTAL** | **126** | **1** | **9** | **136** |
+| **TOTAL** | **128** | **0** | **8** | **136** |
 
-**Progress: ~93% done, ~1% partial, ~6% belum dimulai.**
+**Progress: ~94% done, ~0% partial, ~6% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
 Yang belum: Xendit webhook (6.2, 14.3, 14.4), S3 storage (12.3, 12.6).

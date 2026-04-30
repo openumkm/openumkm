@@ -78,30 +78,11 @@ export class AdminProductsController {
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'images') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'products');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          imageUrls.push(`/uploads/products/${filename}`);
-        }
+        const url = await this.uploadService.uploadBuffer(buffer, 'products', part.mimetype || 'image/jpeg');
+        if (url) imageUrls.push(url);
       } else if (part.type === 'file' && part.fieldname === 'ogImage') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'og');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          ogImageUrl = `/uploads/og/${filename}`;
-        }
+        ogImageUrl = await this.uploadService.uploadBuffer(buffer, 'og', part.mimetype || 'image/jpeg');
       } else if (part.type === 'field') {
         fields[part.fieldname] = part.value;
       }
@@ -174,30 +155,11 @@ export class AdminProductsController {
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'images') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'products');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          imageUrls.push(`/uploads/products/${filename}`);
-        }
+        const url = await this.uploadService.uploadBuffer(buffer, 'products', part.mimetype || 'image/jpeg');
+        if (url) imageUrls.push(url);
       } else if (part.type === 'file' && part.fieldname === 'ogImage') {
         const buffer = await part.toBuffer();
-        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
-          const { v4: uuidv4 } = await import('uuid');
-          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
-          const filename = `${uuidv4()}${ext}`;
-          const { join } = await import('path');
-          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
-          const dir = join(process.cwd(), 'uploads', 'og');
-          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-          writeFileSync(join(dir, filename), buffer);
-          ogImageUrl = `/uploads/og/${filename}`;
-        }
+        ogImageUrl = await this.uploadService.uploadBuffer(buffer, 'og', part.mimetype || 'image/jpeg');
       } else if (part.type === 'field') {
         fields[part.fieldname] = part.value;
       }
