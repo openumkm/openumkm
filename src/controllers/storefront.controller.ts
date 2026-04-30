@@ -7,6 +7,7 @@ import { SettingsService } from '../services/settings.service';
 import { OrderService } from '../services/order.service';
 import { EmailService } from '../services/email.service';
 import { ShippingService } from '../services/shipping.service';
+import { AddressService } from '../services/address.service';
 import { getAuthFromRequest } from '../common/auth.helper';
 import { i18nContext } from '../common/view.helper';
 
@@ -20,6 +21,7 @@ export class StorefrontController {
     private readonly orderService: OrderService,
     private readonly emailService: EmailService,
     private readonly shippingService: ShippingService,
+    private readonly addressService: AddressService,
   ) {}
 
   private getAuth(req: FastifyRequest) {
@@ -288,24 +290,23 @@ export class StorefrontController {
     // Get saved addresses if logged in
     let savedAddresses: any[] = [];
     if (auth) {
-      const { AddressService } = await import('../services/address.service');
-      // We can't easily import here, so we'll pass empty and let the view handle it
-      // This will be improved when we wire the address service properly
+      savedAddresses = await this.addressService.listByUser(auth.sub);
     }
 
     return res.view('storefront/checkout.ejs', {
       pageTitle: 'Checkout',
       cartItems: cart,
       subtotal,
-      shipping: 0, // Will be calculated via RajaOngkir later
+      shipping: 0,
       tax: taxTotal,
       total: subtotal + taxTotal,
-      couriers: [], // Will be populated via RajaOngkir
+      couriers: [],
       bankAccounts: activeBanks,
       cartCount: cart.reduce((sum, i) => sum + i.qty, 0),
       isLoggedIn: !!auth,
       xenditEnabled,
       manualEnabled,
+      savedAddresses,
       ...i18nContext(req),
     });
   }
@@ -344,15 +345,43 @@ export class StorefrontController {
     const currency = defaultCurrency?.code || 'IDR';
 
     // Build shipping address
-    const shippingAddress = {
-      recipientName: body.recipientName || '',
-      phone: body.phone || '',
-      email: body.email || '',
-      addressLine: body.addressLine || '',
-      city: body.city || '',
-      province: body.province || '',
-      postalCode: body.postalCode || '',
-    };
+    let shippingAddress: Record<string, unknown>;
+
+    const savedAddressId = body.savedAddressId;
+    if (savedAddressId && auth) {
+      const savedAddr = await this.addressService.getById(savedAddressId, auth.sub);
+      if (savedAddr) {
+        shippingAddress = {
+          recipientName: savedAddr.recipientName,
+          phone: savedAddr.phone,
+          email: body.email || '',
+          addressLine: savedAddr.addressLine,
+          city: savedAddr.city,
+          province: savedAddr.province,
+          postalCode: savedAddr.postalCode,
+        };
+      } else {
+        shippingAddress = {
+          recipientName: body.recipientName || '',
+          phone: body.phone || '',
+          email: body.email || '',
+          addressLine: body.addressLine || '',
+          city: body.city || '',
+          province: body.province || '',
+          postalCode: body.postalCode || '',
+        };
+      }
+    } else {
+      shippingAddress = {
+        recipientName: body.recipientName || '',
+        phone: body.phone || '',
+        email: body.email || '',
+        addressLine: body.addressLine || '',
+        city: body.city || '',
+        province: body.province || '',
+        postalCode: body.postalCode || '',
+      };
+    }
 
     // Build items snapshot
     const items = cart.map((item) => ({

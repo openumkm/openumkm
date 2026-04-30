@@ -5,6 +5,7 @@
   const cartQty = typeof cartCount !== 'undefined' ? cartCount : 0;
   const page = typeof currentPage !== 'undefined' ? currentPage : '';
   const locale = typeof currentLang !== 'undefined' ? currentLang : 'en';
+  const currCode = typeof currency !== 'undefined' ? currency : 'IDR';
 %>
 
 <header class="header-ghost" id="mainHeader">
@@ -21,9 +22,17 @@
 
     <div class="header-actions">
       <div class="lang-switcher">
-        <a href="/?lang=id" class="<%= locale === 'id' ? 'active' : '' %>">ID</a>
+        <a href="/?lang=id<%= currCode !== 'IDR' ? '&currency=' + currCode : '' %>" class="<%= locale === 'id' ? 'active' : '' %>">ID</a>
         <span class="lang-sep">|</span>
-        <a href="/?lang=en" class="<%= locale === 'en' ? 'active' : '' %>">EN</a>
+        <a href="/?lang=en<%= currCode !== 'IDR' ? '&currency=' + currCode : '' %>" class="<%= locale === 'en' ? 'active' : '' %>">EN</a>
+        <% if (typeof currencies !== 'undefined' && currencies.length > 1) { %>
+        <span class="lang-sep">·</span>
+        <select onchange="var v=this.value;var u=new URL(location);u.searchParams.set('currency',v);location.href=u.toString()" style="border:none;background:transparent;font:var(--font-label-sm);color:var(--color-text-muted);cursor:pointer;padding:0 2px;">
+          <% currencies.forEach(function(c) { %>
+          <option value="<%= c.code %>" <%= c.code === currCode ? 'selected' : '' %>><%= c.symbol %> <%= c.code %></option>
+          <% }); %>
+        </select>
+        <% } %>
       </div>
 
       <a href="/?search=1" class="header-action-btn" aria-label="Search products" title="Search">

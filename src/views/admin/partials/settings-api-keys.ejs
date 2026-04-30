@@ -13,7 +13,54 @@
   </div>
   <div class="form-group">
     <label for="originCity" class="form-label">Origin City (Shipping)</label>
-    <input type="text" id="originCity" name="originCity" class="input" value="<%= s.originCity || '' %>" placeholder="Jakarta">
-    <span class="form-hint">City where your products ship from. Used for shipping cost calculation.</span>
+    <input type="text" id="originCity" name="originCity" class="input" value="<%= s.originCity || '' %>" placeholder="Type to search city..." autocomplete="off">
+    <div id="originCityResults" class="autocomplete-dropdown" style="display:none;"></div>
+    <span class="form-hint">City where your products ship from. Start typing to search.</span>
   </div>
 </div>
+
+<script>
+(function() {
+  var searchInput = document.getElementById('originCity');
+  var resultsDiv = document.getElementById('originCityResults');
+  var searchTimer = null;
+
+  if (!searchInput || !resultsDiv) return;
+
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    var q = searchInput.value.trim();
+    if (q.length < 2) { resultsDiv.style.display = 'none'; return; }
+
+    searchTimer = setTimeout(function() {
+      fetch('/api/shipping/search?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data.results || data.results.length === 0) {
+            resultsDiv.innerHTML = '<div class="autocomplete-item text-muted">No results</div>';
+            resultsDiv.style.display = 'block';
+            return;
+          }
+          resultsDiv.innerHTML = data.results.map(function(r) {
+            var label = r.city + ', ' + r.province;
+            return '<div class="autocomplete-item" data-label="' + label + '">' + label + '</div>';
+          }).join('');
+          resultsDiv.style.display = 'block';
+
+          resultsDiv.querySelectorAll('.autocomplete-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+              searchInput.value = item.getAttribute('data-label');
+              resultsDiv.style.display = 'none';
+            });
+          });
+        });
+    }, 300);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!resultsDiv.contains(e.target) && e.target !== searchInput) {
+      resultsDiv.style.display = 'none';
+    }
+  });
+})();
+</script>

@@ -50,10 +50,10 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 | 3.3 | Search (`?q=`) | ✅ | DB query via `ProductService.list({ search })` |
 | 3.4 | Pagination (`?page=&limit=`) | ✅ | Pagination di storefront home |
 | 3.5 | Sort (`?sort=price_asc\|price_desc`) | ✅ | Sort support di `ProductService.list()` |
-| 3.6 | Language switch (`?lang=`) | ❌ | Tidak ada implementasi |
-| 3.7 | SEO meta di `<head>` | 🟡 | `metaDescription` di-pass ke view tapi hanya di home, belum dari DB |
+| 3.6 | Language switch (`?lang=`) | ✅ | Header ID/EN links + cookie persist, i18n detection di onRequest |
+| 3.7 | SEO meta di `<head>` | ✅ | metaDescription dari DB settings + product description |
 | 3.8 | Out of stock label + disabled checkout | ✅ | Badge "Out of Stock" di home + cart warning + checkout disabled |
-| 3.9 | Currency display / switch | ❌ | Tidak ada currency formatting atau switch UI |
+| 3.9 | Currency display / switch | ✅ | Currency dropdown di header, cookie persist, detection di onRequest |
 
 ---
 
@@ -80,7 +80,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 | 5.1 | `GET /checkout` | ✅ | Wired ke real cart + tax rates + bank accounts dari DB |
 | 5.2 | `POST /checkout/submit` | ✅ | Route di `StorefrontController` — create order + deduct stock |
 | 5.3 | Guest checkout form (name, phone, address) | ✅ | Backend handler di `POST /checkout/submit` |
-| 5.4 | Logged-in checkout (select saved address) | 🟡 | Backend ready, UI belum wire saved addresses |
+| 5.4 | Logged-in checkout (select saved address) | ✅ | Saved address selection di checkout, auto-fill form, submit pakai saved address |
 | 5.5 | Shipping cost calculation (RajaOngkir) | ✅ | AJAX calculate via `ShippingService` |
 | 5.6 | Tax calculation at checkout | ✅ | Query `tax_rates` table, calculate per active tax |
 | 5.7 | Stock deduction on order create | ✅ | `ProductService.deductStock()` di checkout submit |
@@ -175,7 +175,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 | 11.7 | Currencies (toggle, exchange rate) | ✅ | Toggle active + update rate |
 | 11.8 | Courier toggle | ✅ | Stored as comma-separated in settings |
 | 11.9 | Store logo upload | ✅ | Multipart upload di settings form, saved ke setting `store_logo` |
-| 11.10 | Origin city dropdown (RajaOngkir) | ❌ | Text input, bukan dropdown dari API |
+| 11.10 | Origin city dropdown (RajaOngkir) | ✅ | Autocomplete via `/api/shipping/search` di settings form |
 
 ---
 
@@ -343,15 +343,15 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 |----------|------|---------|-------------|-------|
 | Infrastructure | 10 | 0 | 0 | 10 |
 | Auth & Setup | 6 | 0 | 0 | 6 |
-| Storefront | 6 | 0 | 3 | 9 |
+| Storefront | 9 | 0 | 0 | 9 |
 | Cart | 9 | 0 | 0 | 9 |
-| Checkout | 7 | 1 | 1 | 9 |
+| Checkout | 8 | 0 | 1 | 9 |
 | Payment | 5 | 0 | 3 | 8 |
 | Order Management | 8 | 0 | 0 | 8 |
 | Customer Dashboard | 8 | 0 | 0 | 8 |
 | Admin Dashboard | 5 | 0 | 1 | 6 |
 | Admin Products | 8 | 0 | 0 | 8 |
-| Admin Settings | 9 | 0 | 1 | 10 |
+| Admin Settings | 10 | 0 | 0 | 10 |
 | File Upload | 4 | 1 | 1 | 6 |
 | Shipping (RajaOngkir) | 5 | 0 | 0 | 5 |
 | Shipping (Custom Methods) | 0 | 0 | 5 | 5 |
@@ -360,9 +360,9 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
 | Misc / Polish | 5 | 0 | 1 | 6 |
-| **TOTAL** | **112** | **2** | **22** | **136** |
+| **TOTAL** | **116** | **1** | **19** | **136** |
 
-**Progress: ~82% done, ~1% partial, ~17% belum dimulai.**
+**Progress: ~85% done, ~1% partial, ~14% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
 Yang belum: Xendit payment, custom shipping methods, CSRF protection, S3 storage, origin city dropdown.

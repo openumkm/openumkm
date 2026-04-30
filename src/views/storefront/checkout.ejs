@@ -11,6 +11,8 @@ var taxAmount = typeof tax !== 'undefined' ? tax : 0;
 var totalAmount = typeof total !== 'undefined' ? total : ((typeof subtotal !== 'undefined' ? subtotal : 0) + shippingCost + taxAmount);
 var courierList = typeof couriers !== 'undefined' ? couriers : [];
 var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
+var savedAddrs = typeof savedAddresses !== 'undefined' ? savedAddresses : [];
+var hasSavedAddrs = savedAddrs.length > 0;
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,6 +28,29 @@ var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
       <div class="col-8 md:col-6">
         <div class="checkout-form">
           <form action="/checkout/submit" method="post" id="checkoutForm">
+
+            <% if (hasSavedAddrs) { %>
+            <section class="mb-12">
+              <h3>0. Saved Addresses</h3>
+              <div class="flex flex-col gap-3">
+                <% savedAddrs.forEach(function(addr, idx) { %>
+                <label class="shipping-method<%= idx === 0 ? ' selected' : '' %>">
+                  <input type="radio" name="savedAddressId" value="<%= addr.id %>" <%= idx === 0 ? 'checked' : '' %>>
+                  <div class="shipping-method-content" style="width:100%">
+                    <p class="shipping-method-name"><%= addr.label %></p>
+                    <p class="shipping-method-desc"><%= addr.recipientName %> — <%= addr.phone %> — <%= addr.addressLine %>, <%= addr.city %>, <%= addr.province %>, <%= addr.postalCode %></p>
+                  </div>
+                </label>
+                <% }); %>
+                <label class="shipping-method">
+                  <input type="radio" name="savedAddressId" value="">
+                  <div class="shipping-method-content" style="width:100%">
+                    <p class="shipping-method-name">Enter a new address</p>
+                  </div>
+                </label>
+              </div>
+            </section>
+            <% } %>
 
             <section class="mb-12">
               <h3>1. Contact Information</h3>
@@ -178,6 +203,48 @@ var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
   var subtotal = <%= typeof subtotal !== 'undefined' ? subtotal : 0 %>;
   var taxAmount = <%= taxAmount %>;
   var selectedShipping = 0;
+
+  // ── Saved Addresses ──
+  <% if (hasSavedAddrs) { %>
+  var savedAddrs = <%- JSON.stringify(savedAddresses || []) %>;
+  var addrRadios = document.querySelectorAll('input[name="savedAddressId"]');
+  var nameInput = document.getElementById('name');
+  var emailInput = document.getElementById('email');
+  var phoneInput = document.getElementById('phone');
+  var addrLineInput = document.getElementById('address');
+  var destSearchInput = document.getElementById('destinationSearch');
+  var cityInput = document.getElementById('city');
+  var provinceInput = document.getElementById('province');
+  var postalInput = document.getElementById('postalCode');
+  var recipInput = document.getElementById('recipientName');
+
+  addrRadios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var addrId = radio.value;
+      var addr = savedAddrs.find(function(a) { return a.id === addrId; });
+      if (addr) {
+        if (recipInput) recipInput.value = addr.recipientName || '';
+        if (phoneInput) phoneInput.value = addr.phone || '';
+        if (addrLineInput) addrLineInput.value = addr.addressLine || '';
+        if (cityInput) cityInput.value = addr.city || '';
+        if (provinceInput) provinceInput.value = addr.province || '';
+        if (postalInput) postalInput.value = addr.postalCode || '';
+        if (destSearchInput) { destSearchInput.value = addr.city || ''; destSearchInput.readOnly = true; }
+        if (nameInput) { nameInput.value = addr.recipientName || ''; nameInput.readOnly = true; }
+        if (phoneInput) phoneInput.readOnly = true;
+        if (addrLineInput) addrLineInput.readOnly = true;
+        if (cityInput) cityInput.readOnly = true;
+        if (provinceInput) provinceInput.readOnly = true;
+        if (postalInput) postalInput.readOnly = true;
+      } else {
+        // New address mode - unlock all fields
+        [nameInput, phoneInput, addrLineInput, cityInput, provinceInput, postalInput, recipInput, destSearchInput].forEach(function(f) {
+          if (f) { f.value = ''; f.readOnly = false; }
+        });
+      }
+    });
+  });
+  <% } %>
 
   function formatRp(amount) {
     return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);

@@ -42,6 +42,7 @@ async function bootstrap() {
       isAdmin: false,
       cartCount: 0,
       currentLang: 'en',
+      currentCurrency: 'IDR',
       t: createTranslator('en'),
     },
   });
@@ -69,6 +70,7 @@ async function bootstrap() {
   // Setup guard + i18n language detection
   let setupComplete: boolean | null = null;
   let defaultLang: string | null = null;
+  let activeCurrencies: any[] | null = null;
   const authService = app.get(AuthService);
   const settingsService = app.get(SettingsService);
 
@@ -111,6 +113,29 @@ async function bootstrap() {
     // Inject into request for controllers to use
     (request as any).lang = lang;
     (request as any).t = createTranslator(lang);
+
+    // Currency detection
+    if (activeCurrencies === null) {
+      activeCurrencies = await settingsService.getCurrencies();
+    }
+
+    const currencies = activeCurrencies.filter((c: any) => c.isActive);
+    const defaultCurr = currencies.find((c: any) => c.isDefault);
+
+    const requestedCurrency = request.query?.currency || request.cookies?.currency;
+    const currencyCode = requestedCurrency || defaultCurr?.code || 'IDR';
+
+    if (request.query?.currency) {
+      reply.setCookie('currency', currencyCode, {
+        path: '/',
+        httpOnly: false,
+        sameSite: 'lax',
+        maxAge: 365 * 24 * 60 * 60,
+      });
+    }
+
+    (request as any).currency = currencyCode;
+    (request as any).currencies = currencies;
   });
 
   // 404 handler
