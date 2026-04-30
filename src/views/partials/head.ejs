@@ -45,4 +45,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/static/css/app.css">
+  <script>
+  (function() {
+    function getCookie(n){var m=document.cookie.match(new RegExp('(^| )'+n+'=([^;]+)'));return m?m[2]:null}
+    var t=getCookie('_csrf');if(!t)return;
+    document.addEventListener('DOMContentLoaded',function(){
+      document.querySelectorAll('form[method="post"]').forEach(function(f){
+        if(f.querySelector('input[name="_csrf"]'))return;
+        var i=document.createElement('input');i.type='hidden';i.name='_csrf';i.value=t;f.appendChild(i);
+      });
+    });
+  })();
+  </script>
 </head>

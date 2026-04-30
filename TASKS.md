@@ -289,7 +289,7 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | 18.3 | `@fastify/formbody` untuk parse POST body | ✅ | Registered di `main.ts` |
 | 18.4 | Uploads volume serving | ✅ | Static route `/uploads/` di `main.ts` |
 | 18.5 | Error handling / 404 page | ✅ | 404 view + global error handler di `main.ts` |
-| 18.6 | CSRF protection | ❌ | Tidak ada CSRF token di forms |
+| 18.6 | CSRF protection | ✅ | Double Submit Cookie: token in cookie + hidden input, validated via preHandler |
 
 ---
 
@@ -359,10 +359,10 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Email (SMTP) | 10 | 0 | 0 | 10 |
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
-| Misc / Polish | 5 | 0 | 1 | 6 |
-| **TOTAL** | **116** | **1** | **19** | **136** |
+| Misc / Polish | 6 | 0 | 0 | 6 |
+| **TOTAL** | **117** | **1** | **18** | **136** |
 
-**Progress: ~85% done, ~1% partial, ~14% belum dimulai.**
+**Progress: ~86% done, ~1% partial, ~13% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
 Yang belum: Xendit payment, custom shipping methods, CSRF protection, S3 storage, origin city dropdown.

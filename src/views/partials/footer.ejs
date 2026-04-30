@@ -61,3 +61,23 @@
     </div>
   </div>
 </footer>
+
+<script>
+(function() {
+  function getCookie(name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+  }
+  var token = getCookie('_csrf');
+  if (!token) return;
+
+  document.querySelectorAll('form[method="post"]').forEach(function(form) {
+    if (form.querySelector('input[name="_csrf"]')) return;
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = '_csrf';
+    input.value = token;
+    form.appendChild(input);
+  });
+})();
+</script>

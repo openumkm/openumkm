@@ -13,6 +13,7 @@ import { AppModule } from './app.module';
 import { AuthService } from './services/auth.service';
 import { SettingsService } from './services/settings.service';
 import { preloadTranslations, createTranslator, detectLanguage } from './common/i18n';
+import { generateToken, setCsrfCookie, validateCsrf } from './common/csrf';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -43,6 +44,7 @@ async function bootstrap() {
       cartCount: 0,
       currentLang: 'en',
       currentCurrency: 'IDR',
+      csrfToken: '',
       t: createTranslator('en'),
     },
   });
@@ -136,6 +138,33 @@ async function bootstrap() {
 
     (request as any).currency = currencyCode;
     (request as any).currencies = currencies;
+
+    // CSRF token: read from cookie
+    const csrfToken = request.cookies?._csrf || '';
+    // For GET requests without a token, generate one
+    if (request.method === 'GET' && !csrfToken && !url.startsWith('/static/') && !url.startsWith('/uploads/')) {
+      const newToken = generateToken();
+      setCsrfCookie(reply, newToken);
+      (request as any).csrfToken = newToken;
+    } else {
+      (request as any).csrfToken = csrfToken;
+    }
+  });
+
+  // CSRF validation for POST/PUT/PATCH/DELETE
+  fastify.addHook('preHandler', async (request: any, reply: any) => {
+    if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return;
+
+    // Skip for multipart forms (CSRF token checked via header or relied on SOP)
+    const contentType = (request.headers['content-type'] || '').toLowerCase();
+    if (contentType.includes('multipart/form-data')) return;
+
+    if (!validateCsrf(request, reply)) {
+      if (request.url.startsWith('/api/') || request.url.startsWith('/health')) {
+        return reply.status(403).send({ error: 'Invalid CSRF token' });
+      }
+      return reply.status(403).send('Invalid or missing CSRF token. Please go back and try again.');
+    }
   });
 
   // 404 handler
