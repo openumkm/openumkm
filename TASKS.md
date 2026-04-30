@@ -13,7 +13,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 
 | # | Task | Status | Detail |
 |---|------|--------|--------|
-| 1.1 | Database schema (Drizzle) | ✅ | 13 tabel, 5 enum — sesuai spec |
+| 1.1 | Database schema (Drizzle) | ✅ | 14 tabel, 5 enum — sesuai spec |
 | 1.2 | Migration SQL | ✅ | `0000_careful_morbius.sql` sudah di-generate |
 | 1.3 | DB connection pool | ✅ | `src/db/index.ts`, max 10 connections |
 | 1.4 | NestJS + Fastify setup | ✅ | `main.ts` dengan fastify-view, fastify-static, fastify-cookie |
@@ -233,11 +233,11 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 
 | # | Task | Status | Detail |
 |---|------|--------|--------|
-| 14.1 | Xendit API client | ❌ | Tidak ada HTTP client / service |
-| 14.2 | Create invoice | ❌ | Tidak ada implementasi |
+| 14.1 | Xendit API client | ✅ | `XenditService` — native fetch ke Xendit v2 API |
+| 14.2 | Create invoice | ✅ | `createInvoice()` dipanggil di checkout submit, paymentUrl di-save |
 | 14.3 | Webhook endpoint (`POST /xendit/webhook`) | ❌ | Tidak ada route |
 | 14.4 | Webhook signature verification | ❌ | Tidak ada implementasi |
-| 14.5 | Payment URL redirect | ❌ | Field ada di schema tapi tidak diisi |
+| 14.5 | Payment URL redirect | ✅ | paymentUrl diisi dari Xendit invoice, ditampilkan di checkout-success |
 
 ---
 
@@ -345,24 +345,24 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Auth & Setup | 6 | 0 | 0 | 6 |
 | Storefront | 9 | 0 | 0 | 9 |
 | Cart | 9 | 0 | 0 | 9 |
-| Checkout | 8 | 0 | 1 | 9 |
-| Payment | 6 | 0 | 2 | 8 |
+| Checkout | 9 | 0 | 0 | 9 |
+| Payment | 7 | 0 | 1 | 8 |
 | Order Management | 8 | 0 | 0 | 8 |
 | Customer Dashboard | 8 | 0 | 0 | 8 |
-| Admin Dashboard | 5 | 0 | 1 | 6 |
+| Admin Dashboard | 6 | 0 | 0 | 6 |
 | Admin Products | 8 | 0 | 0 | 8 |
 | Admin Settings | 10 | 0 | 0 | 10 |
 | File Upload | 4 | 1 | 1 | 6 |
 | Shipping (RajaOngkir) | 5 | 0 | 0 | 5 |
 | Shipping (Custom Methods) | 5 | 0 | 0 | 5 |
-| Payment (Xendit) | 1 | 0 | 4 | 5 |
+| Payment (Xendit) | 3 | 0 | 2 | 5 |
 | Email (SMTP) | 10 | 0 | 0 | 10 |
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
 | Misc / Polish | 6 | 0 | 0 | 6 |
-| **TOTAL** | **123** | **1** | **12** | **136** |
+| **TOTAL** | **126** | **1** | **9** | **136** |
 
-**Progress: ~90% done, ~1% partial, ~9% belum dimulai.**
+**Progress: ~93% done, ~1% partial, ~6% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
-Yang belum: Xendit payment, custom shipping methods, CSRF protection, S3 storage, origin city dropdown.
+Yang belum: Xendit webhook (6.2, 14.3, 14.4), S3 storage (12.3, 12.6).
