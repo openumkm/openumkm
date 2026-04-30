@@ -234,22 +234,49 @@ export class StorefrontController {
 
     if (!destination) return res.send({ services: [] });
 
+    const shippingMode = (await this.settingsService.get('shipping_mode')) || 'custom';
     const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
-    if (!rajaOngkirEnabled) return res.send({ services: [] });
 
-    // Get origin from settings
-    const origin = await this.settingsService.get('origin_city');
-    if (!origin) return res.send({ services: [], error: 'Origin city not configured.' });
+    // Get custom shipping methods if mode supports it
+    let customServices: any[] = [];
+    if (shippingMode === 'custom' || shippingMode === 'both') {
+      const methods = await this.settingsService.getActiveShippingMethods();
+      customServices = methods.map((m) => ({
+        courier: m.name,
+        service: m.description || m.name,
+        cost: m.cost,
+        description: m.description || null,
+        etd: '—',
+      }));
+    }
 
-    // Calculate total weight from cart
-    const auth = this.getAuth(req);
-    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
-    const totalWeight = cart.reduce((sum, item) => sum + (item.weight * item.qty), 0);
+    // If rajaongkir disabled or mode is custom-only, return just custom
+    if (shippingMode === 'custom' || !rajaOngkirEnabled) {
+      return res.send({ services: customServices });
+    }
 
-    if (totalWeight <= 0) return res.send({ services: [] });
+    // Get RajaOngkir services
+    const rajaOngkirServices: any[] = [];
+    if (shippingMode === 'rajaongkir' || shippingMode === 'both') {
+      const origin = await this.settingsService.get('origin_city');
+      if (!origin) {
+        // Fallback to custom
+        return res.send({ services: customServices, error: !customServices.length ? 'Origin city not configured.' : undefined });
+      }
 
-    const services = await this.shippingService.calculateCost(origin, destination, totalWeight);
-    return res.send({ services });
+      const auth = this.getAuth(req);
+      const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+      const totalWeight = cart.reduce((sum, item) => sum + (item.weight * item.qty), 0);
+
+      if (totalWeight > 0) {
+        const services = await this.shippingService.calculateCost(origin, destination, totalWeight);
+        rajaOngkirServices.push(...services);
+      }
+    }
+
+    // Combine both in 'both' mode
+    const allServices = [...customServices, ...rajaOngkirServices];
+    return res.send({ services: allServices });
   }
 
   /* ── Checkout ────────────────────────────────── */
@@ -281,6 +308,11 @@ export class StorefrontController {
     const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
     const shippingMode = (await this.settingsService.get('shipping_mode')) || 'custom';
 
+    // Get custom shipping methods
+    const customMethods = (shippingMode === 'custom' || shippingMode === 'both')
+      ? await this.settingsService.getActiveShippingMethods()
+      : [];
+
     // Get bank accounts for manual transfer
     const bankAccounts = await this.settingsService.getBankAccounts();
     const activeBanks = bankAccounts.filter((b) => b.isActive);
@@ -309,6 +341,7 @@ export class StorefrontController {
       xenditEnabled,
       manualEnabled,
       savedAddresses,
+      customShippingMethods: customMethods,
       ...i18nContext(req),
     });
   }

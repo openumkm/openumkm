@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { db } from '../db';
-import { settings, bankAccounts, taxRates, currencies } from '../db/schema';
+import { settings, bankAccounts, taxRates, currencies, shippingMethods } from '../db/schema';
 import { eq } from 'drizzle-orm';
 
 @Injectable()
@@ -100,5 +100,44 @@ export class SettingsService {
 
   async updateExchangeRate(code: string, rate: string) {
     await db.update(currencies).set({ exchangeRate: rate }).where(eq(currencies.code, code));
+  }
+
+  // Shipping methods (custom)
+  async getShippingMethods() {
+    return db.select()
+      .from(shippingMethods)
+      .orderBy(shippingMethods.sortOrder);
+  }
+
+  async getActiveShippingMethods() {
+    return db.select()
+      .from(shippingMethods)
+      .where(eq(shippingMethods.isActive, true))
+      .orderBy(shippingMethods.sortOrder);
+  }
+
+  async addShippingMethod(data: { name: string; cost: number; description?: string | null }) {
+    const [maxRow] = await db.select({ max: shippingMethods.sortOrder })
+      .from(shippingMethods)
+      .orderBy(shippingMethods.sortOrder)
+      .limit(1)
+      .execute();
+    const nextSort = (Number(maxRow?.max) || 0) + 1;
+    await db.insert(shippingMethods).values({ ...data, sortOrder: nextSort, isActive: true });
+  }
+
+  async editShippingMethod(id: string, data: { name: string; cost: number; description?: string | null }) {
+    await db.update(shippingMethods).set(data).where(eq(shippingMethods.id, id));
+  }
+
+  async toggleShippingMethod(id: string) {
+    const [row] = await db.select().from(shippingMethods).where(eq(shippingMethods.id, id)).limit(1);
+    if (row) {
+      await db.update(shippingMethods).set({ isActive: !row.isActive }).where(eq(shippingMethods.id, id));
+    }
+  }
+
+  async deleteShippingMethod(id: string) {
+    await db.delete(shippingMethods).where(eq(shippingMethods.id, id));
   }
 }

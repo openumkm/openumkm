@@ -1,0 +1,134 @@
+<%# Admin Settings: Custom Shipping Methods %>
+<%
+var methods = typeof shippingMethods !== 'undefined' ? shippingMethods : [];
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+}
+%>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Shipping Methods' }) %>
+<body>
+<div class="dashboard-layout">
+  <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'settings' }) %>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h2>Custom Shipping Methods</h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Create your own shipping methods with fixed or free rates. Displayed when shipping mode is set to Custom or Both.</p>
+      </div>
+    </div>
+
+    <div class="settings-nav mb-6">
+      <a href="/admin/settings" class="btn btn-ghost btn-sm">General</a>
+      <a href="/admin/settings/bank-accounts" class="btn btn-ghost btn-sm">Bank Accounts</a>
+      <a href="/admin/settings/taxes" class="btn btn-ghost btn-sm">Tax Rates</a>
+      <a href="/admin/settings/currencies" class="btn btn-ghost btn-sm">Currencies</a>
+      <a href="/admin/settings/shipping-methods" class="btn btn-ghost btn-sm active">Shipping Methods</a>
+    </div>
+
+    <!-- Add Form -->
+    <div class="admin-card mb-6">
+      <h3 class="admin-card-title">Add Shipping Method</h3>
+      <form action="/admin/settings/shipping-methods" method="post">
+        <div class="grid" style="grid-template-columns: 2fr 1fr; gap: var(--space-4);">
+          <div class="form-group">
+            <label for="smName" class="form-label form-label-required">Name</label>
+            <input type="text" id="smName" name="name" class="input" required placeholder="e.g. Free Shipping">
+          </div>
+          <div class="form-group">
+            <label for="smCost" class="form-label form-label-required">Cost (IDR)</label>
+            <input type="number" id="smCost" name="cost" class="input" required min="0" placeholder="0 = free">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="smDesc" class="form-label">Description</label>
+          <input type="text" id="smDesc" name="description" class="input" placeholder="e.g. Delivery within 3-5 business days">
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Add Method</button>
+      </form>
+    </div>
+
+    <!-- List -->
+    <% if (methods.length > 0) { %>
+    <div class="dashboard-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Cost</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% methods.forEach(function(m) { %>
+          <tr id="sm-row-<%= m.id %>">
+            <td><strong><%= m.name %></strong></td>
+            <td style="font: 600 14px/1.3 var(--font-family);"><%= m.cost === 0 ? 'Free' : formatRp(m.cost) %></td>
+            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= m.description || '' %></td>
+            <td>
+              <% if (m.isActive) { %>
+              <span class="badge badge-success">Active</span>
+              <% } else { %>
+              <span class="badge badge-neutral">Inactive</span>
+              <% } %>
+            </td>
+            <td>
+              <div class="flex items-center gap-1">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="toggleEditSM('<%= m.id %>')" title="Edit">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <form action="/admin/settings/shipping-methods/<%= m.id %>/toggle" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-ghost btn-sm" title="Toggle active">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </form>
+                <form action="/admin/settings/shipping-methods/<%= m.id %>/delete" method="post" style="display:inline;" onsubmit="return confirm('Delete this shipping method?');">
+                  <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--color-danger);" title="Delete">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <tr id="sm-edit-<%= m.id %>" style="display:none;">
+            <td colspan="5">
+              <form action="/admin/settings/shipping-methods/<%= m.id %>" method="post" class="flex items-center gap-3" style="padding: var(--space-2) 0;">
+                <input type="text" name="name" value="<%= m.name %>" class="input input-sm" required style="width:160px;" placeholder="Name">
+                <input type="number" name="cost" value="<%= m.cost %>" class="input input-sm" required min="0" style="width:100px;" placeholder="Cost">
+                <input type="text" name="description" value="<%= m.description || '' %>" class="input input-sm" style="width:200px;" placeholder="Description">
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="toggleEditSM('<%= m.id %>')">Cancel</button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <% } else { %>
+    <div class="dashboard-table-wrap">
+      <div class="empty-state">
+        <h3>No shipping methods</h3>
+        <p>Add a custom shipping method above. Create methods like "Free Shipping", "Flat Rate Rp 10.000", or "Local Delivery Rp 5.000".</p>
+      </div>
+    </div>
+    <% } %>
+  </main>
+</div>
+</body>
+</html>
+<script>
+function toggleEditSM(id) {
+  var editRow = document.getElementById('sm-edit-' + id);
+  var row = document.getElementById('sm-row-' + id);
+  if (editRow.style.display === 'none' || editRow.style.display === '') {
+    editRow.style.display = '';
+    row.style.display = 'none';
+  } else {
+    editRow.style.display = 'none';
+    row.style.display = '';
+  }
+}
+</script>

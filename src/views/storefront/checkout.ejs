@@ -99,11 +99,24 @@ var hasSavedAddrs = savedAddrs.length > 0;
             <section class="mb-12">
               <h3>3. Shipping Method</h3>
               <div class="shipping-methods" id="shippingMethods">
+                <% if (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) { %>
+                <% customShippingMethods.forEach(function(m, idx) { %>
+                <label class="shipping-method<%= idx === 0 ? ' selected' : '' %>">
+                  <input type="radio" name="shippingOption" value="<%= m.cost %>" data-courier="<%= m.name %>" data-service="<%= m.description || m.name %>" <%= idx === 0 ? 'checked' : '' %>>
+                  <div class="shipping-method-content">
+                    <p class="shipping-method-name"><%= m.name %></p>
+                    <p class="shipping-method-desc"><%= m.description || '' %></p>
+                  </div>
+                  <span class="shipping-method-price"><%= m.cost === 0 ? 'Free' : formatRp(m.cost) %></span>
+                </label>
+                <% }); %>
+                <% } else { %>
                 <div class="text-muted p-4" id="shippingPlaceholder">Select a city above to see available shipping options.</div>
+                <% } %>
               </div>
-              <input type="hidden" name="shippingCost" id="shippingCostInput" value="0">
-              <input type="hidden" name="courier" id="courierInput" value="">
-              <input type="hidden" name="courierService" id="courierServiceInput" value="">
+              <input type="hidden" name="shippingCost" id="shippingCostInput" value="<%= typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0 ? customShippingMethods[0].cost : 0 %>">
+              <input type="hidden" name="courier" id="courierInput" value="<%= typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0 ? customShippingMethods[0].name : '' %>">
+              <input type="hidden" name="courierService" id="courierServiceInput" value="<%= typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0 ? (customShippingMethods[0].description || customShippingMethods[0].name) : '' %>">
             </section>
 
             <section class="mb-12">
@@ -202,7 +215,9 @@ var hasSavedAddrs = savedAddrs.length > 0;
 (function() {
   var subtotal = <%= typeof subtotal !== 'undefined' ? subtotal : 0 %>;
   var taxAmount = <%= taxAmount %>;
-  var selectedShipping = 0;
+  var selectedShipping = <%= (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) ? customShippingMethods[0].cost : 0 %>;
+  var initialCourier = '<%= (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) ? customShippingMethods[0].name : '' %>';
+  var initialService = '<%= (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) ? (customShippingMethods[0].description || customShippingMethods[0].name) : '' %>';
 
   // ── Saved Addresses ──
   <% if (hasSavedAddrs) { %>

@@ -210,11 +210,11 @@ Seller bisa buat sendiri metode pengiriman dengan harga gratis atau statis. Cont
 
 | # | Task | Status | Detail |
 |---|------|--------|--------|
-| 13.6 | DB: tabel `shipping_methods` | ❌ | Tabel baru: `id`, `name`, `cost` (integer, 0 = gratis), `description`, `is_active`, `sort_order`, `created_at` |
-| 13.7 | Admin: CRUD custom shipping methods | ❌ | `GET /admin/settings/shipping-methods` — list, add, edit, toggle, delete |
-| 13.8 | Admin: settings toggle RajaOngkir vs Custom | ❌ | Setting `shipping_mode`: `rajaongkir` \| `custom` \| `both`. Default: `custom` |
-| 13.9 | Checkout: tampilkan custom shipping methods | ❌ | Jika mode `custom` atau `both`, tampilkan list metode custom di checkout |
-| 13.10 | Checkout: logic gabungan RajaOngkir + Custom | ❌ | Jika mode `both`, tampilkan RajaOngkir results + custom methods bersama |
+| 13.6 | DB: tabel `shipping_methods` | ✅ | Tabel dengan id, name, cost, description, is_active, sort_order, created_at |
+| 13.7 | Admin: CRUD custom shipping methods | ✅ | `GET /admin/settings/shipping-methods` — list, add, edit, toggle, delete |
+| 13.8 | Admin: settings toggle RajaOngkir vs Custom | ✅ | Setting `shipping_mode`: `custom`, `rajaongkir`, `both` + `rajaongkir_enabled` |
+| 13.9 | Checkout: tampilkan custom shipping methods | ✅ | Custom methods direct display di checkout, pre-selected saat mode custom |
+| 13.10 | Checkout: logic gabungan RajaOngkir + Custom | ✅ | `/api/shipping/calculate` return custom + RajaOngkir services sesuai mode |
 
 ### Shipping Mode Logic
 
@@ -354,15 +354,15 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Admin Settings | 10 | 0 | 0 | 10 |
 | File Upload | 4 | 1 | 1 | 6 |
 | Shipping (RajaOngkir) | 5 | 0 | 0 | 5 |
-| Shipping (Custom Methods) | 0 | 0 | 5 | 5 |
-| Payment (Xendit) | 0 | 0 | 5 | 5 |
+| Shipping (Custom Methods) | 5 | 0 | 0 | 5 |
+| Payment (Xendit) | 1 | 0 | 4 | 5 |
 | Email (SMTP) | 10 | 0 | 0 | 10 |
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
 | Misc / Polish | 6 | 0 | 0 | 6 |
-| **TOTAL** | **118** | **1** | **17** | **136** |
+| **TOTAL** | **123** | **1** | **12** | **136** |
 
-**Progress: ~87% done, ~1% partial, ~12% belum dimulai.**
+**Progress: ~90% done, ~1% partial, ~9% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
 Yang belum: Xendit payment, custom shipping methods, CSRF protection, S3 storage, origin city dropdown.

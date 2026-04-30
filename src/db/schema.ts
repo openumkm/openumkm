@@ -216,6 +216,18 @@ export const currencies = pgTable('currencies', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+/* ── Shipping Methods (Custom) ─────────────────── */
+
+export const shippingMethods = pgTable('shipping_methods', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  cost: integer('cost').notNull().default(0),
+  description: text('description'),
+  isActive: boolean('is_active').default(true).notNull(),
+  sortOrder: integer('sort_order').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 /* ── Settings (key-value) ──────────────────────── */
 
 export const settings = pgTable('settings', {
