@@ -77,6 +77,8 @@ export class OrderService {
     courier?: string;
     courierService?: string;
     expiresInHours?: number;
+    paymentInvoiceId?: string | null;
+    paymentUrl?: string | null;
   }) {
     const orderNumber = await this.generateOrderNumber();
     const hours = data.expiresInHours || 24;
@@ -95,6 +97,8 @@ export class OrderService {
       shippingAddress: data.shippingAddress,
       courier: data.courier || null,
       courierService: data.courierService || null,
+      paymentInvoiceId: data.paymentInvoiceId || null,
+      paymentUrl: data.paymentUrl || null,
       expiresAt,
     }).returning();
 
@@ -118,6 +122,12 @@ export class OrderService {
   async setTracking(id: string, trackingNumber: string) {
     await db.update(orders)
       .set({ trackingNumber, updatedAt: new Date() })
+      .where(eq(orders.id, id));
+  }
+
+  async updatePaymentInfo(id: string, paymentInvoiceId: string, paymentUrl: string) {
+    await db.update(orders)
+      .set({ paymentInvoiceId, paymentUrl, updatedAt: new Date() })
       .where(eq(orders.id, id));
   }
 

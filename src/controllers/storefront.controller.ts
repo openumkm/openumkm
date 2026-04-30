@@ -8,6 +8,7 @@ import { OrderService } from '../services/order.service';
 import { EmailService } from '../services/email.service';
 import { ShippingService } from '../services/shipping.service';
 import { AddressService } from '../services/address.service';
+import { XenditService } from '../services/xendit.service';
 import { getAuthFromRequest } from '../common/auth.helper';
 import { i18nContext } from '../common/view.helper';
 
@@ -22,6 +23,7 @@ export class StorefrontController {
     private readonly emailService: EmailService,
     private readonly shippingService: ShippingService,
     private readonly addressService: AddressService,
+    private readonly xenditService: XenditService,
   ) {}
 
   private getAuth(req: FastifyRequest) {
@@ -419,6 +421,34 @@ export class StorefrontController {
     // Clear cart
     await this.sessionService.clearCart(sessionId);
 
+    // Create Xendit invoice if applicable
+    let paymentUrl: string | null = null;
+    if (paymentMethod === 'xendit') {
+      const proto = (req as any).protocol || 'https';
+      const host = (req as any).hostname || 'localhost:3000';
+      const baseUrl = `${proto}://${host}`;
+
+      const invoice = await this.xenditService.createInvoice({
+        externalId: order.orderNumber,
+        amount: total,
+        payerEmail: (shippingAddress.email as string) || '',
+        description: `Order #${order.orderNumber}`,
+        successRedirectUrl: `${baseUrl}/checkout/success/${order.id}`,
+        failureRedirectUrl: `${baseUrl}/checkout`,
+        currency,
+        items: items.map((item) => ({
+          name: item.name,
+          quantity: item.qty,
+          price: item.price,
+        })),
+      });
+
+      if (invoice) {
+        paymentUrl = invoice.invoice_url;
+        await this.orderService.updatePaymentInfo(order.id, invoice.id, invoice.invoice_url);
+      }
+    }
+
     // Send order confirmation email
     const customerEmail = (shippingAddress.email as string) || '';
     if (paymentMethod === 'xendit') {
@@ -426,7 +456,7 @@ export class StorefrontController {
         orderNumber: order.orderNumber,
         total: order.total,
         currency,
-        paymentUrl: order.paymentUrl,
+        paymentUrl: paymentUrl || order.paymentUrl,
         items,
         expiresAt: order.expiresAt,
       }, customerEmail);

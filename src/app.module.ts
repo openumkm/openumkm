@@ -20,6 +20,7 @@ import { AddressService } from './services/address.service';
 import { EmailService } from './services/email.service';
 import { AiService } from './services/ai.service';
 import { ShippingService } from './services/shipping.service';
+import { XenditService } from './services/xendit.service';
 
 @Module({
   controllers: [
@@ -46,6 +47,7 @@ import { ShippingService } from './services/shipping.service';
     EmailService,
     AiService,
     ShippingService,
+    XenditService,
   ],
 })
 export class AppModule {}

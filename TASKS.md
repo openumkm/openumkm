@@ -93,7 +93,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 
 | # | Task | Status | Detail |
 |---|------|--------|--------|
-| 6.1 | Xendit invoice creation | ❌ | Tidak ada Xendit API integration |
+| 6.1 | Xendit invoice creation | ✅ | `XenditService.createInvoice()` — dipanggil saat checkout xendit, paymentUrl di-save |
 | 6.2 | Xendit webhook handler | ❌ | Tidak ada webhook endpoint |
 | 6.3 | Manual transfer — show bank accounts | ✅ | Bank accounts dari DB ditampilkan di checkout + payment confirm |
 | 6.4 | `GET /payment/confirm/:id` | ✅ | Wired ke real order + bank accounts dari DB |
@@ -346,7 +346,7 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Storefront | 9 | 0 | 0 | 9 |
 | Cart | 9 | 0 | 0 | 9 |
 | Checkout | 8 | 0 | 1 | 9 |
-| Payment | 5 | 0 | 3 | 8 |
+| Payment | 6 | 0 | 2 | 8 |
 | Order Management | 8 | 0 | 0 | 8 |
 | Customer Dashboard | 8 | 0 | 0 | 8 |
 | Admin Dashboard | 5 | 0 | 1 | 6 |
@@ -360,9 +360,9 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
 | Misc / Polish | 6 | 0 | 0 | 6 |
-| **TOTAL** | **117** | **1** | **18** | **136** |
+| **TOTAL** | **118** | **1** | **17** | **136** |
 
-**Progress: ~86% done, ~1% partial, ~13% belum dimulai.**
+**Progress: ~87% done, ~1% partial, ~12% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
 Yang belum: Xendit payment, custom shipping methods, CSRF protection, S3 storage, origin city dropdown.
