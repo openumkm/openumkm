@@ -1,0 +1,115 @@
+<%# Admin Orders List Page %>
+<%
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+}
+var orderList = typeof orders !== 'undefined' ? orders : [];
+var searchQuery = typeof search !== 'undefined' ? search : '';
+var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
+var currentPageNum = typeof page !== 'undefined' ? page : 1;
+var totalPages = typeof pages !== 'undefined' ? pages : 1;
+var statuses = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shipped', 'completed', 'cancelled', 'expired'];
+%>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Orders' }) %>
+<body>
+<div class="dashboard-layout">
+  <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'orders' }) %>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h2>Orders</h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Manage and track customer orders.</p>
+      </div>
+    </div>
+
+    <div class="dashboard-toolbar">
+      <form action="/admin/orders" method="get" class="flex items-center gap-3" style="flex: 1;">
+        <input type="search" name="q" class="input" placeholder="Search by order number or customer..." value="<%= searchQuery %>" style="max-width: 300px;">
+        <select name="status" class="select" style="max-width: 200px;">
+          <option value="">All Statuses</option>
+          <% statuses.forEach(function(s) { %>
+          <option value="<%= s %>" <%= statusFilter === s ? 'selected' : '' %>><%= s.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); }) %></option>
+          <% }); %>
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+      </form>
+      <span style="font: var(--font-label-xs); color: var(--color-text-muted);"><%= orderList.length %> order<%= orderList.length !== 1 ? 's' : '' %></span>
+    </div>
+
+    <% if (orderList.length > 0) { %>
+    <div class="dashboard-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orderList.forEach(function(order) { %>
+          <tr>
+            <td><strong style="color: var(--color-primary);">#<%= order.orderNumber %></strong></td>
+            <td>
+              <div class="flex items-center gap-2">
+                <div class="avatar" style="width: 32px; height: 32px; font-size: 12px;"><%= order.customerName ? order.customerName.charAt(0).toUpperCase() : 'G' %></div>
+                <div>
+                  <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= order.customerName || 'Guest' %></p>
+                  <% if (order.customerEmail) { %>
+                  <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;"><%= order.customerEmail %></p>
+                  <% } %>
+                </div>
+              </div>
+            </td>
+            <td class="amount" style="font: 600 14px/1.3 var(--font-family);"><%= formatRp(order.total) %></td>
+            <td>
+              <span class="badge <%= order.paymentMethod === 'xendit' ? 'badge-info' : 'badge-neutral' %>"><%= order.paymentMethod === 'xendit' ? 'Xendit' : 'Transfer' %></span>
+            </td>
+            <td>
+              <span class="status status-<%= order.status %>"><%= order.status.replace(/_/g, ' ') %></span>
+            </td>
+            <td style="font: var(--font-label-xs); color: var(--color-text-muted);"><%= order.createdAt %></td>
+            <td>
+              <a href="/admin/orders/<%= order.id %>" class="btn btn-ghost btn-sm" title="View detail">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View
+              </a>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (totalPages > 1) { %>
+    <div class="pagination">
+      <% if (currentPageNum > 1) { %>
+      <a href="/admin/orders?page=<%= currentPageNum - 1 %><%= searchQuery ? '&q=' + searchQuery : '' %><%= statusFilter ? '&status=' + statusFilter : '' %>" class="btn btn-ghost btn-sm">&larr; Previous</a>
+      <% } %>
+      <span style="font: var(--font-label-sm); color: var(--color-text-muted);">Page <%= currentPageNum %> of <%= totalPages %></span>
+      <% if (currentPageNum < totalPages) { %>
+      <a href="/admin/orders?page=<%= currentPageNum + 1 %><%= searchQuery ? '&q=' + searchQuery : '' %><%= statusFilter ? '&status=' + statusFilter : '' %>" class="btn btn-ghost btn-sm">Next &rarr;</a>
+      <% } %>
+    </div>
+    <% } %>
+
+    <% } else { %>
+    <div class="dashboard-table-wrap">
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3>No orders found</h3>
+        <p><%= searchQuery || statusFilter ? 'Try adjusting your filters.' : 'Orders will appear here when customers start placing them.' %></p>
+      </div>
+    </div>
+    <% } %>
+  </main>
+</div>
+</body>
+</html>

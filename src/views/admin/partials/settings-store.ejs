@@ -1,0 +1,38 @@
+<%# Settings: Store Info Section %>
+<div class="admin-card mb-6">
+  <h3 class="admin-card-title">Store Information</h3>
+  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+    <div class="form-group">
+      <label for="storeName" class="form-label form-label-required">Store Name</label>
+      <input type="text" id="storeName" name="storeName" class="input" value="<%= s.storeName || '' %>" required>
+    </div>
+    <div class="form-group">
+      <label for="storeEmail" class="form-label">Store Email</label>
+      <input type="email" id="storeEmail" name="storeEmail" class="input" value="<%= s.storeEmail || '' %>">
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+    <div class="form-group">
+      <label for="storePhone" class="form-label">Phone</label>
+      <input type="tel" id="storePhone" name="storePhone" class="input" value="<%= s.storePhone || '' %>">
+    </div>
+    <div class="form-group">
+      <label for="invoicePrefix" class="form-label">Invoice Prefix</label>
+      <input type="text" id="invoicePrefix" name="invoicePrefix" class="input" value="<%= s.invoicePrefix || 'INV' %>" placeholder="INV">
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+    <div class="form-group">
+      <label for="defaultLanguage" class="form-label">Default Language</label>
+      <select id="defaultLanguage" name="defaultLanguage" class="select">
+        <option value="id" <%= s.defaultLanguage === 'id' ? 'selected' : '' %>>Bahasa Indonesia</option>
+        <option value="en" <%= s.defaultLanguage === 'en' ? 'selected' : '' %>>English</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Store Logo</label>
+      <input type="file" name="logo" class="input" accept="image/*">
+      <span class="form-hint">Max 5MB. JPG, PNG, or SVG.</span>
+    </div>
+  </div>
+</div>

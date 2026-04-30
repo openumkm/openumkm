@@ -1,0 +1,23 @@
+<%# Settings: SEO Section %>
+<div class="admin-card mb-6">
+  <h3 class="admin-card-title">SEO</h3>
+  <div class="form-group">
+    <label for="seoTitle" class="form-label">Homepage Meta Title</label>
+    <div class="flex items-center gap-2 mb-1">
+      <button type="button" class="btn btn-ghost btn-sm" style="padding: 2px 6px; font-size: 11px;" onclick="alert('AI generation will be available when AI module is configured.')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        AI
+      </button>
+    </div>
+    <input type="text" id="seoTitle" name="seoTitle" class="input" value="<%= s.seoTitle || '' %>" placeholder="Your Store — Tagline">
+  </div>
+  <div class="form-group">
+    <label for="seoDescription" class="form-label">Homepage Meta Description</label>
+    <textarea id="seoDescription" name="seoDescription" class="textarea" rows="3" placeholder="Describe your store for search engines..."><%= s.seoDescription || '' %></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">OG Image</label>
+    <input type="file" name="seoOgImage" class="input" accept="image/*">
+    <span class="form-hint">Recommended: 1200×630px. Used when your site is shared on social media.</span>
+  </div>
+</div>

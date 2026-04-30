@@ -1,0 +1,239 @@
+<%#
+  Checkout Page — storefront
+  Variables: pageTitle, cartItems[], subtotal, shipping, tax, total, couriers[], bankAccounts[], cartCount, isLoggedIn
+%>
+<%
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+}
+var shippingCost = typeof shipping !== 'undefined' ? shipping : 0;
+var taxAmount = typeof tax !== 'undefined' ? tax : 0;
+var totalAmount = typeof total !== 'undefined' ? total : ((typeof subtotal !== 'undefined' ? subtotal : 0) + shippingCost + taxAmount);
+var courierList = typeof couriers !== 'undefined' ? couriers : [];
+var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
+%>
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head.ejs', { pageTitle, metaDescription: 'Complete your order securely.' }) %>
+<body>
+<%- include('../partials/header.ejs', { isLoggedIn, isAdmin: false, cartCount, currentPage: 'checkout' }) %>
+
+<main class="checkout-page">
+  <div class="container">
+    <h1 class="mb-8">Checkout</h1>
+
+    <div class="grid">
+      <div class="col-8 md:col-6">
+        <div class="checkout-form">
+          <form action="/checkout/place-order" method="post" id="checkoutForm">
+
+            <section class="mb-12">
+              <h3>1. Contact Information</h3>
+              <div class="form-group">
+                <label for="name" class="form-label form-label-required">Full Name</label>
+                <input type="text" id="name" name="name" class="input" required placeholder="Enter your full name">
+              </div>
+              <div class="form-group">
+                <label for="email" class="form-label">Email Address <span class="text-muted">(optional)</span></label>
+                <input type="email" id="email" name="email" class="input" placeholder="you@example.com">
+              </div>
+              <div class="form-group">
+                <label for="phone" class="form-label form-label-required">Phone Number</label>
+                <input type="tel" id="phone" name="phone" class="input" required placeholder="+62 812-3456-7890">
+                <span class="form-hint">Used for delivery updates and order confirmations.</span>
+              </div>
+            </section>
+
+            <section class="mb-12">
+              <h3>2. Shipping Address</h3>
+              <div class="form-group">
+                <label for="address" class="form-label form-label-required">Address</label>
+                <textarea id="address" name="address" class="textarea" required placeholder="Street name, building, house number"></textarea>
+              </div>
+              <div class="grid" style="grid-template-columns:1fr 1fr;gap:var(--space-4)">
+                <div class="form-group">
+                  <label for="city" class="form-label form-label-required">City</label>
+                  <input type="text" id="city" name="city" class="input" required placeholder="Jakarta">
+                </div>
+                <div class="form-group">
+                  <label for="province" class="form-label form-label-required">Province</label>
+                  <input type="text" id="province" name="province" class="input" required placeholder="DKI Jakarta">
+                </div>
+              </div>
+              <div class="grid" style="grid-template-columns:1fr 1fr;gap:var(--space-4)">
+                <div class="form-group">
+                  <label for="postalCode" class="form-label form-label-required">Postal Code</label>
+                  <input type="text" id="postalCode" name="postalCode" class="input" required placeholder="12345">
+                </div>
+                <div class="form-group">
+                  <label for="country" class="form-label form-label-required">Country</label>
+                  <input type="text" id="country" name="country" class="input" required value="Indonesia">
+                </div>
+              </div>
+            </section>
+
+            <section class="mb-12">
+              <h3>3. Shipping Method</h3>
+              <div class="shipping-methods">
+                <% if (courierList.length > 0) { %>
+                <% courierList.forEach(function(courier, idx) { %>
+                <label class="shipping-method<%= idx === 0 ? ' selected' : '' %>">
+                  <input type="radio" name="shipping" value="<%= courier.code %>" <%= idx === 0 ? 'checked' : '' %>>
+                  <div class="shipping-method-content">
+                    <p class="shipping-method-name"><%= courier.name %> - <%= courier.service %></p>
+                    <p class="shipping-method-desc">Estimated delivery: <%= courier.etd %></p>
+                  </div>
+                  <span class="shipping-method-price"><%= formatRp(courier.cost) %></span>
+                </label>
+                <% }); %>
+                <% } else { %>
+                <label class="shipping-method selected">
+                  <input type="radio" name="shipping" value="standard" checked>
+                  <div class="shipping-method-content">
+                    <p class="shipping-method-name">Standard Shipping</p>
+                    <p class="shipping-method-desc">Estimated delivery: 3-7 business days</p>
+                  </div>
+                  <span class="shipping-method-price"><%= formatRp(shippingCost) %></span>
+                </label>
+                <% } %>
+              </div>
+            </section>
+
+            <section class="mb-12">
+              <h3>4. Payment Method</h3>
+              <div class="payment-tabs" role="tablist">
+                <button type="button" class="payment-tab active" role="tab" aria-selected="true" data-tab="pay-xendit">Online Payment (Xendit)</button>
+                <button type="button" class="payment-tab" role="tab" aria-selected="false" data-tab="pay-transfer">Manual Bank Transfer</button>
+              </div>
+
+              <div class="payment-tab-content active" id="pay-xendit" role="tabpanel">
+                <div class="alert alert-info mb-4">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <span>After placing your order, you will be redirected to the Xendit payment page to complete payment via bank transfer, virtual account, QRIS, or e-wallet.</span>
+                </div>
+                <input type="hidden" name="paymentMethod" value="xendit" id="paymentMethodInput">
+              </div>
+
+              <div class="payment-tab-content" id="pay-transfer" role="tabpanel">
+                <p class="text-secondary mb-4">Transfer the exact amount to one of the following bank accounts:</p>
+                <div class="bank-list">
+                  <% if (banks.length > 0) { %>
+                  <% banks.forEach(function(bank, idx) { %>
+                  <label class="bank-account<%= idx === 0 ? ' selected' : '' %>">
+                    <input type="radio" name="bankAccount" value="<%= bank.id %>" <%= idx === 0 ? 'checked' : '' %>>
+                    <div class="bank-logo"><%= bank.name.substring(0, 3).toUpperCase() %></div>
+                    <div class="bank-info">
+                      <p class="bank-name"><%= bank.name %></p>
+                      <p class="bank-number"><%= bank.number %> &middot; a/n <%= bank.holder %></p>
+                    </div>
+                  </label>
+                  <% }); %>
+                  <% } else { %>
+                  <div class="text-muted p-4">No bank accounts configured yet.</div>
+                  <% } %>
+                </div>
+                <input type="hidden" name="paymentMethodManual" value="transfer">
+              </div>
+            </section>
+
+          </form>
+        </div>
+      </div>
+
+      <aside class="col-4 md:col-6">
+        <div class="checkout-summary">
+          <h3>Order Summary</h3>
+          <% if (typeof cartItems !== 'undefined' && cartItems.length > 0) { %>
+          <div class="flex flex-col gap-4 mb-6">
+            <% cartItems.forEach(function(item) { %>
+            <div class="flex items-center gap-3">
+              <div style="width:56px;height:56px;border-radius:var(--radius-md);overflow:hidden;flex-shrink:0;background:var(--color-gray-50)">
+                <img src="<%= item.image %>" alt="<%= item.name %>" style="width:100%;height:100%;object-fit:cover">
+              </div>
+              <div style="flex:1;min-width:0">
+                <p class="truncate" style="font:500 14px/1.3 var(--font-family);color:var(--color-text)"><%= item.name %></p>
+                <p class="text-muted" style="font:var(--font-label-xs)">Qty: <%= item.qty %></p>
+              </div>
+              <span style="font:600 14px/1.3 var(--font-family);color:var(--color-text);white-space:nowrap"><%= formatRp(item.price * (item.qty || 1)) %></span>
+            </div>
+            <% }); %>
+          </div>
+          <% } %>
+
+          <div class="cart-summary-row">
+            <span>Subtotal</span>
+            <span class="font-semibold"><%= formatRp(typeof subtotal !== 'undefined' ? subtotal : 0) %></span>
+          </div>
+          <div class="cart-summary-row">
+            <span>Tax (11%)</span>
+            <span><%= formatRp(taxAmount) %></span>
+          </div>
+          <div class="cart-summary-row">
+            <span>Shipping</span>
+            <span><%= shippingCost > 0 ? formatRp(shippingCost) : 'Calculated at next step' %></span>
+          </div>
+          <div class="cart-summary-row total">
+            <span>Total</span>
+            <span><%= formatRp(totalAmount) %></span>
+          </div>
+
+          <button type="submit" form="checkoutForm" class="btn btn-primary btn-lg w-full">
+            Place Order
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <p class="text-muted text-center mt-4" style="font:var(--font-label-xs)">
+            By placing this order you agree to our <a href="/terms" style="color:var(--color-primary)">Terms &amp; Conditions</a>.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<script>
+(function() {
+  var paymentTabs = document.querySelectorAll('.payment-tab');
+  paymentTabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      paymentTabs.forEach(function(t) {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+
+      document.querySelectorAll('.payment-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      var target = document.getElementById(tab.getAttribute('data-tab'));
+      if (target) target.classList.add('active');
+
+      var methodInput = document.getElementById('paymentMethodInput');
+      if (methodInput) {
+        methodInput.value = tab.getAttribute('data-tab') === 'pay-xendit' ? 'xendit' : 'transfer';
+      }
+    });
+  });
+
+  var shippingMethods = document.querySelectorAll('.shipping-method');
+  shippingMethods.forEach(function(method) {
+    method.addEventListener('click', function() {
+      shippingMethods.forEach(function(m) { m.classList.remove('selected'); });
+      method.classList.add('selected');
+      method.querySelector('input[type="radio"]').checked = true;
+    });
+  });
+
+  var bankAccounts = document.querySelectorAll('.bank-account');
+  bankAccounts.forEach(function(acct) {
+    acct.addEventListener('click', function() {
+      bankAccounts.forEach(function(a) { a.classList.remove('selected'); });
+      acct.classList.add('selected');
+      acct.querySelector('input[type="radio"]').checked = true;
+    });
+  });
+})();
+</script>
+
+<%- include('../partials/footer.ejs') %>
+</body>
+</html>

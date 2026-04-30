@@ -1,0 +1,54 @@
+<%# Admin Dashboard Page %>
+<%
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+}
+var s = typeof stats !== 'undefined' ? stats : {};
+var periods = typeof revenuePeriods !== 'undefined' ? revenuePeriods : [];
+var orders = typeof recentOrders !== 'undefined' ? recentOrders : [];
+%>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Admin Dashboard' }) %>
+<body>
+<div class="dashboard-layout">
+  <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'dashboard' }) %>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div>
+        <h2>Admin Dashboard</h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Overview of your store performance.</p>
+      </div>
+    </div>
+
+    <%- include('./partials/dashboard-stats', { stats: s }) %>
+
+    <div style="margin-bottom: var(--space-8);">
+      <div class="dashboard-table-header" style="margin-bottom: var(--space-4);">
+        <h3>Revenue</h3>
+      </div>
+      <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+        <a href="?period=daily" class="btn btn-ghost btn-sm">Daily</a>
+        <a href="?period=weekly" class="btn btn-ghost btn-sm">Weekly</a>
+        <a href="?period=monthly" class="btn btn-ghost btn-sm">Monthly</a>
+        <a href="?period=yearly" class="btn btn-ghost btn-sm">Yearly</a>
+      </div>
+      <% if (periods.length > 0) { %>
+      <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: var(--space-6);">
+        <% periods.forEach(function(rp) { %>
+        <div class="stat-card" style="text-align: center;">
+          <div class="stat-card-label"><%= rp.label %></div>
+          <div class="stat-card-value" style="font-size: 24px; margin-bottom: var(--space-2);"><%= formatRp(rp.total) %></div>
+          <div style="font: var(--font-body-md); color: var(--color-text-muted);"><%= rp.orders %> orders</div>
+        </div>
+        <% }); %>
+      </div>
+      <% } else { %>
+      <div style="text-align: center; padding: var(--space-8); color: var(--color-text-muted);">No revenue data available.</div>
+      <% } %>
+    </div>
+
+    <%- include('./partials/recent-orders-table', { recentOrders: orders, formatRp: formatRp, isAdmin: true }) %>
+  </main>
+</div>
+</body>
+</html>

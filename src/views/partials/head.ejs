@@ -1,0 +1,48 @@
+<%# Head partial - include in all pages %>
+<!DOCTYPE html>
+<html lang="<%= typeof lang !== 'undefined' ? lang : 'en' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6366F1">
+
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Swift Commerce' %></title>
+
+  <% if (typeof metaDescription !== 'undefined' && metaDescription) { %>
+  <meta name="description" content="<%= metaDescription %>">
+  <% } %>
+
+  <% if (typeof ogTitle !== 'undefined' && ogTitle) { %>
+  <meta property="og:title" content="<%= ogTitle %>">
+  <% } else if (typeof pageTitle !== 'undefined') { %>
+  <meta property="og:title" content="<%= pageTitle %>">
+  <% } %>
+
+  <% if (typeof ogDescription !== 'undefined' && ogDescription) { %>
+  <meta property="og:description" content="<%= ogDescription %>">
+  <% } else if (typeof metaDescription !== 'undefined' && metaDescription) { %>
+  <meta property="og:description" content="<%= metaDescription %>">
+  <% } %>
+
+  <% if (typeof ogImage !== 'undefined' && ogImage) { %>
+  <meta property="og:image" content="<%= ogImage %>">
+  <% } %>
+
+  <% if (typeof ogUrl !== 'undefined' && ogUrl) { %>
+  <meta property="og:url" content="<%= ogUrl %>">
+  <% } %>
+
+  <% if (typeof ogType !== 'undefined' && ogType) { %>
+  <meta property="og:type" content="<%= ogType %>">
+  <% } else { %>
+  <meta property="og:type" content="website">
+  <% } %>
+
+  <meta property="og:site_name" content="Swift Commerce">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>

@@ -1,0 +1,22 @@
+<%# Settings: Shipping Couriers Section %>
+<%
+var courierList = typeof couriers !== 'undefined' ? couriers : [];
+%>
+<div class="admin-card mb-6">
+  <h3 class="admin-card-title">Shipping Couriers</h3>
+  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);">Enable the couriers you want to offer at checkout.</p>
+  <div class="flex flex-col gap-3">
+    <% courierList.forEach(function(c) { %>
+    <div class="flex items-center justify-between" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md);">
+      <div>
+        <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= c.name %></p>
+        <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;">Code: <%= c.code %></p>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" name="couriers[]" value="<%= c.code %>" <%= c.enabled ? 'checked' : '' %>>
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+    <% }); %>
+  </div>
+</div>

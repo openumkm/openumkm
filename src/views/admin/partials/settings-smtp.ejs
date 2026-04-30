@@ -1,0 +1,35 @@
+<%# Settings: SMTP Configuration Section %>
+<div class="admin-card mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="admin-card-title" style="margin-bottom: 0;">Email (SMTP)</h3>
+    <label class="toggle">
+      <input type="checkbox" name="smtpEnabled" value="1" <%= s.smtpEnabled ? 'checked' : '' %>>
+      <span class="toggle-track"></span>
+      <span class="toggle-label">Enabled</span>
+    </label>
+  </div>
+  <div class="grid" style="grid-template-columns: 2fr 1fr; gap: var(--space-4);">
+    <div class="form-group">
+      <label for="smtpHost" class="form-label">SMTP Host</label>
+      <input type="text" id="smtpHost" name="smtpHost" class="input" value="<%= s.smtpHost || '' %>" placeholder="smtp.gmail.com">
+    </div>
+    <div class="form-group">
+      <label for="smtpPort" class="form-label">Port</label>
+      <input type="number" id="smtpPort" name="smtpPort" class="input" value="<%= s.smtpPort || 587 %>" placeholder="587">
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+    <div class="form-group">
+      <label for="smtpUsername" class="form-label">Username</label>
+      <input type="text" id="smtpUsername" name="smtpUsername" class="input" value="<%= s.smtpUsername || '' %>">
+    </div>
+    <div class="form-group">
+      <label for="smtpPassword" class="form-label">Password</label>
+      <input type="password" id="smtpPassword" name="smtpPassword" class="input" value="<%= s.smtpPassword || '' %>">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="smtpFromAddress" class="form-label">From Address</label>
+    <input type="email" id="smtpFromAddress" name="smtpFromAddress" class="input" value="<%= s.smtpFromAddress || '' %>" placeholder="noreply@yourstore.com">
+  </div>
+</div>

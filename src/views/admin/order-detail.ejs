@@ -1,0 +1,174 @@
+<%# Admin Order Detail Page %>
+<%
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+}
+var o = typeof order !== 'undefined' ? order : {};
+var items = o.items || [];
+var addr = o.shippingAddress || {};
+var statuses = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shipped', 'completed', 'cancelled'];
+%>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Order Detail' }) %>
+<body>
+<div class="dashboard-layout">
+  <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'orders' }) %>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="flex items-center gap-3">
+        <a href="/admin/orders" style="color: var(--color-text-muted); display: flex;" title="Back to orders">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <div>
+          <div class="flex items-center gap-3">
+            <h2>Order #<%= o.orderNumber || o.id %></h2>
+            <span class="status status-<%= o.status || 'pending' %>"><%= (o.status || 'pending').replace(/_/g, ' ') %></span>
+          </div>
+          <p style="color: var(--color-text-secondary); margin-bottom: 0;">Created <%= o.createdAt || '—' %></p>
+        </div>
+      </div>
+    </div>
+
+    <% if (typeof success !== 'undefined' && success) { %>
+    <div class="alert alert-success mb-6">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <span><%= success %></span>
+    </div>
+    <% } %>
+
+    <div class="grid" style="margin-bottom: var(--space-6);">
+      <div class="col-8">
+        <!-- Order Items -->
+        <div class="admin-card mb-6">
+          <h3 class="admin-card-title">Items</h3>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Variant</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% items.forEach(function(item) { %>
+              <tr>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <% if (item.image) { %>
+                    <img src="<%= item.image %>" alt="<%= item.name %>" style="width: 44px; height: 44px; border-radius: var(--radius-md); object-fit: cover;">
+                    <% } %>
+                    <span style="font: var(--font-label-sm);"><%= item.name %></span>
+                  </div>
+                </td>
+                <td style="font: var(--font-label-xs); color: var(--color-text-muted);"><%= item.variant || '—' %></td>
+                <td><%= item.qty || 1 %></td>
+                <td><%= formatRp(item.price) %></td>
+                <td class="amount"><%= formatRp(item.price * (item.qty || 1)) %></td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+
+          <div style="border-top: 1px solid var(--color-border-light); padding-top: var(--space-4); margin-top: var(--space-4);">
+            <div class="flex justify-between mb-2" style="font: var(--font-body-md);">
+              <span style="color: var(--color-text-muted);">Subtotal</span>
+              <span><%= formatRp(o.subtotal) %></span>
+            </div>
+            <div class="flex justify-between mb-2" style="font: var(--font-body-md);">
+              <span style="color: var(--color-text-muted);">Tax</span>
+              <span><%= formatRp(o.taxTotal || 0) %></span>
+            </div>
+            <div class="flex justify-between mb-2" style="font: var(--font-body-md);">
+              <span style="color: var(--color-text-muted);">Shipping (<%= o.courier || '—' %>)</span>
+              <span><%= formatRp(o.shippingCost || 0) %></span>
+            </div>
+            <div class="flex justify-between" style="font: 600 18px/1.3 var(--font-family); padding-top: var(--space-3); border-top: 1px solid var(--color-border-light);">
+              <span>Total</span>
+              <span style="color: var(--color-primary);"><%= formatRp(o.total) %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="admin-card mb-6">
+          <h3 class="admin-card-title">Shipping Address</h3>
+          <div style="font: var(--font-body-md); color: var(--color-text-secondary);">
+            <p style="font-weight: 600; color: var(--color-text); margin-bottom: var(--space-1);"><%= addr.recipientName || addr.name || '—' %></p>
+            <p style="margin-bottom: var(--space-1);"><%= addr.phone || '' %></p>
+            <p style="margin-bottom: var(--space-1);"><%= addr.address || addr.addressLine || '' %></p>
+            <p><%= addr.city || '' %><%= addr.province ? ', ' + addr.province : '' %> <%= addr.postalCode || '' %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <!-- Update Status -->
+        <div class="admin-card mb-6">
+          <h3 class="admin-card-title">Update Status</h3>
+          <form action="/admin/orders/<%= o.id %>/status" method="post">
+            <div class="form-group">
+              <label for="status" class="form-label">Order Status</label>
+              <select id="status" name="status" class="select">
+                <% statuses.forEach(function(s) { %>
+                <option value="<%= s %>" <%= o.status === s ? 'selected' : '' %>><%= s.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); }) %></option>
+                <% }); %>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">Update Status</button>
+          </form>
+        </div>
+
+        <!-- Tracking -->
+        <div class="admin-card mb-6">
+          <h3 class="admin-card-title">Tracking</h3>
+          <form action="/admin/orders/<%= o.id %>/tracking" method="post">
+            <div class="form-group">
+              <label for="trackingNumber" class="form-label">Tracking Number</label>
+              <input type="text" id="trackingNumber" name="trackingNumber" class="input" value="<%= o.trackingNumber || '' %>" placeholder="Enter tracking number">
+            </div>
+            <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;">Save Tracking</button>
+          </form>
+        </div>
+
+        <!-- Order Info -->
+        <div class="admin-card mb-6">
+          <h3 class="admin-card-title">Order Info</h3>
+          <div class="flex flex-col gap-3" style="font: var(--font-body-md);">
+            <div class="flex justify-between">
+              <span style="color: var(--color-text-muted);">Payment</span>
+              <span class="badge <%= o.paymentMethod === 'xendit' ? 'badge-info' : 'badge-neutral' %>"><%= o.paymentMethod === 'xendit' ? 'Xendit' : 'Manual Transfer' %></span>
+            </div>
+            <div class="flex justify-between">
+              <span style="color: var(--color-text-muted);">Currency</span>
+              <span><%= o.currency || 'IDR' %></span>
+            </div>
+            <div class="flex justify-between">
+              <span style="color: var(--color-text-muted);">Courier</span>
+              <span><%= o.courier || '—' %> <%= o.courierService || '' %></span>
+            </div>
+            <div class="flex justify-between">
+              <span style="color: var(--color-text-muted);">Expires</span>
+              <span><%= o.expiresAt || '—' %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer -->
+        <div class="admin-card">
+          <h3 class="admin-card-title">Customer</h3>
+          <div class="flex items-center gap-3">
+            <div class="avatar" style="width: 40px; height: 40px;"><%= o.customerName ? o.customerName.charAt(0).toUpperCase() : 'G' %></div>
+            <div>
+              <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= o.customerName || 'Guest Checkout' %></p>
+              <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;"><%= o.customerEmail || '' %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

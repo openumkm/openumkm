@@ -1,0 +1,31 @@
+<%# Settings: Payment Methods Section %>
+<div class="admin-card mb-6">
+  <h3 class="admin-card-title">Payment Methods</h3>
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center justify-between" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md);">
+      <div>
+        <p style="font: var(--font-label-sm); margin-bottom: 2px;">Xendit (Online Payment)</p>
+        <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;">Accept payments via VA, QRIS, e-wallet, and more.</p>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" name="xenditEnabled" value="1" <%= s.xenditEnabled ? 'checked' : '' %>>
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+    <div class="flex items-center justify-between" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md);">
+      <div>
+        <p style="font: var(--font-label-sm); margin-bottom: 2px;">Manual Bank Transfer</p>
+        <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;">Buyer transfers manually, uploads proof for review.</p>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" name="manualTransferEnabled" value="1" <%= s.manualTransferEnabled ? 'checked' : '' %>>
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+  <div class="form-group mt-4">
+    <label for="autoExpireHours" class="form-label">Auto-Expire Unpaid Orders (hours)</label>
+    <input type="number" id="autoExpireHours" name="autoExpireHours" class="input" value="<%= s.autoExpireHours || 24 %>" min="1" max="168" style="max-width: 200px;">
+    <span class="form-hint">Orders not paid within this time will be automatically expired.</span>
+  </div>
+</div>

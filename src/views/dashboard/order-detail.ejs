@@ -1,0 +1,192 @@
+<% const userNameVal = typeof userName !== 'undefined' ? userName : 'Customer'; %>
+
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Order Detail' }) %>
+
+<body>
+<div class="dashboard-layout">
+  <aside class="dashboard-sidebar" aria-label="Dashboard navigation">
+    <div class="dashboard-sidebar-logo">
+      <span>S</span>wift Commerce
+    </div>
+
+    <div class="flex items-center gap-3" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md); margin-bottom: var(--space-6);">
+      <div class="avatar" style="width: 44px; height: 44px; font-size: 16px;" aria-hidden="true"><%= userNameVal.charAt(0).toUpperCase() %></div>
+      <div>
+        <p style="font: var(--font-label-sm); color: var(--color-text); margin-bottom: 0;"><%= userNameVal %></p>
+        <p style="font: var(--font-label-xs); color: var(--color-text-muted);">Customer</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Dashboard menu">
+      <a href="/dashboard" class="sidebar-nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="/dashboard/orders" class="sidebar-nav-item active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        My Orders
+      </a>
+      <a href="/dashboard/addresses" class="sidebar-nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Addresses
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/auth/logout" class="sidebar-nav-item" style="color: var(--color-danger);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </a>
+    </div>
+  </aside>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="flex items-center gap-3">
+        <h2>Order #<%= order.orderNumber || order.id %></h2>
+        <span class="status <%= 'status-' + ((order.status || '').toLowerCase()) %>"><%= order.status || 'Pending' %></span>
+      </div>
+      <a href="/dashboard/orders" style="color: var(--color-primary); font: var(--font-label-sm); font-weight: 600;">&larr; Back to Orders</a>
+    </div>
+
+    <div class="grid" style="margin-bottom: var(--space-6);">
+      <div class="col-6" style="background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-lg); padding: var(--space-6);">
+        <h4 style="margin-bottom: var(--space-4);">Order Information</h4>
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between" style="font: var(--font-body-md);">
+            <span style="color: var(--color-text-muted);">Date</span>
+            <span><%= order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '—' %></span>
+          </div>
+          <div class="flex justify-between" style="font: var(--font-body-md);">
+            <span style="color: var(--color-text-muted);">Payment Method</span>
+            <span><%= order.paymentMethod || '—' %></span>
+          </div>
+          <div class="flex justify-between" style="font: var(--font-body-md);">
+            <span style="color: var(--color-text-muted);">Courier</span>
+            <span><%= order.courier || '—' %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-table-wrap" style="margin-bottom: var(--space-6);">
+      <div class="dashboard-table-header">
+        <h3>Items</h3>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Variant</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (order.items && order.items.length > 0) {
+            order.items.forEach(function(item) { %>
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <% if (item.image) { %>
+                <img src="<%= item.image %>" alt="<%= item.name %>" style="width: 48px; height: 48px; border-radius: var(--radius-md); object-fit: cover;">
+                <% } else { %>
+                <div style="width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--color-gray-100); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <% } %>
+                <span><%= item.name %></span>
+              </div>
+            </td>
+            <td><%= item.variant || '—' %></td>
+            <td><%= item.quantity || 1 %></td>
+            <td>Rp <%= item.price ? item.price.toLocaleString('id-ID') : '0' %></td>
+            <td class="amount">Rp <%= item.subtotal ? item.subtotal.toLocaleString('id-ID') : ((item.price || 0) * (item.quantity || 1)).toLocaleString('id-ID') %></td>
+          </tr>
+          <% });
+          } else { %>
+          <tr>
+            <td colspan="5" style="text-align: center; color: var(--color-text-muted); padding: var(--space-8);">No items found.</td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid" style="margin-bottom: var(--space-6);">
+      <div class="col-6">
+        <div style="background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-lg); padding: var(--space-6);">
+          <h4 style="margin-bottom: var(--space-4);">Order Totals</h4>
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between" style="font: var(--font-body-md);">
+              <span style="color: var(--color-text-muted);">Subtotal</span>
+              <span>Rp <%= order.subtotal ? order.subtotal.toLocaleString('id-ID') : (order.total || 0).toLocaleString('id-ID') %></span>
+            </div>
+            <div class="flex justify-between" style="font: var(--font-body-md);">
+              <span style="color: var(--color-text-muted);">Shipping</span>
+              <span>Rp <%= order.shippingCost ? order.shippingCost.toLocaleString('id-ID') : '0' %></span>
+            </div>
+            <div class="flex justify-between" style="font: var(--font-body-md);">
+              <span style="color: var(--color-text-muted);">Tax</span>
+              <span>Rp <%= order.tax ? order.tax.toLocaleString('id-ID') : '0' %></span>
+            </div>
+            <div style="border-top: 1px solid var(--color-border-light); padding-top: var(--space-3);" class="flex justify-between">
+              <strong>Total</strong>
+              <strong style="font-size: 18px; color: var(--color-primary);">Rp <%= order.total ? order.total.toLocaleString('id-ID') : '0' %></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <% if (order.shippingAddress) { %>
+        <div style="background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-6);">
+          <h4 style="margin-bottom: var(--space-3);">Shipping Address</h4>
+          <div style="font: var(--font-body-md); color: var(--color-text-secondary);">
+            <p style="font-weight: 600; color: var(--color-text); margin-bottom: var(--space-1);">
+              <%= order.shippingAddress.name || order.shippingAddress.label || '—' %>
+            </p>
+            <p style="margin-bottom: var(--space-1);"><%= order.shippingAddress.phone || '' %></p>
+            <p><%= order.shippingAddress.address || '' %></p>
+            <p><%= order.shippingAddress.city || '' %><%= order.shippingAddress.postalCode ? ', ' + order.shippingAddress.postalCode : '' %></p>
+          </div>
+        </div>
+        <% } %>
+
+        <% if (order.trackingNumber) { %>
+        <div style="background: var(--color-surface); border: 1px solid var(--color-border-light); border-radius: var(--radius-lg); padding: var(--space-6);">
+          <h4 style="margin-bottom: var(--space-3);">Tracking Information</h4>
+          <div style="font: var(--font-body-md);">
+            <div class="flex justify-between" style="margin-bottom: var(--space-2);">
+              <span style="color: var(--color-text-muted);">Tracking Number</span>
+              <span style="font-weight: 600;"><%= order.trackingNumber %></span>
+            </div>
+            <% if (order.trackingUrl) { %>
+            <a href="<%= order.trackingUrl %>" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" style="margin-top: var(--space-2);">Track Package</a>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <% if (order.paymentMethod === 'Manual Transfer' && (order.status === 'pending' || order.status === 'waiting_confirmation')) { %>
+    <div style="background: var(--color-warning-bg); border: 1px solid #FDE68A; border-radius: var(--radius-lg); padding: var(--space-6); margin-bottom: var(--space-6);">
+      <div class="flex items-center justify-between">
+        <div>
+          <h4 style="margin-bottom: var(--space-1);">Payment Confirmation</h4>
+          <p style="color: var(--color-text-secondary); margin-bottom: 0;">Your payment is pending. Confirm your payment to process this order.</p>
+        </div>
+        <a href="/payment/confirm/<%= order.id %>" class="btn btn-primary">Confirm Payment</a>
+      </div>
+    </div>
+    <% } %>
+
+    <a href="/dashboard/orders" style="display: inline-flex; align-items: center; gap: var(--space-2); color: var(--color-text-secondary); font: var(--font-label-sm); margin-top: var(--space-4);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Orders
+    </a>
+  </main>
+</div>
+</body>
+</html>

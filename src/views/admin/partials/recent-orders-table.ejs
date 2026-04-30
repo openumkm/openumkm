@@ -1,0 +1,50 @@
+<%# Recent Orders Table Partial — used in admin dashboard %>
+<%
+var orders = typeof recentOrders !== 'undefined' ? recentOrders : [];
+var admin = typeof isAdmin !== 'undefined' ? isAdmin : false;
+var basePath = admin ? '/admin/orders' : '/dashboard/orders';
+%>
+<div class="dashboard-table-wrap">
+  <div class="dashboard-table-header">
+    <h3>Recent Orders</h3>
+  </div>
+  <% if (orders.length > 0) { %>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Customer</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(function(order) { %>
+      <tr style="cursor: pointer;" onclick="window.location.href='<%= basePath %>/<%= order.id %>'">
+        <td><strong>#<%= order.orderNumber || order.id %></strong></td>
+        <td>
+          <div class="customer-cell">
+            <div class="avatar"><%= order.customerName ? order.customerName.charAt(0).toUpperCase() : 'G' %></div>
+            <span><%= order.customerName || 'Guest' %></span>
+          </div>
+        </td>
+        <td class="amount">Rp <%= order.total ? order.total.toLocaleString('id-ID') : '0' %></td>
+        <td>
+          <span class="status status-<%= (order.status || 'pending').toLowerCase() %>"><%= (order.status || 'Pending').replace(/_/g, ' ') %></span>
+        </td>
+        <td><%= order.createdAt || '—' %></td>
+      </tr>
+      <% }); %>
+    </tbody>
+  </table>
+  <% } else { %>
+  <div class="empty-state">
+    <div class="empty-state-icon">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <h3>No orders yet</h3>
+    <p>Recent orders will appear here once customers start placing them.</p>
+  </div>
+  <% } %>
+</div>

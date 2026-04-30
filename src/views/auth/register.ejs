@@ -1,0 +1,103 @@
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Create Account' }) %>
+
+<body>
+<%- include('../partials/header', { isLoggedIn: typeof isLoggedIn !== 'undefined' ? isLoggedIn : false, cartCount: typeof cartCount !== 'undefined' ? cartCount : 0 }) %>
+
+<main class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <div class="logo">
+        <span>S</span>wift Commerce
+      </div>
+      <h2>Create Account</h2>
+      <p>Join Swift Commerce today</p>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger" role="alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span><%= error %></span>
+    </div>
+    <% } %>
+
+    <form action="/auth/register" method="POST" novalidate>
+      <div class="form-group">
+        <label for="fullName" class="form-label form-label-required">Full Name</label>
+        <input
+          type="text"
+          id="fullName"
+          name="fullName"
+          class="input"
+          placeholder="Jane Doe"
+          required
+          autocomplete="name"
+          autofocus
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label form-label-required">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="input"
+          placeholder="you@example.com"
+          required
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="phone" class="form-label form-label-required">Phone Number</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          class="input"
+          placeholder="+62 812 3456 7890"
+          required
+          autocomplete="tel"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label form-label-required">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="input"
+          placeholder="Min. 8 characters"
+          required
+          minlength="8"
+          autocomplete="new-password"
+        >
+        <span class="form-hint">Must be at least 8 characters</span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label form-label-required">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          class="input"
+          placeholder="Re-enter your password"
+          required
+          autocomplete="new-password"
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+    </form>
+
+    <div class="auth-card-footer">
+      Already have an account? <a href="/auth/login">Sign in</a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

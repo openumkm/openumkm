@@ -1,0 +1,13 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "builder": "tsc",
+    "deleteOutDir": true,
+    "assets": [
+      { "include": "views/**/*", "outDir": "dist" },
+      { "include": "public/**/*", "outDir": "dist" },
+      { "include": "locales/**/*", "outDir": "dist" }
+    ]
+  }
+}

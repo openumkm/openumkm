@@ -1,0 +1,19 @@
+<%# Settings: API Keys Section %>
+<div class="admin-card mb-6">
+  <h3 class="admin-card-title">API Keys</h3>
+  <div class="form-group">
+    <label for="xenditSecretKey" class="form-label">Xendit Secret Key</label>
+    <input type="password" id="xenditSecretKey" name="xenditSecretKey" class="input" value="<%= s.xenditSecretKey || '' %>" placeholder="xnd_development_xxxxx">
+    <span class="form-hint">Required for online payment processing via Xendit.</span>
+  </div>
+  <div class="form-group">
+    <label for="rajaOngkirApiKey" class="form-label">RajaOngkir API Key</label>
+    <input type="password" id="rajaOngkirApiKey" name="rajaOngkirApiKey" class="input" value="<%= s.rajaOngkirApiKey || '' %>" placeholder="Your RajaOngkir API key">
+    <span class="form-hint">Required for shipping cost calculation.</span>
+  </div>
+  <div class="form-group">
+    <label for="originCity" class="form-label">Origin City (Shipping)</label>
+    <input type="text" id="originCity" name="originCity" class="input" value="<%= s.originCity || '' %>" placeholder="Jakarta">
+    <span class="form-hint">City where your products ship from. Used for shipping cost calculation.</span>
+  </div>
+</div>

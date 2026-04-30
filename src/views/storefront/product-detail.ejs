@@ -1,0 +1,216 @@
+<%#
+  Product Detail Page — storefront
+  Variables: pageTitle, product {slug, name, price, description, category, images[], stock, variants}, cartCount, isLoggedIn, relatedProducts[]
+%>
+<%
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+}
+var images = (typeof product !== 'undefined' && product.images && product.images.length > 0) ? product.images : ['/static/img/placeholder.svg'];
+var mainImage = images[0];
+var stock = (typeof product !== 'undefined' && typeof product.stock !== 'undefined') ? product.stock : 0;
+var outOfStock = stock === 0;
+var variants = (typeof product !== 'undefined' && product.variants) ? product.variants : null;
+%>
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head.ejs', { pageTitle, metaDescription: typeof product !== 'undefined' ? product.description : '', ogImage: mainImage }) %>
+<body>
+<%- include('../partials/header.ejs', { isLoggedIn, isAdmin: false, cartCount, currentPage: 'products' }) %>
+
+<% if (typeof product !== 'undefined') { %>
+<main class="product-detail" itemscope itemtype="https://schema.org/Product">
+  <div class="container">
+    <nav class="mb-6" aria-label="Breadcrumb">
+      <ol class="flex items-center gap-2" style="font:var(--font-label-sm);color:var(--color-text-muted)">
+        <li><a href="/" class="hover-underline" style="color:var(--color-text-secondary)">Home</a></li>
+        <li aria-hidden="true">/</li>
+        <li><a href="/?category=<%= product.category %>" class="hover-underline" style="color:var(--color-text-secondary)"><%= product.category %></a></li>
+        <li aria-hidden="true">/</li>
+        <li style="color:var(--color-text)" aria-current="page"><%= product.name %></li>
+      </ol>
+    </nav>
+
+    <div class="grid">
+      <div class="col-5 md:col-6">
+        <div class="product-gallery">
+          <div class="product-gallery-main" id="galleryMain">
+            <img src="<%= mainImage %>" alt="<%= product.name %>" id="galleryMainImg" itemprop="image">
+          </div>
+          <% if (images.length > 1) { %>
+          <div class="product-gallery-thumbnails" id="galleryThumbs">
+            <% images.forEach(function(img, i) { %>
+            <button type="button" class="product-gallery-thumb<%= i === 0 ? ' active' : '' %>" data-image="<%= img %>" aria-label="View image <%= i + 1 %>">
+              <img src="<%= img %>" alt="<%= product.name %> thumbnail <%= i + 1 %>" loading="lazy">
+            </button>
+            <% }); %>
+          </div>
+          <% } %>
+        </div>
+        <script>
+        (function() {
+          var main = document.getElementById('galleryMainImg');
+          var thumbs = document.querySelectorAll('#galleryThumbs .product-gallery-thumb');
+          if (!main || !thumbs.length) return;
+          thumbs.forEach(function(thumb) {
+            thumb.addEventListener('click', function() {
+              thumbs.forEach(function(t) { t.classList.remove('active'); });
+              thumb.classList.add('active');
+              main.src = thumb.getAttribute('data-image');
+            });
+          });
+        })();
+        </script>
+      </div>
+
+      <div class="col-6 col-offset-1 md:col-6">
+        <div class="product-info">
+          <p class="product-card-category" itemprop="category"><%= product.category %></p>
+          <h1 itemprop="name"><%= product.name %></h1>
+
+          <div class="product-info-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+            <span class="current" itemprop="price" content="<%= product.price %>"><%= formatRp(product.price) %></span>
+            <meta itemprop="priceCurrency" content="IDR">
+            <% if (outOfStock) { %>
+            <link itemprop="availability" href="https://schema.org/OutOfStock">
+            <% } else { %>
+            <link itemprop="availability" href="https://schema.org/InStock">
+            <% } %>
+          </div>
+
+          <div class="product-info-desc" itemprop="description">
+            <p><%= product.description %></p>
+          </div>
+
+          <% if (variants && variants.length > 0) { %>
+          <div class="variant-selector">
+            <% variants.forEach(function(variant) { %>
+            <div class="mb-4">
+              <label class="variant-selector-label"><%= variant.label %>: <span class="selected"><%= variant.options[0] %></span></label>
+              <div class="variant-options">
+                <% variant.options.forEach(function(opt, idx) { %>
+                <button type="button" class="variant-option<%= idx === 0 ? ' active' : '' %>" data-variant="<%= variant.name %>" data-value="<%= opt %>"><%= opt %></button>
+                <% }); %>
+              </div>
+            </div>
+            <% }); %>
+          </div>
+          <% } %>
+
+          <div class="product-meta mb-6">
+            <div class="product-meta-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <% if (outOfStock) { %>
+              <span class="text-danger font-semibold">Habis / Out of Stock</span>
+              <% } else { %>
+              <span>Stock: <strong><%= stock %> available</strong></span>
+              <% } %>
+            </div>
+          </div>
+
+          <% if (!outOfStock) { %>
+          <form action="/cart/add" method="post" class="product-actions">
+            <div class="qty-selector">
+              <button type="button" class="qty-btn" aria-label="Decrease quantity" onclick="var i=this.nextElementSibling;i.value=Math.max(1,+i.value-1)">-</button>
+              <input type="number" name="qty" class="qty-input" value="1" min="1" max="<%= stock %>" aria-label="Quantity">
+              <button type="button" class="qty-btn" aria-label="Increase quantity" onclick="var i=this.previousElementSibling;i.value=Math.min(<%= stock %>,+i.value+1)">+</button>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+          </form>
+          <% } else { %>
+          <button class="btn btn-secondary btn-lg" disabled style="width:100%">Out of Stock</button>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12">
+      <div class="tabs" role="tablist">
+        <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="tab-desc">Description</button>
+        <button type="button" class="tab" role="tab" aria-selected="false" data-tab="tab-shipping">Shipping Info</button>
+      </div>
+      <div class="tab-content active" id="tab-desc" role="tabpanel">
+        <p style="line-height:1.8;color:var(--color-text-secondary)"><%= product.description %></p>
+      </div>
+      <div class="tab-content" id="tab-shipping" role="tabpanel">
+        <div class="flex flex-col gap-3" style="line-height:1.8;color:var(--color-text-secondary)">
+          <p><strong>Processing Time:</strong> Orders are processed within 1-2 business days.</p>
+          <p><strong>Shipping:</strong> We deliver via JNE, J&T, SiCepat, and Pos Indonesia. Delivery within 2-7 business days depending on your location.</p>
+          <p><strong>Returns:</strong> Items can be returned within 7 days of delivery. Must be in original condition with tags attached.</p>
+        </div>
+      </div>
+    </div>
+
+    <% if (typeof relatedProducts !== 'undefined' && relatedProducts.length > 0) { %>
+    <section class="mt-20" aria-labelledby="related-heading">
+      <h2 id="related-heading" class="mb-8">Related Products</h2>
+      <div class="product-grid">
+        <% relatedProducts.forEach(function(rp) { %>
+        <a href="/product/<%= rp.slug %>" class="product-card">
+          <div class="product-card-image">
+            <img src="<%= rp.image %>" alt="<%= rp.name %>" loading="lazy">
+          </div>
+          <div class="product-card-body">
+            <p class="product-card-category"><%= rp.category %></p>
+            <h3 class="product-card-name"><%= rp.name %></h3>
+            <p class="product-card-price"><%= formatRp(rp.price) %></p>
+          </div>
+        </a>
+        <% }); %>
+      </div>
+    </section>
+    <% } %>
+  </div>
+</main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "<%= product.name %>",
+  "description": "<%= product.description.replace(/"/g, '\\"') %>",
+  "image": "<%= mainImage %>",
+  "category": "<%= product.category %>",
+  "offers": {
+    "@type": "Offer",
+    "price": "<%= product.price %>",
+    "priceCurrency": "IDR",
+    "availability": "<%= outOfStock ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock' %>"
+  }
+}
+</script>
+
+<script>
+(function() {
+  var tabs = document.querySelectorAll('.tabs .tab');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      var target = document.getElementById(tab.getAttribute('data-tab'));
+      if (target) target.classList.add('active');
+    });
+  });
+
+  var variantOptions = document.querySelectorAll('.variant-option');
+  variantOptions.forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      var parent = opt.parentElement;
+      parent.querySelectorAll('.variant-option').forEach(function(o) { o.classList.remove('active'); });
+      opt.classList.add('active');
+      var label = parent.closest('.variant-selector').querySelector('.variant-selector-label .selected');
+      if (label) label.textContent = opt.textContent;
+    });
+  });
+})();
+</script>
+<% } %>
+
+<%- include('../partials/footer.ejs') %>
+</body>
+</html>

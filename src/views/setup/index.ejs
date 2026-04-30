@@ -1,0 +1,126 @@
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Store Setup' }) %>
+
+<body>
+<main class="setup-page">
+  <div class="setup-card">
+    <div style="text-align: center; margin-bottom: var(--space-8);">
+      <div style="font: 700 28px/1.2 var(--font-family); color: var(--color-text); margin-bottom: var(--space-2);">
+        <span style="color: var(--color-primary);">S</span>wift Commerce
+      </div>
+      <h2 style="margin-bottom: var(--space-2);">Welcome to Swift Commerce</h2>
+      <p style="color: var(--color-text-secondary); font: var(--font-body-md);">Set up your store in seconds</p>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger" role="alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span><%= error %></span>
+    </div>
+    <% } %>
+
+    <form action="/setup" method="POST" novalidate>
+      <div class="form-group">
+        <label for="storeName" class="form-label form-label-required">Store Name</label>
+        <input
+          type="text"
+          id="storeName"
+          name="storeName"
+          class="input"
+          placeholder="My Awesome Store"
+          required
+          autofocus
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="email" class="form-label form-label-required">Admin Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="input"
+          placeholder="admin@mystore.com"
+          required
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label form-label-required">Admin Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="input"
+          placeholder="Min. 8 characters"
+          required
+          minlength="8"
+          autocomplete="new-password"
+        >
+        <div id="strengthBar" style="height: 4px; border-radius: var(--radius-full); background: var(--color-border-light); margin-top: var(--space-2); overflow: hidden; transition: width var(--transition-base);">
+          <div id="strengthFill" style="height: 100%; width: 0%; border-radius: var(--radius-full); transition: width var(--transition-base), background var(--transition-base);"></div>
+        </div>
+        <span id="strengthText" class="form-hint" style="margin-top: var(--space-1);"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword" class="form-label form-label-required">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          class="input"
+          placeholder="Re-enter your password"
+          required
+          autocomplete="new-password"
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Create Your Store</button>
+    </form>
+
+    <p style="text-align: center; font: var(--font-label-xs); color: var(--color-text-muted); margin-top: var(--space-8); margin-bottom: 0;">
+      Swift Commerce &mdash; Self-hosted eCommerce
+    </p>
+  </div>
+</main>
+
+<script>
+(function() {
+  var password = document.getElementById('password');
+  var fill = document.getElementById('strengthFill');
+  var text = document.getElementById('strengthText');
+
+  if (!password || !fill || !text) return;
+
+  password.addEventListener('input', function() {
+    var val = password.value;
+    var score = 0;
+
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    if (val.length >= 12) score++;
+
+    var pct = score * 20;
+    fill.style.width = pct + '%';
+
+    if (score <= 1) {
+      fill.style.background = 'var(--color-danger)';
+      text.textContent = 'Weak password';
+      text.style.color = 'var(--color-danger)';
+    } else if (score <= 3) {
+      fill.style.background = 'var(--color-warning)';
+      text.textContent = 'Fair password';
+      text.style.color = 'var(--color-warning)';
+    } else {
+      fill.style.background = 'var(--color-success)';
+      text.textContent = 'Strong password';
+      text.style.color = 'var(--color-success)';
+    }
+  });
+})();
+</script>
+</body>
+</html>

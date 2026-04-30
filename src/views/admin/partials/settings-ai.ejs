@@ -1,0 +1,26 @@
+<%# Settings: AI Configuration Section %>
+<div class="admin-card mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="admin-card-title" style="margin-bottom: 0;">AI Content Generator</h3>
+    <label class="toggle">
+      <input type="checkbox" name="aiEnabled" value="1" <%= s.aiEnabled ? 'checked' : '' %>>
+      <span class="toggle-track"></span>
+      <span class="toggle-label">Enabled</span>
+    </label>
+  </div>
+  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);">Connect an OpenAI-compatible API to generate product descriptions, SEO meta, and more.</p>
+  <div class="form-group">
+    <label for="aiBaseUrl" class="form-label">API Base URL</label>
+    <input type="url" id="aiBaseUrl" name="aiBaseUrl" class="input" value="<%= s.aiBaseUrl || '' %>" placeholder="https://api.openai.com/v1">
+  </div>
+  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+    <div class="form-group">
+      <label for="aiApiKey" class="form-label">API Key</label>
+      <input type="password" id="aiApiKey" name="aiApiKey" class="input" value="<%= s.aiApiKey || '' %>" placeholder="sk-xxxxx">
+    </div>
+    <div class="form-group">
+      <label for="aiModel" class="form-label">Model Name</label>
+      <input type="text" id="aiModel" name="aiModel" class="input" value="<%= s.aiModel || '' %>" placeholder="gpt-4o-mini">
+    </div>
+  </div>
+</div>

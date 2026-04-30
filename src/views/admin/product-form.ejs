@@ -1,0 +1,199 @@
+<%# Admin Product Form (New / Edit) %>
+<%
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+}
+var isEdit = typeof product !== 'undefined' && product && product.id;
+var p = isEdit ? product : { name: '', slug: '', description: '', price: '', weight: '', stock: '', minOrder: 1, metaTitle: '', metaDescription: '', isActive: true, images: [], variants: [] };
+var formAction = isEdit ? '/admin/products/' + p.id : '/admin/products';
+var images = p.images || [];
+var variants = p.variants || [];
+%>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : (isEdit ? 'Edit Product' : 'New Product') }) %>
+<body>
+<div class="dashboard-layout">
+  <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'products' }) %>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="flex items-center gap-3">
+        <a href="/admin/products" style="color: var(--color-text-muted); display: flex;" title="Back to products">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <div>
+          <h2><%= isEdit ? 'Edit Product' : 'New Product' %></h2>
+          <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= isEdit ? 'Update product details.' : 'Add a new product to your catalog.' %></p>
+        </div>
+      </div>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger mb-6" role="alert">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span><%= error %></span>
+    </div>
+    <% } %>
+
+    <form action="<%= formAction %>" method="post" enctype="multipart/form-data" id="productForm">
+      <div class="grid">
+        <div class="col-8">
+          <div class="admin-card mb-6">
+            <h3 class="admin-card-title">Basic Information</h3>
+            <div class="form-group">
+              <label for="name" class="form-label form-label-required">Product Name</label>
+              <input type="text" id="name" name="name" class="input" required value="<%= p.name %>" placeholder="e.g. Sneaker Urban 01">
+            </div>
+            <div class="form-group">
+              <label for="slug" class="form-label">Slug</label>
+              <input type="text" id="slug" name="slug" class="input" value="<%= p.slug %>" placeholder="auto-generated-from-name">
+              <span class="form-hint">Leave empty to auto-generate from product name.</span>
+            </div>
+            <div class="form-group">
+              <label for="description" class="form-label">Description</label>
+              <div class="flex items-center gap-2 mb-2">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="alert('AI generation will be available when AI module is configured.')">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  Generate with AI
+                </button>
+              </div>
+              <textarea id="description" name="description" class="textarea" rows="5" placeholder="Describe your product..."><%= p.description %></textarea>
+            </div>
+          </div>
+
+          <div class="admin-card mb-6">
+            <h3 class="admin-card-title">Pricing & Inventory</h3>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+              <div class="form-group">
+                <label for="price" class="form-label form-label-required">Price (IDR)</label>
+                <input type="number" id="price" name="price" class="input" required value="<%= p.price %>" min="0" step="1" placeholder="350000">
+                <span class="form-hint">In smallest currency unit (e.g. Rupiah).</span>
+              </div>
+              <div class="form-group">
+                <label for="weight" class="form-label form-label-required">Weight (grams)</label>
+                <input type="number" id="weight" name="weight" class="input" required value="<%= p.weight %>" min="0" placeholder="800">
+              </div>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+              <div class="form-group">
+                <label for="stock" class="form-label form-label-required">Stock</label>
+                <input type="number" id="stock" name="stock" class="input" required value="<%= p.stock %>" min="0" placeholder="25">
+              </div>
+              <div class="form-group">
+                <label for="minOrder" class="form-label">Minimum Order</label>
+                <input type="number" id="minOrder" name="minOrder" class="input" value="<%= p.minOrder || 1 %>" min="1" placeholder="1">
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card mb-6">
+            <h3 class="admin-card-title">Images</h3>
+            <div class="upload-area" id="productUploadZone" tabindex="0" role="button" aria-label="Upload product images">
+              <div class="upload-area-icon">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <p class="upload-area-text"><strong>Click to upload</strong> or drag and drop</p>
+              <p class="upload-area-hint">JPG, PNG up to 5MB. First image will be the primary image.</p>
+            </div>
+            <input type="file" id="productImages" name="images" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
+            <% if (images.length > 0) { %>
+            <div class="image-preview-grid mt-4">
+              <% images.forEach(function(img, idx) { %>
+              <div class="image-preview-item">
+                <img src="<%= img.url %>" alt="Product image <%= idx + 1 %>">
+                <% if (idx === 0) { %><span class="badge badge-primary" style="position:absolute;top:4px;left:4px;">Primary</span><% } %>
+              </div>
+              <% }); %>
+            </div>
+            <% } %>
+          </div>
+
+          <div class="admin-card mb-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="admin-card-title" style="margin-bottom:0;">Variants</h3>
+              <button type="button" class="btn btn-ghost btn-sm" id="addVariantBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Variant
+              </button>
+            </div>
+            <div id="variantsContainer">
+              <% if (variants.length > 0) { %>
+              <% variants.forEach(function(v, idx) { %>
+              <div class="variant-row" data-index="<%= idx %>">
+                <div class="grid" style="grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: var(--space-3); align-items: end;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="variants[<%= idx %>][name]" class="input" value="<%= v.name %>" placeholder="Red / XL">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Size</label>
+                    <input type="text" name="variants[<%= idx %>][size]" class="input" value="<%= v.size || '' %>" placeholder="XL">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Color</label>
+                    <input type="text" name="variants[<%= idx %>][color]" class="input" value="<%= v.color || '' %>" placeholder="Red">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Price</label>
+                    <input type="number" name="variants[<%= idx %>][price]" class="input" value="<%= v.price || '' %>" placeholder="Override">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Stock</label>
+                    <input type="number" name="variants[<%= idx %>][stock]" class="input" value="<%= v.stock %>" placeholder="0">
+                  </div>
+                  <button type="button" class="btn btn-ghost btn-sm remove-variant-btn" style="color: var(--color-danger); margin-bottom: 2px;" title="Remove variant">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+              <% }); %>
+              <% } else { %>
+              <p class="text-muted" style="font: var(--font-body-md); padding: var(--space-4) 0;">No variants added. Products without variants use the main price and stock.</p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-4">
+          <div class="admin-card mb-6">
+            <h3 class="admin-card-title">Status</h3>
+            <label class="toggle">
+              <input type="checkbox" name="isActive" value="1" <%= p.isActive ? 'checked' : '' %>>
+              <span class="toggle-track"></span>
+              <span class="toggle-label">Active</span>
+            </label>
+            <p class="form-hint mt-2">Inactive products are hidden from the storefront.</p>
+          </div>
+
+          <div class="admin-card mb-6">
+            <h3 class="admin-card-title">SEO</h3>
+            <div class="form-group">
+              <label for="metaTitle" class="form-label">Meta Title</label>
+              <div class="flex items-center gap-2 mb-1">
+                <button type="button" class="btn btn-ghost btn-sm" style="padding: 2px 6px; font-size: 11px;" onclick="alert('AI generation will be available when AI module is configured.')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  AI
+                </button>
+              </div>
+              <input type="text" id="metaTitle" name="metaTitle" class="input" value="<%= p.metaTitle || '' %>" placeholder="SEO title for search engines">
+            </div>
+            <div class="form-group">
+              <label for="metaDescription" class="form-label">Meta Description</label>
+              <textarea id="metaDescription" name="metaDescription" class="textarea" rows="3" placeholder="SEO description..."><%= p.metaDescription || '' %></textarea>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              <%= isEdit ? 'Update Product' : 'Create Product' %>
+            </button>
+            <a href="/admin/products" class="btn btn-ghost" style="width: 100%;">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+
+<%- include('./partials/product-form-scripts', { variants: variants }) %>
+</body>
+</html>

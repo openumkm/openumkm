@@ -1,0 +1,88 @@
+<%# Checkout Success Page %>
+<%
+function formatRp(amount) {
+  return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+}
+var o = typeof order !== 'undefined' ? order : {};
+var isManual = o.paymentMethod === 'manual_transfer';
+var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
+%>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Order Confirmed' }) %>
+<body>
+<%- include('../partials/header', { isLoggedIn: typeof isLoggedIn !== 'undefined' ? isLoggedIn : false, cartCount: 0 }) %>
+
+<main class="checkout-success">
+  <div class="container" style="max-width: 700px;">
+    <div class="text-center mb-8">
+      <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--color-success-bg); display: inline-flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h1>Order Confirmed!</h1>
+      <p style="font: var(--font-body-lg); color: var(--color-text-secondary);">
+        Your order <strong>#<%= o.orderNumber || '' %></strong> has been placed successfully.
+      </p>
+    </div>
+
+    <div class="admin-card mb-6">
+      <div class="flex justify-between mb-3" style="font: var(--font-body-md);">
+        <span style="color: var(--color-text-muted);">Order Number</span>
+        <strong><%= o.orderNumber || '—' %></strong>
+      </div>
+      <div class="flex justify-between mb-3" style="font: var(--font-body-md);">
+        <span style="color: var(--color-text-muted);">Total</span>
+        <strong style="color: var(--color-primary);"><%= formatRp(o.total) %></strong>
+      </div>
+      <div class="flex justify-between mb-3" style="font: var(--font-body-md);">
+        <span style="color: var(--color-text-muted);">Payment Method</span>
+        <span><%= isManual ? 'Manual Bank Transfer' : 'Xendit (Online)' %></span>
+      </div>
+      <div class="flex justify-between" style="font: var(--font-body-md);">
+        <span style="color: var(--color-text-muted);">Status</span>
+        <span class="status status-pending">Pending Payment</span>
+      </div>
+    </div>
+
+    <% if (isManual && banks.length > 0) { %>
+    <div class="admin-card mb-6">
+      <h3 class="admin-card-title">Transfer Instructions</h3>
+      <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+        Please transfer the exact amount to one of the following accounts:
+      </p>
+      <div class="flex flex-col gap-3">
+        <% banks.forEach(function(bank) { %>
+        <div class="flex items-center gap-3" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md);">
+          <div style="width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--color-primary-light); display: flex; align-items: center; justify-content: center; font: 700 12px/1 var(--font-family); color: var(--color-primary);">
+            <%= bank.bankName.substring(0, 3).toUpperCase() %>
+          </div>
+          <div style="flex: 1;">
+            <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= bank.bankName %></p>
+            <p style="font: 600 16px/1.3 var(--font-family); margin-bottom: 0;"><%= bank.accountNumber %></p>
+            <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;">a/n <%= bank.accountHolder %></p>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+      <div class="payment-timer mt-4">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Complete payment within <strong>24 hours</strong>. After transferring, <a href="/payment/confirm/<%= o.id %>" style="color: var(--color-primary); font-weight: 600;">upload your proof of payment</a>.</span>
+      </div>
+    </div>
+    <% } else if (!isManual) { %>
+    <div class="admin-card mb-6">
+      <div class="alert alert-info">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>You will be redirected to the Xendit payment page. If not redirected automatically, <a href="<%= o.paymentUrl || '#' %>" style="color: var(--color-primary); font-weight: 600;">click here</a>.</span>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="flex justify-center gap-3 mt-8">
+      <a href="/dashboard/orders" class="btn btn-primary">View My Orders</a>
+      <a href="/" class="btn btn-ghost">Continue Shopping</a>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
+</body>
+</html>

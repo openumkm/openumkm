@@ -1,0 +1,49 @@
+<%# Product Form Scripts Partial %>
+<script>
+(function() {
+  var uploadZone = document.getElementById('productUploadZone');
+  var fileInput = document.getElementById('productImages');
+  if (uploadZone && fileInput) {
+    uploadZone.addEventListener('click', function() { fileInput.click(); });
+    uploadZone.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+  }
+
+  var nameInput = document.getElementById('name');
+  var slugInput = document.getElementById('slug');
+  if (nameInput && slugInput) {
+    nameInput.addEventListener('input', function() {
+      if (!slugInput.dataset.manual) {
+        slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      }
+    });
+    slugInput.addEventListener('input', function() { slugInput.dataset.manual = '1'; });
+  }
+
+  var variantIdx = <%= typeof variants !== 'undefined' ? variants.length : 0 %>;
+  var addBtn = document.getElementById('addVariantBtn');
+  var container = document.getElementById('variantsContainer');
+  if (addBtn && container) {
+    addBtn.addEventListener('click', function() {
+      var hint = container.querySelector('.text-muted');
+      if (hint) hint.remove();
+      var row = document.createElement('div');
+      row.className = 'variant-row';
+      row.dataset.index = variantIdx;
+      row.innerHTML = '<div class="grid" style="grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: var(--space-3); align-items: end;">'
+        + '<div class="form-group" style="margin-bottom:0;"><label class="form-label">Name</label><input type="text" name="variants[' + variantIdx + '][name]" class="input" placeholder="Red / XL"></div>'
+        + '<div class="form-group" style="margin-bottom:0;"><label class="form-label">Size</label><input type="text" name="variants[' + variantIdx + '][size]" class="input" placeholder="XL"></div>'
+        + '<div class="form-group" style="margin-bottom:0;"><label class="form-label">Color</label><input type="text" name="variants[' + variantIdx + '][color]" class="input" placeholder="Red"></div>'
+        + '<div class="form-group" style="margin-bottom:0;"><label class="form-label">Price</label><input type="number" name="variants[' + variantIdx + '][price]" class="input" placeholder="Override"></div>'
+        + '<div class="form-group" style="margin-bottom:0;"><label class="form-label">Stock</label><input type="number" name="variants[' + variantIdx + '][stock]" class="input" placeholder="0"></div>'
+        + '<button type="button" class="btn btn-ghost btn-sm remove-variant-btn" style="color: var(--color-danger); margin-bottom: 2px;" title="Remove variant"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+        + '</div>';
+      container.appendChild(row);
+      variantIdx++;
+    });
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.remove-variant-btn');
+      if (btn) btn.closest('.variant-row').remove();
+    });
+  }
+})();
+</script>
