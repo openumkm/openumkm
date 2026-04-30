@@ -1,0 +1,33 @@
+<%- include('layout', { body: `
+<h2 style="margin:0 0 16px;color:#111827;font-size:18px;">New Payment Confirmation</h2>
+<p style="color:#374151;line-height:1.6;">
+  A customer has uploaded payment proof for order <strong>${order.orderNumber}</strong>. Please review it in the admin panel.
+</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+  <tr style="background:#f9fafb;">
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;">Order</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;">${order.orderNumber}</td>
+  </tr>
+  <tr>
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Order Total</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">${Number(order.total).toLocaleString()}</td>
+  </tr>
+  <tr style="background:#f9fafb;">
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Sender Bank</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">${confirmation.senderBank}</td>
+  </tr>
+  <tr>
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Sender Name</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">${confirmation.senderName}</td>
+  </tr>
+  <tr style="background:#f9fafb;">
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Amount Transferred</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">${Number(confirmation.amount).toLocaleString()}</td>
+  </tr>
+</table>
+
+<p style="text-align:center;margin:24px 0;">
+  <a href="#" style="display:inline-block;background:#4f46e5;color:#ffffff;padding:12px 32px;border-radius:6px;text-decoration:none;font-weight:600;">Review in Admin Panel</a>
+</p>
+` }) %>

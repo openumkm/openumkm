@@ -1,0 +1,19 @@
+<%- include('layout', { body: `
+<h2 style="margin:0 0 16px;color:#111827;font-size:18px;">Your Order Has Been Shipped!</h2>
+<p style="color:#374151;line-height:1.6;">
+  Good news! Your order <strong>${order.orderNumber}</strong> is on its way.
+</p>
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+  <tr style="background:#f9fafb;">
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;">Order Number</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;">${order.orderNumber}</td>
+  </tr>
+  ${order.courier ? '<tr><td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Courier</td><td style="padding:12px 16px;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">' + order.courier + (order.courierService ? ' — ' + order.courierService : '') + '</td></tr>' : ''}
+  ${order.trackingNumber ? '<tr style="background:#f9fafb;"><td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Tracking Number</td><td style="padding:12px 16px;color:#4f46e5;font-size:14px;font-weight:600;border-top:1px solid #e5e7eb;">' + order.trackingNumber + '</td></tr>' : ''}
+</table>
+
+<p style="color:#6b7280;font-size:13px;line-height:1.5;">
+  You can track your package using the tracking number above on the courier's website.
+</p>
+` }) %>

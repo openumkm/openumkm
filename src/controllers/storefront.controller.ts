@@ -1,160 +1,550 @@
 import { Controller, Get, Param, Post, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-
-const dummyProducts = [
-  { id: '1', slug: 'sneaker-urban-01', name: 'Sneaker Urban 01', price: 350000, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop', category: 'Shoes' },
-  { id: '2', slug: 'classic-leather-watch', name: 'Classic Leather Watch', price: 1250000, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop', category: 'Accessories' },
-  { id: '3', slug: 'minimalist-backpack', name: 'Minimalist Backpack', price: 480000, image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop', category: 'Bags' },
-  { id: '4', slug: 'wireless-earbuds-pro', name: 'Wireless Earbuds Pro', price: 890000, image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&h=400&fit=crop', category: 'Electronics' },
-  { id: '5', slug: 'cotton-tee-essential', name: 'Cotton Tee Essential', price: 150000, image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop', category: 'Clothing' },
-  { id: '6', slug: 'ceramic-coffee-mug', name: 'Ceramic Coffee Mug', price: 95000, image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&h=400&fit=crop', category: 'Home' },
-  { id: '7', slug: 'denim-jacket-v2', name: 'Denim Jacket V2', price: 675000, image: 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=400&fit=crop', category: 'Clothing' },
-  { id: '8', slug: 'smart-fitness-band', name: 'Smart Fitness Band', price: 420000, image: 'https://images.unsplash.com/photo-1575311373937-040b8e3fd6ce?w=400&h=400&fit=crop', category: 'Electronics' },
-];
-
-const productDetail = {
-  id: '1',
-  slug: 'sneaker-urban-01',
-  name: 'Sneaker Urban 01',
-  price: 350000,
-  description: 'Step into comfort with our Urban Sneaker collection. Crafted with premium canvas and a vulcanized rubber sole, these sneakers offer all-day comfort with a timeless silhouette. The minimalist design pairs effortlessly with any outfit, making it a versatile addition to your wardrobe.',
-  images: [
-    'https://images.unsplash.com/photo-1542291026-7eec264c7ff?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&h=600&fit=crop',
-    'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&h=600&fit=crop',
-  ],
-  weight: 800,
-  stock: 25,
-  variants: [
-    { label: 'Size', name: 'size', options: ['40', '41', '42'] },
-    { label: 'Color', name: 'color', options: ['White', 'Black'] },
-  ],
-  category: 'Shoes',
-  metaTitle: 'Sneaker Urban 01 - Swift Commerce',
-  metaDescription: 'Premium canvas sneakers with vulcanized rubber sole. All-day comfort.',
-};
+import { AuthService } from '../services/auth.service';
+import { ProductService } from '../services/product.service';
+import { SessionService } from '../services/session.service';
+import { SettingsService } from '../services/settings.service';
+import { OrderService } from '../services/order.service';
+import { EmailService } from '../services/email.service';
+import { ShippingService } from '../services/shipping.service';
+import { getAuthFromRequest } from '../common/auth.helper';
+import { i18nContext } from '../common/view.helper';
 
 @Controller()
 export class StorefrontController {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly productService: ProductService,
+    private readonly sessionService: SessionService,
+    private readonly settingsService: SettingsService,
+    private readonly orderService: OrderService,
+    private readonly emailService: EmailService,
+    private readonly shippingService: ShippingService,
+  ) {}
+
+  private getAuth(req: FastifyRequest) {
+    return getAuthFromRequest(req, this.authService);
+  }
+
   @Get('/')
-  homePage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-    const search = (req.query as any).q || '';
-    const filtered = search
-      ? dummyProducts.filter((p) =>
-          p.name.toLowerCase().includes(search.toLowerCase()),
-        )
-      : dummyProducts;
+  async homePage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const query = req.query as Record<string, string>;
+    const search = query.q || '';
+    const page = parseInt(query.page || '1', 10);
+    const limit = parseInt(query.limit || '12', 10);
+    const sort = query.sort || '';
+
+    const result = await this.productService.list({
+      search: search || undefined,
+      page,
+      limit,
+      activeOnly: true,
+      sort,
+    });
+
+    // Get primary image for each product
+    const productsWithImages = await Promise.all(
+      result.products.map(async (p) => {
+        const images = await this.productService.getImages(p.id);
+        const primary = images.find((i) => i.isPrimary) || images[0];
+        return { ...p, image: primary?.url || null };
+      }),
+    );
+
+    const { sessionId, cart } = await this.sessionService.getCart(req, res, auth?.sub);
+    const seoTitle = await this.settingsService.get('seo_title');
+    const seoDesc = await this.settingsService.get('seo_description');
+    const storeName = await this.settingsService.get('store_name');
 
     return res.view('storefront/home.ejs', {
-      pageTitle: 'Swift Commerce — Modern Online Store',
-      products: filtered,
+      pageTitle: seoTitle || storeName || 'Store',
+      products: productsWithImages,
       search,
-      cartCount: 0,
-      isLoggedIn: false,
-      metaDescription: 'Discover curated premium products at Swift Commerce. Modern minimalist online store.',
+      page: result.page,
+      pages: result.pages,
+      sort,
+      cartCount: cart.reduce((sum, i) => sum + i.qty, 0),
+      isLoggedIn: !!auth,
+      metaDescription: seoDesc || '',
+      ...i18nContext(req),
     });
   }
 
   @Get('/product/:slug')
-  productDetailPage(@Param('slug') slug: string, @Res() res: FastifyReply) {
-    const product = slug === 'sneaker-urban-01'
-      ? productDetail
-      : { ...dummyProducts[0], ...productDetail, images: [dummyProducts[0].image] };
+  async productDetailPage(@Param('slug') slug: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const product = await this.productService.getBySlug(slug);
+    if (!product) return res.status(404).send('Product not found');
+
+    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+
+    // Get related products (same active, exclude current, limit 4)
+    const related = await this.productService.list({ activeOnly: true, limit: 4 });
+    const relatedWithImages = await Promise.all(
+      related.products
+        .filter((p) => p.id !== product.id)
+        .slice(0, 4)
+        .map(async (p) => {
+          const images = await this.productService.getImages(p.id);
+          const primary = images.find((i) => i.isPrimary) || images[0];
+          return { ...p, image: primary?.url || null };
+        }),
+    );
 
     return res.view('storefront/product-detail.ejs', {
-      pageTitle: `${product.name} — Swift Commerce`,
-      product,
-      cartCount: 0,
-      isLoggedIn: false,
-      relatedProducts: dummyProducts.slice(0, 4),
+      pageTitle: `${product.metaTitle || product.name} — Store`,
+      product: {
+        ...product,
+        images: product.images.map((i) => i.url),
+      },
+      cartCount: cart.reduce((sum, i) => sum + i.qty, 0),
+      isLoggedIn: !!auth,
+      relatedProducts: relatedWithImages,
+      ...i18nContext(req),
     });
+  }
+
+  /* ── Cart Routes ─────────────────────────────── */
+
+  @Post('/cart/add')
+  async cartAdd(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const body = req.body as Record<string, string>;
+    const productId = body.productId;
+    const variantId = body.variantId || undefined;
+    const qty = Math.max(1, parseInt(body.qty || '1', 10));
+
+    const product = await this.productService.getById(productId);
+    if (!product) return res.redirect(302, '/');
+
+    // Find variant if specified
+    let price = product.price;
+    let stock = product.stock;
+    let weight = product.weight;
+    let variantLabel = '';
+
+    if (variantId) {
+      const variant = product.variants.find((v) => v.id === variantId);
+      if (variant) {
+        price = variant.price ?? product.price;
+        stock = variant.stock;
+        weight = variant.weight ?? product.weight;
+        variantLabel = variant.name;
+      }
+    }
+
+    // Stock check
+    if (stock <= 0) return res.redirect(302, `/product/${product.slug}`);
+
+    const primaryImage = product.images.find((i) => i.isPrimary) || product.images[0];
+
+    const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
+    await this.sessionService.addToCart(sessionId, {
+      productId,
+      variantId,
+      name: product.name,
+      variant: variantLabel || undefined,
+      price,
+      qty: Math.min(qty, stock),
+      image: primaryImage?.url || undefined,
+      weight,
+      stock,
+    });
+
+    return res.redirect(302, '/cart');
   }
 
   @Get('/cart')
-  cartPage(@Res() res: FastifyReply) {
-    const cartItems = [
-      { id: '1', name: 'Sneaker Urban 01', variant: 'White / 42', price: 350000, qty: 2, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop' },
-      { id: '4', name: 'Wireless Earbuds Pro', variant: 'Black', price: 890000, qty: 1, image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=200&h=200&fit=crop' },
-    ];
+  async cartPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+
+    // Refresh stock info for cart items
+    const cartItems = await Promise.all(
+      cart.map(async (item) => {
+        const product = await this.productService.getById(item.productId);
+        let currentStock = product?.stock || 0;
+        if (item.variantId && product) {
+          const variant = product.variants.find((v) => v.id === item.variantId);
+          currentStock = variant?.stock ?? currentStock;
+        }
+        const stockChanged = currentStock !== item.stock;
+        return { ...item, stock: currentStock, stockChanged, outOfStock: currentStock <= 0 };
+      }),
+    );
+
     const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.qty, 0);
 
     return res.view('storefront/cart.ejs', {
-      pageTitle: 'Shopping Cart — Swift Commerce',
+      pageTitle: 'Shopping Cart',
       cartItems,
       subtotal,
-      cartCount: 3,
-      isLoggedIn: false,
+      cartCount: cartItems.reduce((sum, i) => sum + i.qty, 0),
+      isLoggedIn: !!auth,
+      ...i18nContext(req),
     });
   }
 
+  @Post('/cart/update')
+  async cartUpdate(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const body = req.body as Record<string, string>;
+    const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
+
+    await this.sessionService.updateCartQty(
+      sessionId,
+      body.productId,
+      body.variantId || undefined,
+      Math.max(0, parseInt(body.qty || '1', 10)),
+    );
+
+    return res.redirect(302, '/cart');
+  }
+
+  @Post('/cart/remove')
+  async cartRemove(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const body = req.body as Record<string, string>;
+    const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
+
+    await this.sessionService.removeFromCart(sessionId, body.productId, body.variantId || undefined);
+    return res.redirect(302, '/cart');
+  }
+
+  /* ── Shipping AJAX ─────────────────────────────── */
+
+  @Get('/api/shipping/search')
+  async shippingSearch(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const query = (req.query as any).q || '';
+    if (!query || query.length < 2) return res.send({ results: [] });
+
+    const results = await this.shippingService.searchDestination(query, 10);
+    return res.send({ results });
+  }
+
+  @Post('/api/shipping/calculate')
+  async shippingCalculate(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const body = req.body as Record<string, string>;
+    const { destination } = body;
+
+    if (!destination) return res.send({ services: [] });
+
+    // Get origin from settings
+    const origin = await this.settingsService.get('origin_city');
+    if (!origin) return res.send({ services: [], error: 'Origin city not configured.' });
+
+    // Calculate total weight from cart
+    const auth = this.getAuth(req);
+    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+    const totalWeight = cart.reduce((sum, item) => sum + (item.weight * item.qty), 0);
+
+    if (totalWeight <= 0) return res.send({ services: [] });
+
+    const services = await this.shippingService.calculateCost(origin, destination, totalWeight);
+    return res.send({ services });
+  }
+
+  /* ── Checkout ────────────────────────────────── */
+
   @Get('/checkout')
-  checkoutPage(@Res() res: FastifyReply) {
-    const cartItems = [
-      { id: '1', name: 'Sneaker Urban 01', variant: 'White / 42', price: 350000, qty: 2, image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop' },
-      { id: '4', name: 'Wireless Earbuds Pro', variant: 'Black', price: 890000, qty: 1, image: 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=100&h=100&fit=crop' },
-    ];
-    const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-    const shipping = 25000;
-    const tax = Math.round(subtotal * 0.11);
-    const total = subtotal + shipping + tax;
+  async checkoutPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
-    const couriers = [
-      { code: 'jne', name: 'JNE', services: [{ name: 'REG', cost: 25000, etd: '2-3 days' }] },
-      { code: 'tiki', name: 'TIKI', services: [{ name: 'REG', cost: 30000, etd: '2-4 days' }] },
-      { code: 'pos', name: 'POS Indonesia', services: [{ name: 'REG', cost: 20000, etd: '3-5 days' }] },
-    ];
+    if (cart.length === 0) return res.redirect(302, '/cart');
 
-    const bankAccounts = [
-      { bankName: 'BCA', accountNumber: '1234567890', accountHolder: 'Swift Commerce', logo: 'bca' },
-      { bankName: 'Mandiri', accountNumber: '0987654321', accountHolder: 'Swift Commerce', logo: 'mandiri' },
-    ];
+    const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+    // Get active tax rates
+    const taxRates = await this.settingsService.getTaxRates();
+    const taxEnabled = (await this.settingsService.get('tax_enabled')) === 'true';
+    const activeTaxes = taxEnabled ? taxRates.filter((t) => t.isActive) : [];
+
+    let taxTotal = 0;
+    for (const tax of activeTaxes) {
+      taxTotal += Math.round(subtotal * (parseFloat(tax.rate) / 100));
+    }
+
+    // Get enabled couriers
+    const enabledCouriersStr = await this.settingsService.get('enabled_couriers');
+    const enabledCodes = (enabledCouriersStr || '').split(',').filter(Boolean);
+
+    // Get bank accounts for manual transfer
+    const bankAccounts = await this.settingsService.getBankAccounts();
+    const activeBanks = bankAccounts.filter((b) => b.isActive);
+
+    // Payment method availability
+    const xenditEnabled = (await this.settingsService.get('xendit_enabled')) === 'true';
+    const manualEnabled = (await this.settingsService.get('manual_transfer_enabled')) === 'true';
+
+    // Get saved addresses if logged in
+    let savedAddresses: any[] = [];
+    if (auth) {
+      const { AddressService } = await import('../services/address.service');
+      // We can't easily import here, so we'll pass empty and let the view handle it
+      // This will be improved when we wire the address service properly
+    }
 
     return res.view('storefront/checkout.ejs', {
-      pageTitle: 'Checkout — Swift Commerce',
-      cartItems,
+      pageTitle: 'Checkout',
+      cartItems: cart,
       subtotal,
-      shipping,
-      tax,
-      total,
-      couriers,
-      bankAccounts,
-      cartCount: 3,
-      isLoggedIn: false,
+      shipping: 0, // Will be calculated via RajaOngkir later
+      tax: taxTotal,
+      total: subtotal + taxTotal,
+      couriers: [], // Will be populated via RajaOngkir
+      bankAccounts: activeBanks,
+      cartCount: cart.reduce((sum, i) => sum + i.qty, 0),
+      isLoggedIn: !!auth,
+      xenditEnabled,
+      manualEnabled,
+      ...i18nContext(req),
     });
+  }
+
+  @Post('/checkout/submit')
+  async checkoutSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const body = req.body as Record<string, string>;
+    const { sessionId, cart } = await this.sessionService.getCart(req, res, auth?.sub);
+
+    if (cart.length === 0) return res.redirect(302, '/cart');
+
+    const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+    // Calculate tax
+    const taxRates = await this.settingsService.getTaxRates();
+    const taxEnabled = (await this.settingsService.get('tax_enabled')) === 'true';
+    const activeTaxes = taxEnabled ? taxRates.filter((t) => t.isActive) : [];
+    let taxTotal = 0;
+    for (const tax of activeTaxes) {
+      taxTotal += Math.round(subtotal * (parseFloat(tax.rate) / 100));
+    }
+
+    const shippingCost = parseInt(body.shippingCost || '0', 10);
+    const total = subtotal + taxTotal + shippingCost;
+
+    const paymentMethod = body.paymentMethod as 'xendit' | 'manual_transfer';
+    if (!paymentMethod) return res.redirect(302, '/checkout');
+
+    // Get auto-expire hours
+    const expireHours = parseInt((await this.settingsService.get('auto_expire_hours')) || '24', 10);
+
+    // Get default currency
+    const currencies = await this.settingsService.getCurrencies();
+    const defaultCurrency = currencies.find((c) => c.isDefault);
+    const currency = defaultCurrency?.code || 'IDR';
+
+    // Build shipping address
+    const shippingAddress = {
+      recipientName: body.recipientName || '',
+      phone: body.phone || '',
+      email: body.email || '',
+      addressLine: body.addressLine || '',
+      city: body.city || '',
+      province: body.province || '',
+      postalCode: body.postalCode || '',
+    };
+
+    // Build items snapshot
+    const items = cart.map((item) => ({
+      productId: item.productId,
+      variantId: item.variantId || null,
+      name: item.name,
+      variant: item.variant || null,
+      price: item.price,
+      qty: item.qty,
+      image: item.image || null,
+      weight: item.weight,
+    }));
+
+    // Deduct stock
+    for (const item of cart) {
+      await this.productService.deductStock(item.productId, item.variantId, item.qty);
+    }
+
+    // Create order
+    const order = await this.orderService.create({
+      customerId: auth?.sub,
+      paymentMethod,
+      subtotal,
+      taxTotal,
+      shippingCost,
+      total,
+      currency,
+      items,
+      shippingAddress,
+      courier: body.courier || undefined,
+      courierService: body.courierService || undefined,
+      expiresInHours: expireHours,
+    });
+
+    // Clear cart
+    await this.sessionService.clearCart(sessionId);
+
+    // Send order confirmation email
+    const customerEmail = (shippingAddress.email as string) || '';
+    if (paymentMethod === 'xendit') {
+      await this.emailService.sendOrderCreatedXendit({
+        orderNumber: order.orderNumber,
+        total: order.total,
+        currency,
+        paymentUrl: order.paymentUrl,
+        items,
+        expiresAt: order.expiresAt,
+      }, customerEmail);
+    } else {
+      const bankAccounts = await this.settingsService.getBankAccounts();
+      const activeBanks = bankAccounts.filter((b) => b.isActive);
+      await this.emailService.sendOrderCreatedManual({
+        orderNumber: order.orderNumber,
+        total: order.total,
+        currency,
+        items,
+        expiresAt: order.expiresAt,
+      }, customerEmail, activeBanks.map((b) => ({
+        bankName: b.bankName,
+        accountNumber: b.accountNumber,
+        accountHolder: b.accountHolder,
+      })));
+    }
+
+    return res.redirect(302, `/checkout/success/${order.id}`);
   }
 
   @Get('/checkout/success/:id')
-  checkoutSuccessPage(@Param('id') id: string, @Res() res: FastifyReply) {
+  async checkoutSuccessPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const order = await this.orderService.getById(id);
+    if (!order) return res.status(404).send('Order not found');
+
+    const bankAccounts = await this.settingsService.getBankAccounts();
+    const activeBanks = bankAccounts.filter((b) => b.isActive);
+
+    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+
     return res.view('storefront/checkout-success.ejs', {
-      pageTitle: 'Order Confirmed — Swift Commerce',
-      isLoggedIn: false,
+      pageTitle: 'Order Confirmed',
+      isLoggedIn: !!auth,
       order: {
-        id,
-        orderNumber: 'INV/20260430/001',
-        total: 1789900,
-        paymentMethod: 'manual_transfer',
-        paymentUrl: null,
+        id: order.id,
+        orderNumber: order.orderNumber,
+        total: order.total,
+        paymentMethod: order.paymentMethod,
+        paymentUrl: order.paymentUrl,
       },
-      bankAccounts: [
-        { bankName: 'BCA', accountNumber: '1234567890', accountHolder: 'Swift Commerce' },
-        { bankName: 'Mandiri', accountNumber: '0987654321', accountHolder: 'Swift Commerce' },
-      ],
+      bankAccounts: activeBanks,
+      ...i18nContext(req),
     });
   }
 
+  /* ── Payment Confirmation ────────────────────── */
+
   @Get('/payment/confirm/:id')
-  paymentConfirmationPage(@Param('id') id: string, @Res() res: FastifyReply) {
+  async paymentConfirmPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const order = await this.orderService.getById(id);
+    if (!order) return res.status(404).send('Order not found');
+
+    const bankAccounts = await this.settingsService.getBankAccounts();
+    const activeBanks = bankAccounts.filter((b) => b.isActive);
+    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+
     return res.view('storefront/payment-confirmation.ejs', {
-      pageTitle: 'Payment Confirmation — Swift Commerce',
-      orderNumber: 'INV/20260430/001',
-      orderId: id,
-      total: 1590000,
-      bankAccounts: [
-        { bankName: 'BCA', accountNumber: '1234567890', accountHolder: 'Swift Commerce', logo: 'bca' },
-        { bankName: 'Mandiri', accountNumber: '0987654321', accountHolder: 'Swift Commerce', logo: 'mandiri' },
-      ],
-      cartCount: 0,
-      isLoggedIn: false,
+      pageTitle: 'Payment Confirmation',
+      orderNumber: order.orderNumber,
+      orderId: order.id,
+      total: order.total,
+      bankAccounts: activeBanks,
+      cartCount: cart.reduce((sum, i) => sum + i.qty, 0),
+      isLoggedIn: !!auth,
+      error: null,
+      success: false,
+      ...i18nContext(req),
+    });
+  }
+
+  @Post('/payment/confirm/:id')
+  async paymentConfirmSubmit(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = this.getAuth(req);
+    const order = await this.orderService.getById(id);
+    if (!order) return res.status(404).send('Order not found');
+
+    // Parse multipart form data
+    const parts = (req as any).parts();
+    const fields: Record<string, string> = {};
+    let receiptImageUrl: string | null = null;
+
+    for await (const part of parts) {
+      if (part.type === 'file' && part.fieldname === 'receiptImage') {
+        const buffer = await part.toBuffer();
+        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
+          const { v4: uuidv4 } = await import('uuid');
+          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
+          const filename = `${uuidv4()}${ext}`;
+          const { join } = await import('path');
+          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
+          const dir = join(process.cwd(), 'uploads', 'receipts');
+          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+          writeFileSync(join(dir, filename), buffer);
+          receiptImageUrl = `/uploads/receipts/${filename}`;
+        }
+      } else if (part.type === 'field') {
+        fields[part.fieldname] = part.value;
+      }
+    }
+
+    if (!receiptImageUrl || !fields.senderBank || !fields.senderName || !fields.amount || !fields.transferDate) {
+      const bankAccounts = await this.settingsService.getBankAccounts();
+      const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+      return res.view('storefront/payment-confirmation.ejs', {
+        pageTitle: 'Payment Confirmation',
+        orderNumber: order.orderNumber,
+        orderId: order.id,
+        total: order.total,
+        bankAccounts: bankAccounts.filter((b) => b.isActive),
+        cartCount: cart.reduce((sum, i) => sum + i.qty, 0),
+        isLoggedIn: !!auth,
+        error: 'Please fill all required fields and upload receipt image.',
+        success: false,
+        ...i18nContext(req),
+      });
+    }
+
+    // Create payment confirmation
+    await this.orderService.createPaymentConfirmation({
+      orderId: order.id,
+      senderBank: fields.senderBank,
+      senderName: fields.senderName,
+      amount: parseInt(fields.amount, 10),
+      transferDate: fields.transferDate,
+      receiptImage: receiptImageUrl,
+      notes: fields.notes || null,
+    });
+
+    // Update order status to waiting_confirmation
+    await this.orderService.updateStatus(order.id, 'waiting_confirmation');
+
+    // Notify seller via email
+    await this.emailService.sendPaymentProofUploaded(
+      { orderNumber: order.orderNumber, total: order.total, id: order.id },
+      { senderBank: fields.senderBank, senderName: fields.senderName, amount: parseInt(fields.amount, 10) },
+    );
+
+    const bankAccounts = await this.settingsService.getBankAccounts();
+    const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
+    return res.view('storefront/payment-confirmation.ejs', {
+      pageTitle: 'Payment Confirmation',
+      orderNumber: order.orderNumber,
+      orderId: order.id,
+      total: order.total,
+      bankAccounts: bankAccounts.filter((b) => b.isActive),
+      cartCount: cart.reduce((sum, i) => sum + i.qty, 0),
+      isLoggedIn: !!auth,
+      error: null,
+      success: true,
+      ...i18nContext(req),
     });
   }
 }

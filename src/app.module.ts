@@ -5,6 +5,7 @@ import { AdminController } from './controllers/admin.controller';
 import { AdminProductsController } from './controllers/admin-products.controller';
 import { AdminOrdersController } from './controllers/admin-orders.controller';
 import { AdminSettingsController } from './controllers/admin-settings.controller';
+import { AdminAiController } from './controllers/admin-ai.controller';
 import { DashboardController } from './controllers/dashboard.controller';
 import { SetupController } from './controllers/setup.controller';
 import { HealthController } from './controllers/health.controller';
@@ -13,6 +14,12 @@ import { SetupService } from './services/setup.service';
 import { SettingsService } from './services/settings.service';
 import { ProductService } from './services/product.service';
 import { OrderService } from './services/order.service';
+import { SessionService } from './services/session.service';
+import { UploadService } from './services/upload.service';
+import { AddressService } from './services/address.service';
+import { EmailService } from './services/email.service';
+import { AiService } from './services/ai.service';
+import { ShippingService } from './services/shipping.service';
 
 @Module({
   controllers: [
@@ -25,6 +32,7 @@ import { OrderService } from './services/order.service';
     AdminProductsController,
     AdminOrdersController,
     AdminSettingsController,
+    AdminAiController,
   ],
   providers: [
     AuthService,
@@ -32,6 +40,12 @@ import { OrderService } from './services/order.service';
     SettingsService,
     ProductService,
     OrderService,
+    SessionService,
+    UploadService,
+    AddressService,
+    EmailService,
+    AiService,
+    ShippingService,
   ],
 })
 export class AppModule {}

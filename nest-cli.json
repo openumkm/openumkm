@@ -7,7 +7,8 @@
     "assets": [
       { "include": "views/**/*", "outDir": "dist" },
       { "include": "public/**/*", "outDir": "dist" },
-      { "include": "locales/**/*", "outDir": "dist" }
+      { "include": "locales/**/*", "outDir": "dist" },
+      { "include": "mail/**/*", "outDir": "dist" }
     ]
   }
 }

@@ -5,3 +5,4 @@ uploads/
 .env
 .env.*
 !.env.example
+rajaongkir-postman.json

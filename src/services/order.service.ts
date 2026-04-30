@@ -168,6 +168,62 @@ export class OrderService {
       .where(eq(paymentConfirmations.id, confirmationId));
   }
 
+  /** Create a payment confirmation (buyer uploads transfer proof) */
+  async createPaymentConfirmation(data: {
+    orderId: string;
+    senderBank: string;
+    senderName: string;
+    amount: number;
+    transferDate: string;
+    receiptImage: string;
+    notes?: string | null;
+  }) {
+    const [pc] = await db.insert(paymentConfirmations).values({
+      orderId: data.orderId,
+      senderBank: data.senderBank,
+      senderName: data.senderName,
+      amount: data.amount,
+      transferDate: data.transferDate,
+      receiptImage: data.receiptImage,
+      notes: data.notes || null,
+    }).returning();
+    return pc;
+  }
+
+  /** Get order by payment confirmation ID */
+  async getOrderByConfirmationId(confirmationId: string) {
+    const [pc] = await db.select({ orderId: paymentConfirmations.orderId })
+      .from(paymentConfirmations)
+      .where(eq(paymentConfirmations.id, confirmationId))
+      .limit(1);
+    if (!pc) return null;
+    return this.getById(pc.orderId);
+  }
+
+  /** Get orders by customer ID */
+  async listByCustomer(customerId: string, opts: { page?: number; limit?: number } = {}) {
+    const { page = 1, limit = 20 } = opts;
+    const offset = (page - 1) * limit;
+
+    const rows = await db.select()
+      .from(orders)
+      .where(eq(orders.customerId, customerId))
+      .orderBy(desc(orders.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [countResult] = await db.select({ count: sql<number>`count(*)` })
+      .from(orders)
+      .where(eq(orders.customerId, customerId));
+
+    return {
+      orders: rows,
+      total: Number(countResult.count),
+      pages: Math.ceil(Number(countResult.count) / limit),
+      page,
+    };
+  }
+
   // Revenue stats
   async getRevenueStats(period: 'daily' | 'weekly' | 'monthly' | 'yearly') {
     const now = new Date();

@@ -26,6 +26,12 @@ services:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
       POSTGRES_DB: app
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c work_mem=4MB
+      -c max_connections=20
+      -c effective_cache_size=256MB
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

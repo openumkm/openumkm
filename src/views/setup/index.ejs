@@ -2,13 +2,19 @@
 
 <body>
 <main class="setup-page">
-  <div class="setup-card">
-    <div style="text-align: center; margin-bottom: var(--space-8);">
+  <div class="setup-card" style="max-width: 560px;">
+    <div style="text-align: center; margin-bottom: var(--space-6);">
       <div style="font: 700 28px/1.2 var(--font-family); color: var(--color-text); margin-bottom: var(--space-2);">
-        <span style="color: var(--color-primary);">S</span>wift Commerce
+        <span style="color: var(--color-primary);">Open</span>UMKM
       </div>
-      <h2 style="margin-bottom: var(--space-2);">Welcome to Swift Commerce</h2>
-      <p style="color: var(--color-text-secondary); font: var(--font-body-md);">Set up your store in seconds</p>
+      <p style="color: var(--color-text-secondary); font: var(--font-body-md);">Set up your store in a few steps</p>
+    </div>
+
+    <!-- Step Indicator -->
+    <div style="display:flex;gap:8px;margin-bottom:var(--space-6);">
+      <div class="setup-step-indicator active" id="ind-1" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-primary);transition:background .2s;"></div>
+      <div class="setup-step-indicator" id="ind-2" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-border-light);transition:background .2s;"></div>
+      <div class="setup-step-indicator" id="ind-3" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-border-light);transition:background .2s;"></div>
     </div>
 
     <% if (typeof error !== 'undefined' && error) { %>
@@ -18,108 +24,192 @@
     </div>
     <% } %>
 
-    <form action="/setup" method="POST" novalidate>
-      <div class="form-group">
-        <label for="storeName" class="form-label form-label-required">Store Name</label>
-        <input
-          type="text"
-          id="storeName"
-          name="storeName"
-          class="input"
-          placeholder="My Awesome Store"
-          required
-          autofocus
-        >
-      </div>
+    <form action="/setup" method="POST" id="setupForm" novalidate>
 
-      <div class="form-group">
-        <label for="email" class="form-label form-label-required">Admin Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          class="input"
-          placeholder="admin@mystore.com"
-          required
-          autocomplete="email"
-        >
-      </div>
+      <!-- ═══ Step 1: Store Info ═══ -->
+      <div class="setup-step" id="step-1">
+        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);">Store Information</h3>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);">Tell us about your store</p>
 
-      <div class="form-group">
-        <label for="password" class="form-label form-label-required">Admin Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="input"
-          placeholder="Min. 8 characters"
-          required
-          minlength="8"
-          autocomplete="new-password"
-        >
-        <div id="strengthBar" style="height: 4px; border-radius: var(--radius-full); background: var(--color-border-light); margin-top: var(--space-2); overflow: hidden; transition: width var(--transition-base);">
-          <div id="strengthFill" style="height: 100%; width: 0%; border-radius: var(--radius-full); transition: width var(--transition-base), background var(--transition-base);"></div>
+        <div class="form-group">
+          <label for="storeName" class="form-label form-label-required">Store Name</label>
+          <input type="text" id="storeName" name="storeName" class="input" placeholder="My Awesome Store" required autofocus>
         </div>
-        <span id="strengthText" class="form-hint" style="margin-top: var(--space-1);"></span>
+
+        <div class="form-group">
+          <label for="storeEmail" class="form-label">Store Email</label>
+          <input type="email" id="storeEmail" name="storeEmail" class="input" placeholder="hello@mystore.com">
+          <span class="form-hint">Used as sender for customer notifications</span>
+        </div>
+
+        <div class="form-group">
+          <label for="storePhone" class="form-label">Store Phone</label>
+          <input type="tel" id="storePhone" name="storePhone" class="input" placeholder="+62 812 3456 7890">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
+          <div class="form-group">
+            <label for="defaultLanguage" class="form-label">Default Language</label>
+            <select id="defaultLanguage" name="defaultLanguage" class="input">
+              <option value="id">Bahasa Indonesia</option>
+              <option value="en">English</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="defaultCurrency" class="form-label">Default Currency</label>
+            <select id="defaultCurrency" name="defaultCurrency" class="input">
+              <option value="IDR">IDR — Rupiah</option>
+              <option value="USD">USD — Dollar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="invoicePrefix" class="form-label">Invoice Prefix</label>
+          <input type="text" id="invoicePrefix" name="invoicePrefix" class="input" placeholder="INV" value="INV" maxlength="10">
+          <span class="form-hint">Order numbers will look like: INV/20260430/001</span>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:var(--space-6);">
+          <button type="button" class="btn btn-primary" onclick="goStep(2)">Next &rarr;</button>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="confirmPassword" class="form-label form-label-required">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          class="input"
-          placeholder="Re-enter your password"
-          required
-          autocomplete="new-password"
-        >
+      <!-- ═══ Step 2: Payment Setup ═══ -->
+      <div class="setup-step" id="step-2" style="display:none;">
+        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);">Payment Setup</h3>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);">Choose how customers will pay</p>
+
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-5);">
+          <label style="display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);cursor:pointer;transition:border-color .2s;" id="lbl-manual">
+            <input type="checkbox" name="manualTransferEnabled" value="1" checked style="margin-top:2px;">
+            <div>
+              <div style="font-weight:600;font-size:14px;color:var(--color-text);">Manual Bank Transfer</div>
+              <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Customers transfer to your bank account and upload proof</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);cursor:pointer;transition:border-color .2s;" id="lbl-xendit">
+            <input type="checkbox" name="xenditEnabled" value="1" style="margin-top:2px;">
+            <div>
+              <div style="font-weight:600;font-size:14px;color:var(--color-text);">Xendit Online Payment</div>
+              <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Accept credit cards, e-wallets, VA, and more via Xendit</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Bank Account (optional first one) -->
+        <div id="bankSection">
+          <h4 style="margin:0 0 var(--space-3);font-size:14px;color:var(--color-text);">Add a Bank Account <span style="font-weight:400;color:var(--color-text-muted);font-size:12px;">(optional, can add later)</span></h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);">
+            <div class="form-group">
+              <label class="form-label">Bank Name</label>
+              <input type="text" name="bankName" class="input" placeholder="BCA">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Account Number</label>
+              <input type="text" name="bankAccountNumber" class="input" placeholder="1234567890">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Holder Name</label>
+            <input type="text" name="bankAccountHolder" class="input" placeholder="John Doe">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="autoExpireHours" class="form-label">Payment Deadline (hours)</label>
+          <input type="number" id="autoExpireHours" name="autoExpireHours" class="input" value="24" min="1" max="168" style="max-width:120px;">
+          <span class="form-hint">Orders auto-expire after this many hours without payment</span>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:var(--space-6);">
+          <button type="button" class="btn btn-secondary" onclick="goStep(1)">&larr; Back</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(3)">Next &rarr;</button>
+        </div>
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Create Your Store</button>
+      <!-- ═══ Step 3: Admin Account ═══ -->
+      <div class="setup-step" id="step-3" style="display:none;">
+        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);">Admin Account</h3>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);">Create your admin login</p>
+
+        <div class="form-group">
+          <label for="email" class="form-label form-label-required">Admin Email</label>
+          <input type="email" id="email" name="email" class="input" placeholder="admin@mystore.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label form-label-required">Password</label>
+          <input type="password" id="password" name="password" class="input" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password">
+          <div id="strengthBar" style="height:4px;border-radius:var(--radius-full);background:var(--color-border-light);margin-top:var(--space-2);overflow:hidden;">
+            <div id="strengthFill" style="height:100%;width:0%;border-radius:var(--radius-full);transition:width .2s,background .2s;"></div>
+          </div>
+          <span id="strengthText" class="form-hint" style="margin-top:var(--space-1);"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword" class="form-label form-label-required">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" class="input" placeholder="Re-enter your password" required autocomplete="new-password">
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:var(--space-6);">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)">&larr; Back</button>
+          <button type="submit" class="btn btn-primary" style="padding-left:var(--space-8);padding-right:var(--space-8);">
+            Create Your Store &rarr;
+          </button>
+        </div>
+      </div>
+
     </form>
 
-    <p style="text-align: center; font: var(--font-label-xs); color: var(--color-text-muted); margin-top: var(--space-8); margin-bottom: 0;">
-      Swift Commerce &mdash; Self-hosted eCommerce
+    <p style="text-align:center;font:var(--font-label-xs);color:var(--color-text-muted);margin-top:var(--space-8);margin-bottom:0;">
+      OpenUMKM &mdash; Self-hosted eCommerce
     </p>
   </div>
 </main>
 
 <script>
 (function() {
+  var currentStep = 1;
+
+  window.goStep = function(step) {
+    // Basic validation before moving forward
+    if (step > currentStep) {
+      if (currentStep === 1) {
+        var storeName = document.getElementById('storeName');
+        if (!storeName.value.trim()) { storeName.focus(); return; }
+      }
+      if (currentStep === 3) return; // submit via form
+    }
+
+    // Hide all steps, show target
+    for (var i = 1; i <= 3; i++) {
+      document.getElementById('step-' + i).style.display = i === step ? 'block' : 'none';
+      document.getElementById('ind-' + i).style.background = i <= step ? 'var(--color-primary)' : 'var(--color-border-light)';
+    }
+    currentStep = step;
+    window.scrollTo(0, 0);
+  };
+
+  // Password strength
   var password = document.getElementById('password');
   var fill = document.getElementById('strengthFill');
   var text = document.getElementById('strengthText');
-
-  if (!password || !fill || !text) return;
-
-  password.addEventListener('input', function() {
-    var val = password.value;
-    var score = 0;
-
-    if (val.length >= 8) score++;
-    if (/[A-Z]/.test(val)) score++;
-    if (/[0-9]/.test(val)) score++;
-    if (/[^A-Za-z0-9]/.test(val)) score++;
-    if (val.length >= 12) score++;
-
-    var pct = score * 20;
-    fill.style.width = pct + '%';
-
-    if (score <= 1) {
-      fill.style.background = 'var(--color-danger)';
-      text.textContent = 'Weak password';
-      text.style.color = 'var(--color-danger)';
-    } else if (score <= 3) {
-      fill.style.background = 'var(--color-warning)';
-      text.textContent = 'Fair password';
-      text.style.color = 'var(--color-warning)';
-    } else {
-      fill.style.background = 'var(--color-success)';
-      text.textContent = 'Strong password';
-      text.style.color = 'var(--color-success)';
-    }
-  });
+  if (password && fill && text) {
+    password.addEventListener('input', function() {
+      var val = password.value;
+      var score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      if (val.length >= 12) score++;
+      fill.style.width = (score * 20) + '%';
+      if (score <= 1) { fill.style.background = 'var(--color-danger)'; text.textContent = 'Weak'; text.style.color = 'var(--color-danger)'; }
+      else if (score <= 3) { fill.style.background = 'var(--color-warning)'; text.textContent = 'Fair'; text.style.color = 'var(--color-warning)'; }
+      else { fill.style.background = 'var(--color-success)'; text.textContent = 'Strong'; text.style.color = 'var(--color-success)'; }
+    });
+  }
 })();
 </script>
 </body>

@@ -12,12 +12,19 @@ export class SetupController {
   ) {}
 
   @Get()
-  async setupPage(@Res() res: FastifyReply) {
+  async setupPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
     const done = await this.setupService.isSetupComplete();
     if (done) return res.status(404).send('Not found');
 
+    // Check SETUP_SECRET if configured
+    const secret = process.env.SETUP_SECRET || '';
+    if (secret) {
+      const provided = (req.query as any).secret || '';
+      if (provided !== secret) return res.status(403).send('Forbidden');
+    }
+
     return res.view('setup/index.ejs', {
-      pageTitle: 'Setup Store — Swift Commerce',
+      pageTitle: 'Setup Store — OpenUMKM',
       error: null,
     });
   }
@@ -28,39 +35,59 @@ export class SetupController {
     if (done) return res.status(404).send('Not found');
 
     const body = req.body as Record<string, string>;
-    const { storeName, email, password, confirmPassword } = body;
 
-    if (!storeName || !email || !password) {
+    // Validate required fields
+    if (!body.storeName || !body.email || !body.password) {
       return res.view('setup/index.ejs', {
-        pageTitle: 'Setup Store — Swift Commerce',
-        error: 'All fields are required.',
+        pageTitle: 'Setup Store — OpenUMKM',
+        error: 'Store name, admin email, and password are required.',
       });
     }
 
-    if (password.length < 8) {
+    if (body.password.length < 8) {
       return res.view('setup/index.ejs', {
-        pageTitle: 'Setup Store — Swift Commerce',
+        pageTitle: 'Setup Store — OpenUMKM',
         error: 'Password must be at least 8 characters.',
       });
     }
 
-    if (password !== confirmPassword) {
+    if (body.password !== body.confirmPassword) {
       return res.view('setup/index.ejs', {
-        pageTitle: 'Setup Store — Swift Commerce',
+        pageTitle: 'Setup Store — OpenUMKM',
         error: 'Passwords do not match.',
       });
     }
 
-    const result = await this.setupService.runSetup({ storeName, email, password });
+    const result = await this.setupService.runSetup({
+      // Admin account
+      email: body.email,
+      password: body.password,
+      // Store info
+      storeName: body.storeName,
+      storeEmail: body.storeEmail || '',
+      storePhone: body.storePhone || '',
+      defaultLanguage: body.defaultLanguage || 'id',
+      defaultCurrency: body.defaultCurrency || 'IDR',
+      invoicePrefix: body.invoicePrefix || 'INV',
+      // Payment
+      manualTransferEnabled: !!body.manualTransferEnabled,
+      xenditEnabled: !!body.xenditEnabled,
+      autoExpireHours: parseInt(body.autoExpireHours || '24', 10),
+      // Bank account
+      bankName: body.bankName || undefined,
+      bankAccountNumber: body.bankAccountNumber || undefined,
+      bankAccountHolder: body.bankAccountHolder || undefined,
+    });
+
     if ('error' in result) {
       return res.view('setup/index.ejs', {
-        pageTitle: 'Setup Store — Swift Commerce',
+        pageTitle: 'Setup Store — OpenUMKM',
         error: result.error,
       });
     }
 
     // Auto-login as admin
-    const loginResult = await this.authService.login(email, password);
+    const loginResult = await this.authService.login(body.email, body.password);
     if ('token' in loginResult && loginResult.token) {
       setAuthCookie(res, loginResult.token);
     }

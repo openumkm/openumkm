@@ -51,7 +51,7 @@ var variants = p.variants || [];
             <div class="form-group">
               <label for="description" class="form-label">Description</label>
               <div class="flex items-center gap-2 mb-2">
-                <button type="button" class="btn btn-ghost btn-sm" onclick="alert('AI generation will be available when AI module is configured.')">
+                <button type="button" class="btn btn-ghost btn-sm ai-gen-btn" data-type="product_description" data-target="description">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                   Generate with AI
                 </button>
@@ -169,7 +169,7 @@ var variants = p.variants || [];
             <div class="form-group">
               <label for="metaTitle" class="form-label">Meta Title</label>
               <div class="flex items-center gap-2 mb-1">
-                <button type="button" class="btn btn-ghost btn-sm" style="padding: 2px 6px; font-size: 11px;" onclick="alert('AI generation will be available when AI module is configured.')">
+                <button type="button" class="btn btn-ghost btn-sm ai-gen-btn" style="padding: 2px 6px; font-size: 11px;" data-type="meta_title" data-target="metaTitle">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                   AI
                 </button>
@@ -178,6 +178,12 @@ var variants = p.variants || [];
             </div>
             <div class="form-group">
               <label for="metaDescription" class="form-label">Meta Description</label>
+              <div class="flex items-center gap-2 mb-1">
+                <button type="button" class="btn btn-ghost btn-sm ai-gen-btn" style="padding: 2px 6px; font-size: 11px;" data-type="meta_description" data-target="metaDescription">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  AI
+                </button>
+              </div>
               <textarea id="metaDescription" name="metaDescription" class="textarea" rows="3" placeholder="SEO description..."><%= p.metaDescription || '' %></textarea>
             </div>
           </div>
@@ -195,5 +201,62 @@ var variants = p.variants || [];
 </div>
 
 <%- include('./partials/product-form-scripts', { variants: variants }) %>
+
+<script>
+(function() {
+  // AI Generate buttons
+  document.querySelectorAll('.ai-gen-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var type = btn.getAttribute('data-type');
+      var targetId = btn.getAttribute('data-target');
+      var target = document.getElementById(targetId);
+      if (!target) return;
+
+      var productName = document.getElementById('name').value.trim();
+      if (!productName) {
+        alert('Please enter a product name first.');
+        document.getElementById('name').focus();
+        return;
+      }
+
+      var description = document.getElementById('description').value.trim();
+
+      // Disable button, show loading
+      var originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"/></svg> Generating...';
+
+      var body = {
+        type: type,
+        productName: productName,
+        description: description
+      };
+
+      fetch('/admin/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success && data.text) {
+          target.value = data.text;
+          // Trigger input event for any listeners
+          target.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          alert(data.error || 'AI generation failed.');
+        }
+      })
+      .catch(function() {
+        alert('Failed to connect to AI service.');
+      })
+      .finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>

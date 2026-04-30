@@ -1,0 +1,24 @@
+<%- include('layout', { body: `
+<h2 style="margin:0 0 16px;color:#111827;font-size:18px;">Payment Confirmed</h2>
+
+${recipient === 'customer' ? '<p style="color:#374151;line-height:1.6;">Great news! Your payment for order <strong>' + order.orderNumber + '</strong> has been confirmed. We will process your order shortly.</p>' : '<p style="color:#374151;line-height:1.6;">Payment for order <strong>' + order.orderNumber + '</strong> has been confirmed.</p>'}
+
+<table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
+  <tr style="background:#f9fafb;">
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;">Order Number</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;">${order.orderNumber}</td>
+  </tr>
+  <tr>
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Total</td>
+    <td style="padding:12px 16px;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">${order.currency} ${Number(order.total).toLocaleString()}</td>
+  </tr>
+  <tr style="background:#f9fafb;">
+    <td style="padding:12px 16px;font-weight:600;color:#374151;font-size:14px;border-top:1px solid #e5e7eb;">Status</td>
+    <td style="padding:12px 16px;font-size:14px;border-top:1px solid #e5e7eb;">
+      <span style="background:#dcfce7;color:#166534;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;">PAID</span>
+    </td>
+  </tr>
+</table>
+
+${recipient === 'customer' ? '<p style="color:#6b7280;font-size:13px;line-height:1.5;">You will receive another email once your order has been shipped.</p>' : ''}
+` }) %>

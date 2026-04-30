@@ -2,6 +2,7 @@ import { Controller, Get, Post, Param, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from '../services/auth.service';
 import { OrderService } from '../services/order.service';
+import { EmailService } from '../services/email.service';
 import { getAuthFromRequest } from '../common/auth.helper';
 
 @Controller('/admin')
@@ -9,6 +10,7 @@ export class AdminOrdersController {
   constructor(
     private readonly authService: AuthService,
     private readonly orderService: OrderService,
+    private readonly emailService: EmailService,
   ) {}
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
@@ -81,7 +83,26 @@ export class AdminOrdersController {
     if (!auth) return;
 
     const { status } = req.body as Record<string, string>;
-    await this.orderService.updateStatus(id, status);
+    const order = await this.orderService.updateStatus(id, status);
+
+    // Send email notifications based on status change
+    if (order) {
+      const addr = (order.shippingAddress || {}) as Record<string, any>;
+      const customerEmail = addr.email || '';
+
+      if (status === 'cancelled') {
+        await this.emailService.sendOrderCancelled(
+          { orderNumber: order.orderNumber, total: order.total },
+          customerEmail,
+        );
+      } else if (status === 'shipped') {
+        await this.emailService.sendOrderShipped(
+          { orderNumber: order.orderNumber, courier: order.courier, courierService: order.courierService, trackingNumber: order.trackingNumber },
+          customerEmail,
+        );
+      }
+    }
+
     return res.redirect(302, `/admin/orders/${id}`);
   }
 
@@ -92,6 +113,17 @@ export class AdminOrdersController {
 
     const { trackingNumber } = req.body as Record<string, string>;
     await this.orderService.setTracking(id, trackingNumber);
+
+    // Send shipped email with tracking
+    const order = await this.orderService.getById(id);
+    if (order) {
+      const addr = (order.shippingAddress || {}) as Record<string, any>;
+      await this.emailService.sendOrderShipped(
+        { orderNumber: order.orderNumber, courier: order.courier, courierService: order.courierService, trackingNumber: order.trackingNumber },
+        addr.email || '',
+      );
+    }
+
     return res.redirect(302, `/admin/orders/${id}`);
   }
 
@@ -118,7 +150,20 @@ export class AdminOrdersController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
-    await this.orderService.approvePayment(id);
+    const pc = await this.orderService.approvePayment(id);
+
+    // Send payment confirmed email
+    if (pc) {
+      const order = await this.orderService.getById(pc.orderId);
+      if (order) {
+        const addr = (order.shippingAddress || {}) as Record<string, any>;
+        await this.emailService.sendPaymentConfirmed(
+          { orderNumber: order.orderNumber, total: order.total, currency: order.currency },
+          addr.email || '',
+        );
+      }
+    }
+
     return res.redirect(302, '/admin/payments/confirmations');
   }
 
@@ -129,6 +174,19 @@ export class AdminOrdersController {
 
     const { reason } = req.body as Record<string, string>;
     await this.orderService.rejectPayment(id, reason || 'Rejected');
+
+    // Send payment rejected email
+    // Need to get the confirmation to find the order
+    const order = await this.orderService.getOrderByConfirmationId(id);
+    if (order) {
+      const addr = (order.shippingAddress || {}) as Record<string, any>;
+      await this.emailService.sendPaymentRejected(
+        { orderNumber: order.orderNumber, total: order.total },
+        addr.email || '',
+        reason || 'Rejected',
+      );
+    }
+
     return res.redirect(302, '/admin/payments/confirmations');
   }
 }
