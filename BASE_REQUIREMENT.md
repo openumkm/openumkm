@@ -150,61 +150,65 @@ S3_SECRET_KEY=                  # optional
 # 3. Project Structure
 
 ```
-/app
-  /modules
-    /auth
-    /product
-    /order
-    /checkout
-    /payment
-    /address
-    /settings
-    /shipping
-    /tax
-    /currency
-    /seo
-    /ai
+/src
+  /common
+    auth.helper.ts          (JWT cookie helpers)
+
+  /controllers
+    health.controller.ts
+    setup.controller.ts
+    auth.controller.ts
+    storefront.controller.ts
+    dashboard.controller.ts
+    admin.controller.ts
+    admin-products.controller.ts
+    admin-orders.controller.ts
+    admin-settings.controller.ts
+
+  /services
+    auth.service.ts
+    setup.service.ts
+    settings.service.ts
+    product.service.ts
+    order.service.ts
 
   /db
-    schema.ts
-    migrations/
+    index.ts              (Drizzle + pg pool)
+    schema.ts             (all table definitions)
+    migrations/           (generated SQL)
+
+  /data
+    dummy-admin.ts        (dummy data for UI-first dev)
+    dummy-settings.ts
 
   /views
     /storefront
     /admin
+      /partials           (sidebar, stats, settings sections)
     /auth
-    /emails
-    /partials
+    /dashboard
+    /setup
+    /partials             (head, header, footer)
 
   /locales
     /id
-      storefront.json
-      admin.json
-      emails.json
-      common.json
     /en
-      storefront.json
-      admin.json
-      emails.json
-      common.json
 
   /public
-    /assets
-    /uploads          (volume mount for local storage)
-
-  /mail
-    templates/        (EJS email templates)
+    /css
+      app.css
 
   main.ts
   config.ts
-  setup.guard.ts
+  app.module.ts
 ```
 
 ### Rules
 
 * No deep nesting
 * No domain-driven layering
-* Keep modules isolated but simple
+* Controllers handle HTTP, services handle business logic
+* Split controllers by domain when they exceed 150 lines (e.g. `admin-products`, `admin-orders`, `admin-settings`)
 
 ---
 
@@ -719,7 +723,7 @@ POST /admin/ai/generate          AI generate content (AJAX endpoint, returns gen
 
 ---
 
-# 6. Request Flow
+# 7. Request Flow
 
 ## Product Page
 
@@ -798,7 +802,7 @@ grand_total = subtotal + tax_total + shipping_cost
 
 ---
 
-# 7. Performance Strategy
+# 8. Performance Strategy
 
 ## Database
 
@@ -838,7 +842,7 @@ grand_total = subtotal + tax_total + shipping_cost
 
 ---
 
-# 8. Docker Design
+# 9. Docker Design
 
 ## docker-compose
 
@@ -904,7 +908,17 @@ volumes:
 
 ---
 
-# 9. Database Schema (Draft)
+# 10. Database Schema
+
+Implemented in `src/db/schema.ts` using Drizzle ORM. Migration generated at `src/db/migrations/`.
+
+## Enums
+
+* `user_role`: customer, seller
+* `order_status`: pending, waiting_confirmation, paid, processing, shipped, completed, cancelled, expired
+* `payment_method`: xendit, manual_transfer
+* `confirmation_status`: pending, approved, rejected
+* `tax_apply_to`: subtotal, subtotal_shipping
 
 ## tables
 
@@ -1051,7 +1065,7 @@ settings
 
 ---
 
-# 10. Constraints
+# 11. Constraints
 
 ## Must Follow
 
@@ -1070,7 +1084,7 @@ settings
 
 ---
 
-# 11. Non-Goals
+# 12. Non-Goals
 
 * Multi-tenant system
 * Enterprise scalability
@@ -1082,7 +1096,7 @@ settings
 
 ---
 
-# 12. Development Rules for AI Agent
+# 13. Development Rules for AI Agent
 
 ## DO
 
@@ -1106,7 +1120,7 @@ To maintain readability and ease of maintenance, enforce the following LoC limit
 
 | File Type | Max LoC | Strategy if exceeded |
 |---|---|---|
-| `.ts` controller | 150 lines | Split into multiple controllers or extract dummy data to separate file |
+| `.ts` controller | 200 lines | Split into multiple controllers by domain |
 | `.ts` service/module | 200 lines | Split logic into helper functions or sub-modules |
 | `.ejs` view template | 200 lines | Extract repeated sections into partials (`<%- include(...) %>`) |
 | `.css` stylesheet | 3000 lines | Split into multiple CSS files (e.g. `base.css`, `components.css`, `admin.css`) |
