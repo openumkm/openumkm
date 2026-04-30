@@ -7,6 +7,11 @@
     <span class="form-hint">Required for online payment processing via Xendit.</span>
   </div>
   <div class="form-group">
+    <label for="xenditCallbackToken" class="form-label">Xendit Webhook Token</label>
+    <input type="password" id="xenditCallbackToken" name="xenditCallbackToken" class="input" value="<%= s.xenditCallbackToken || '' %>" placeholder="Your webhook verification token">
+    <span class="form-hint">Set in Xendit Dashboard → Webhooks. Used to verify incoming webhook requests.</span>
+  </div>
+  <div class="form-group">
     <label for="rajaOngkirApiKey" class="form-label">RajaOngkir API Key</label>
     <input type="password" id="rajaOngkirApiKey" name="rajaOngkirApiKey" class="input" value="<%= s.rajaOngkirApiKey || '' %>" placeholder="Your RajaOngkir API key">
     <span class="form-hint">Required for shipping cost calculation.</span>

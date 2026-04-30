@@ -9,6 +9,7 @@ import { AdminAiController } from './controllers/admin-ai.controller';
 import { DashboardController } from './controllers/dashboard.controller';
 import { SetupController } from './controllers/setup.controller';
 import { HealthController } from './controllers/health.controller';
+import { XenditWebhookController } from './controllers/xendit-webhook.controller';
 import { AuthService } from './services/auth.service';
 import { SetupService } from './services/setup.service';
 import { SettingsService } from './services/settings.service';
@@ -34,6 +35,7 @@ import { XenditService } from './services/xendit.service';
     AdminOrdersController,
     AdminSettingsController,
     AdminAiController,
+    XenditWebhookController,
   ],
   providers: [
     AuthService,
