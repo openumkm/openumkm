@@ -49,8 +49,10 @@ function formatRp(amount) {
         <div class="product-card-image">
           <img src="<%= product.image %>" alt="<%= product.name %>" loading="<%= index < 4 ? 'eager' : 'lazy' %>">
           <div class="product-card-badge flex flex-col gap-1">
-            <span class="badge badge-primary"><%= product.category %></span>
-            <% if (index < 3) { %>
+            <% if (product.stock <= 0) { %>
+            <span class="badge badge-danger">Out of Stock</span>
+            <% } %>
+            <% if (index < 3 && product.stock > 0) { %>
             <span class="badge badge-success">Featured</span>
             <% } %>
           </div>

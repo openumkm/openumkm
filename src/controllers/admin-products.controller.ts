@@ -73,6 +73,7 @@ export class AdminProductsController {
     const parts = (req as any).parts();
     const fields: Record<string, string> = {};
     const imageUrls: string[] = [];
+    let ogImageUrl: string | null = null;
 
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'images') {
@@ -87,6 +88,19 @@ export class AdminProductsController {
           if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
           writeFileSync(join(dir, filename), buffer);
           imageUrls.push(`/uploads/products/${filename}`);
+        }
+      } else if (part.type === 'file' && part.fieldname === 'ogImage') {
+        const buffer = await part.toBuffer();
+        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
+          const { v4: uuidv4 } = await import('uuid');
+          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
+          const filename = `${uuidv4()}${ext}`;
+          const { join } = await import('path');
+          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
+          const dir = join(process.cwd(), 'uploads', 'og');
+          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+          writeFileSync(join(dir, filename), buffer);
+          ogImageUrl = `/uploads/og/${filename}`;
         }
       } else if (part.type === 'field') {
         fields[part.fieldname] = part.value;
@@ -116,6 +130,7 @@ export class AdminProductsController {
       minOrder: parseInt(fields.minOrder || '1', 10),
       metaTitle: fields.metaTitle || null,
       metaDescription: fields.metaDescription || null,
+      ogImage: ogImageUrl,
       isActive: fields.isActive === '1',
     });
 
@@ -154,6 +169,7 @@ export class AdminProductsController {
     const parts = (req as any).parts();
     const fields: Record<string, string> = {};
     const imageUrls: string[] = [];
+    let ogImageUrl: string | null = null;
 
     for await (const part of parts) {
       if (part.type === 'file' && part.fieldname === 'images') {
@@ -169,12 +185,25 @@ export class AdminProductsController {
           writeFileSync(join(dir, filename), buffer);
           imageUrls.push(`/uploads/products/${filename}`);
         }
+      } else if (part.type === 'file' && part.fieldname === 'ogImage') {
+        const buffer = await part.toBuffer();
+        if (buffer.length > 0 && buffer.length <= 5 * 1024 * 1024) {
+          const { v4: uuidv4 } = await import('uuid');
+          const ext = part.mimetype === 'image/png' ? '.png' : part.mimetype === 'image/webp' ? '.webp' : '.jpg';
+          const filename = `${uuidv4()}${ext}`;
+          const { join } = await import('path');
+          const { existsSync, mkdirSync, writeFileSync } = await import('fs');
+          const dir = join(process.cwd(), 'uploads', 'og');
+          if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+          writeFileSync(join(dir, filename), buffer);
+          ogImageUrl = `/uploads/og/${filename}`;
+        }
       } else if (part.type === 'field') {
         fields[part.fieldname] = part.value;
       }
     }
 
-    await this.productService.update(id, {
+    const updateData: any = {
       name: fields.name,
       slug: fields.slug || undefined,
       description: fields.description || null,
@@ -185,7 +214,10 @@ export class AdminProductsController {
       metaTitle: fields.metaTitle || null,
       metaDescription: fields.metaDescription || null,
       isActive: fields.isActive === '1',
-    });
+    };
+    if (ogImageUrl) updateData.ogImage = ogImageUrl;
+
+    await this.productService.update(id, updateData);
 
     // Add new images if uploaded
     for (const url of imageUrls) {

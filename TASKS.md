@@ -52,7 +52,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 | 3.5 | Sort (`?sort=price_asc\|price_desc`) | ✅ | Sort support di `ProductService.list()` |
 | 3.6 | Language switch (`?lang=`) | ❌ | Tidak ada implementasi |
 | 3.7 | SEO meta di `<head>` | 🟡 | `metaDescription` di-pass ke view tapi hanya di home, belum dari DB |
-| 3.8 | Out of stock label + disabled checkout | ❌ | Tidak ada logic stock check di storefront |
+| 3.8 | Out of stock label + disabled checkout | ✅ | Badge "Out of Stock" di home + cart warning + checkout disabled |
 | 3.9 | Currency display / switch | ❌ | Tidak ada currency formatting atau switch UI |
 
 ---
@@ -95,7 +95,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 |---|------|--------|--------|
 | 6.1 | Xendit invoice creation | ❌ | Tidak ada Xendit API integration |
 | 6.2 | Xendit webhook handler | ❌ | Tidak ada webhook endpoint |
-| 6.3 | Manual transfer — show bank accounts | 🟡 | Dummy bank accounts di view |
+| 6.3 | Manual transfer — show bank accounts | ✅ | Bank accounts dari DB ditampilkan di checkout + payment confirm |
 | 6.4 | `GET /payment/confirm/:id` | ✅ | Wired ke real order + bank accounts dari DB |
 | 6.5 | `POST /payment/confirm/:id` (upload proof) | ✅ | Multipart upload + create payment confirmation |
 | 6.6 | File upload untuk receipt image | ✅ | Multipart parsing + save to `/uploads/receipts/` |
@@ -158,7 +158,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 | 10.5 | Product image upload | ✅ | Multipart upload di `admin-products.controller.ts` |
 | 10.6 | Product image management (CRUD, primary, sort) | ✅ | Add + delete image routes |
 | 10.7 | Product variant management | ✅ | Add + delete variant routes |
-| 10.8 | OG image upload | ❌ | Field ada di schema tapi tidak ada upload |
+| 10.8 | OG image upload | ✅ | Field upload di product form + handled di create/edit |
 
 ---
 
@@ -169,12 +169,12 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 | 11.1 | Settings page (store info, API keys, SMTP, etc.) | ✅ | GET + POST, semua key disimpan ke DB |
 | 11.2 | Bank accounts CRUD | ✅ | Add, toggle, delete |
 | 11.3 | Bank account edit | ✅ | `POST /admin/settings/bank-accounts/:id` — inline edit di view |
-| 11.4 | Bank account logo upload | ❌ | Field ada di schema tapi tidak ada upload |
+| 11.4 | Bank account logo upload | ✅ | Multipart upload di add/edit form, saved to /uploads/bank-logos/ |
 | 11.5 | Tax rates CRUD | ✅ | Add, toggle, delete |
 | 11.6 | Tax rate edit | ✅ | `POST /admin/settings/taxes/:id` — inline edit di view |
 | 11.7 | Currencies (toggle, exchange rate) | ✅ | Toggle active + update rate |
 | 11.8 | Courier toggle | ✅ | Stored as comma-separated in settings |
-| 11.9 | Store logo upload | ❌ | Tidak ada upload handler |
+| 11.9 | Store logo upload | ✅ | Multipart upload di settings form, saved ke setting `store_logo` |
 | 11.10 | Origin city dropdown (RajaOngkir) | ❌ | Text input, bukan dropdown dari API |
 
 ---
@@ -287,7 +287,7 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | 18.1 | Dockerfile: hapus Prisma copy line | ✅ | Removed |
 | 18.2 | PostgreSQL tuning di docker-compose | ✅ | `shared_buffers`, `work_mem`, `max_connections`, `effective_cache_size` |
 | 18.3 | `@fastify/formbody` untuk parse POST body | ✅ | Registered di `main.ts` |
-| 18.4 | Uploads volume serving | ❌ | Volume mount ada di compose tapi tidak ada static route |
+| 18.4 | Uploads volume serving | ✅ | Static route `/uploads/` di `main.ts` |
 | 18.5 | Error handling / 404 page | ✅ | 404 view + global error handler di `main.ts` |
 | 18.6 | CSRF protection | ❌ | Tidak ada CSRF token di forms |
 
@@ -343,15 +343,15 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 |----------|------|---------|-------------|-------|
 | Infrastructure | 10 | 0 | 0 | 10 |
 | Auth & Setup | 6 | 0 | 0 | 6 |
-| Storefront | 5 | 0 | 4 | 9 |
+| Storefront | 6 | 0 | 3 | 9 |
 | Cart | 9 | 0 | 0 | 9 |
 | Checkout | 7 | 1 | 1 | 9 |
-| Payment | 4 | 1 | 3 | 8 |
+| Payment | 5 | 0 | 3 | 8 |
 | Order Management | 8 | 0 | 0 | 8 |
 | Customer Dashboard | 8 | 0 | 0 | 8 |
 | Admin Dashboard | 5 | 0 | 1 | 6 |
-| Admin Products | 7 | 0 | 1 | 8 |
-| Admin Settings | 7 | 0 | 3 | 10 |
+| Admin Products | 8 | 0 | 0 | 8 |
+| Admin Settings | 9 | 0 | 1 | 10 |
 | File Upload | 4 | 1 | 1 | 6 |
 | Shipping (RajaOngkir) | 5 | 0 | 0 | 5 |
 | Shipping (Custom Methods) | 0 | 0 | 5 | 5 |
@@ -359,10 +359,10 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Email (SMTP) | 10 | 0 | 0 | 10 |
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
-| Misc / Polish | 4 | 0 | 2 | 6 |
-| **TOTAL** | **106** | **3** | **27** | **136** |
+| Misc / Polish | 5 | 0 | 1 | 6 |
+| **TOTAL** | **112** | **2** | **22** | **136** |
 
-**Progress: ~78% done, ~2% partial, ~20% belum dimulai.**
+**Progress: ~82% done, ~1% partial, ~17% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
-Yang belum: Xendit payment, custom shipping methods, dan beberapa polish items (admin edit routes, error handling, currency display, dll).
+Yang belum: Xendit payment, custom shipping methods, CSRF protection, S3 storage, origin city dropdown.

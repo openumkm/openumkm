@@ -186,6 +186,14 @@ var variants = p.variants || [];
               </div>
               <textarea id="metaDescription" name="metaDescription" class="textarea" rows="3" placeholder="SEO description..."><%= p.metaDescription || '' %></textarea>
             </div>
+            <div class="form-group">
+              <label for="ogImage" class="form-label">OG Image</label>
+              <% if (p.ogImage) { %>
+              <div class="mb-2"><img src="<%= p.ogImage %>" alt="OG Image preview" style="max-width:200px;max-height:100px;border-radius:var(--radius-md);"></div>
+              <% } %>
+              <input type="file" id="ogImage" name="ogImage" class="input" accept="image/jpeg,image/png,image/webp">
+              <span class="form-hint">Social sharing image. JPG, PNG up to 5MB. Leave empty to keep current.</span>
+            </div>
           </div>
 
           <div class="flex flex-col gap-3">

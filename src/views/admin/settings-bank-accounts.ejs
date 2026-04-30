@@ -25,7 +25,7 @@ var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
     <!-- Add Bank Account Form -->
     <div class="admin-card mb-6">
       <h3 class="admin-card-title">Add Bank Account</h3>
-      <form action="/admin/settings/bank-accounts" method="post">
+      <form action="/admin/settings/bank-accounts" method="post" enctype="multipart/form-data">
         <div class="grid" style="grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4);">
           <div class="form-group">
             <label for="bankName" class="form-label form-label-required">Bank Name</label>
@@ -39,6 +39,11 @@ var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
             <label for="accountHolder" class="form-label form-label-required">Account Holder</label>
             <input type="text" id="accountHolder" name="accountHolder" class="input" required placeholder="Store Name">
           </div>
+        </div>
+        <div class="form-group">
+          <label for="bankLogo" class="form-label">Logo</label>
+          <input type="file" id="bankLogo" name="logo" class="input" accept="image/jpeg,image/png">
+          <span class="form-hint">JPG, PNG up to 5MB. Optional.</span>
         </div>
         <button type="submit" class="btn btn-primary btn-sm">Add Bank Account</button>
       </form>
@@ -90,12 +95,17 @@ var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
           </tr>
           <tr id="bank-edit-<%= bank.id %>" style="display:none;">
             <td colspan="5">
-              <form action="/admin/settings/bank-accounts/<%= bank.id %>" method="post" class="flex items-center gap-3" style="padding: var(--space-2) 0;">
-                <input type="text" name="bankName" value="<%= bank.bankName %>" class="input input-sm" required style="width:150px;" placeholder="Bank">
-                <input type="text" name="accountNumber" value="<%= bank.accountNumber %>" class="input input-sm" required style="width:140px;" placeholder="Number">
-                <input type="text" name="accountHolder" value="<%= bank.accountHolder %>" class="input input-sm" required style="width:180px;" placeholder="Holder">
-                <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="toggleEditBank('<%= bank.id %>')">Cancel</button>
+              <form action="/admin/settings/bank-accounts/<%= bank.id %>" method="post" enctype="multipart/form-data" class="flex flex-col gap-2" style="padding: var(--space-2) 0;">
+                <div class="flex items-center gap-3">
+                  <input type="text" name="bankName" value="<%= bank.bankName %>" class="input input-sm" required style="width:150px;" placeholder="Bank">
+                  <input type="text" name="accountNumber" value="<%= bank.accountNumber %>" class="input input-sm" required style="width:140px;" placeholder="Number">
+                  <input type="text" name="accountHolder" value="<%= bank.accountHolder %>" class="input input-sm" required style="width:180px;" placeholder="Holder">
+                </div>
+                <div class="flex items-center gap-3">
+                  <input type="file" name="logo" class="input input-sm" accept="image/jpeg,image/png">
+                  <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="toggleEditBank('<%= bank.id %>')">Cancel</button>
+                </div>
               </form>
             </td>
           </tr>

@@ -95,7 +95,7 @@ export class ProductService {
   async create(data: {
     name: string; slug: string; description?: string | null;
     price: number; weight: number; stock: number; minOrder?: number;
-    metaTitle?: string | null; metaDescription?: string | null; isActive?: boolean;
+    metaTitle?: string | null; metaDescription?: string | null; ogImage?: string | null; isActive?: boolean;
   }) {
     const [product] = await db.insert(products).values({
       ...data,
@@ -108,7 +108,7 @@ export class ProductService {
   async update(id: string, data: Partial<{
     name: string; slug: string; description: string | null;
     price: number; weight: number; stock: number; minOrder: number;
-    metaTitle: string | null; metaDescription: string | null; isActive: boolean;
+    metaTitle: string | null; metaDescription: string | null; ogImage: string | null; isActive: boolean;
   }>) {
     const [product] = await db.update(products)
       .set({ ...data, updatedAt: new Date() })

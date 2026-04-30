@@ -8,6 +8,7 @@ function formatRp(amount) {
 }
 var items = (typeof cartItems !== 'undefined' && Array.isArray(cartItems)) ? cartItems : [];
 var hasItems = items.length > 0;
+var hasOutOfStock = items.some(function(i) { return i.outOfStock; });
 var loggedIn = typeof isLoggedIn !== 'undefined' ? isLoggedIn : false;
 %>
 <!DOCTYPE html>
@@ -42,7 +43,7 @@ var loggedIn = typeof isLoggedIn !== 'undefined' ? isLoggedIn : false;
           </thead>
           <tbody>
             <% items.forEach(function(item) { %>
-            <tr>
+            <tr<%= item.outOfStock ? ' style="opacity:0.6"' : '' %>>
               <td data-label="Product">
                 <div class="product-cell">
                   <div class="product-thumb">
@@ -52,6 +53,11 @@ var loggedIn = typeof isLoggedIn !== 'undefined' ? isLoggedIn : false;
                     <p class="product-name"><a href="/product/<%= item.slug || '#' %>"><%= item.name %></a></p>
                     <% if (item.variant) { %>
                     <p class="product-variant"><%= item.variant %></p>
+                    <% } %>
+                    <% if (item.outOfStock) { %>
+                    <p style="color:var(--color-danger);font-size:13px;font-weight:600;">Out of Stock — Remove to continue</p>
+                    <% } else if (item.stockChanged) { %>
+                    <p style="color:var(--color-warning,#f59e0b);font-size:13px;">Stock changed: <%= item.stock %> available</p>
                     <% } %>
                   </div>
                 </div>
@@ -104,10 +110,17 @@ var loggedIn = typeof isLoggedIn !== 'undefined' ? isLoggedIn : false;
             <span>Total</span>
             <span><%= formatRp(typeof subtotal !== 'undefined' ? subtotal : 0) %></span>
           </div>
+          <% if (hasOutOfStock) { %>
+          <div class="alert alert-warning mt-4" style="background:#fef3c7;color:#92400e;padding:var(--space-3);border-radius:var(--radius-md);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>Some items are out of stock. Please remove them before checking out.</span>
+          </div>
+          <% } else { %>
           <a href="/checkout" class="btn btn-primary btn-lg">
             Proceed to Checkout
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
+          <% } %>
         </aside>
       </div>
     </div>

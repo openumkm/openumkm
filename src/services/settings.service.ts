@@ -43,7 +43,7 @@ export class SettingsService {
     return db.select().from(bankAccounts).orderBy(bankAccounts.sortOrder);
   }
 
-  async addBankAccount(data: { bankName: string; accountNumber: string; accountHolder: string }) {
+  async addBankAccount(data: { bankName: string; accountNumber: string; accountHolder: string; logoUrl?: string | null }) {
     await db.insert(bankAccounts).values(data);
   }
 
@@ -58,7 +58,7 @@ export class SettingsService {
     await db.delete(bankAccounts).where(eq(bankAccounts.id, id));
   }
 
-  async editBankAccount(id: string, data: { bankName: string; accountNumber: string; accountHolder: string }) {
+  async editBankAccount(id: string, data: { bankName: string; accountNumber: string; accountHolder: string; logoUrl?: string | null }) {
     await db.update(bankAccounts).set(data).where(eq(bankAccounts.id, id));
   }
 
