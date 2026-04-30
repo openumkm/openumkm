@@ -58,6 +58,10 @@ export class SettingsService {
     await db.delete(bankAccounts).where(eq(bankAccounts.id, id));
   }
 
+  async editBankAccount(id: string, data: { bankName: string; accountNumber: string; accountHolder: string }) {
+    await db.update(bankAccounts).set(data).where(eq(bankAccounts.id, id));
+  }
+
   // Tax rates
   async getTaxRates() {
     return db.select().from(taxRates);
@@ -76,6 +80,10 @@ export class SettingsService {
 
   async deleteTaxRate(id: string) {
     await db.delete(taxRates).where(eq(taxRates.id, id));
+  }
+
+  async editTaxRate(id: string, data: { name: string; rate: string; applyTo: 'subtotal' | 'subtotal_shipping' }) {
+    await db.update(taxRates).set(data).where(eq(taxRates.id, id));
   }
 
   // Currencies

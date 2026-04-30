@@ -65,6 +65,8 @@ export class SetupService {
       smtp_enabled: 'false',
       ai_enabled: 'false',
       enabled_couriers: 'jne,tiki,jnt',
+      rajaongkir_enabled: 'false',
+      shipping_mode: 'custom',
       seo_title: data.storeName,
       seo_description: '',
     };

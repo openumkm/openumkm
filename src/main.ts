@@ -113,6 +113,35 @@ async function bootstrap() {
     (request as any).t = createTranslator(lang);
   });
 
+  // 404 handler
+  fastify.setNotFoundHandler(async (_request: any, reply: any) => {
+    if (_request.url.startsWith('/api/') || _request.url.startsWith('/health')) {
+      return reply.status(404).send({ error: 'Not found' });
+    }
+    return reply.status(404).view('404.ejs', {
+      pageTitle: '404 — Page Not Found',
+      isLoggedIn: false,
+      cartCount: 0,
+    });
+  });
+
+  // Global error handler
+  fastify.setErrorHandler(async (error: any, _request: any, reply: any) => {
+    console.error('[Error]', error.message || error);
+    if (_request.url.startsWith('/api/') || _request.url.startsWith('/health')) {
+      return reply.status(error.statusCode || 500).send({
+        error: error.message || 'Internal Server Error',
+        statusCode: error.statusCode || 500,
+      });
+    }
+    return reply.status(error.statusCode || 500).view('404.ejs', {
+      pageTitle: error.statusCode ? `${error.statusCode} — Error` : 'Error',
+      error: error.message || 'Something went wrong.',
+      isLoggedIn: false,
+      cartCount: 0,
+    });
+  });
+
   const port = parseInt(process.env.PORT || '3000', 10);
   await app.listen(port, '0.0.0.0');
   console.log(`[eCommerce] Running on http://0.0.0.0:${port}`);

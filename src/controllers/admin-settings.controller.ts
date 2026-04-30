@@ -11,6 +11,7 @@ const SETTING_KEYS = [
   'xendit_enabled', 'manual_transfer_enabled', 'auto_expire_hours', 'tax_enabled',
   'seo_title', 'seo_description',
   'ai_base_url', 'ai_api_key', 'ai_model', 'ai_enabled',
+  'rajaongkir_enabled', 'shipping_mode',
 ];
 
 const COURIERS = [
@@ -61,6 +62,8 @@ export class AdminSettingsController {
         seoTitle: s.seo_title, seoDescription: s.seo_description,
         aiBaseUrl: s.ai_base_url, aiApiKey: s.ai_api_key, aiModel: s.ai_model,
         aiEnabled: s.ai_enabled === 'true',
+        rajaOngkirEnabled: s.rajaongkir_enabled === 'true',
+        shippingMode: s.shipping_mode || 'custom',
       },
       couriers: COURIERS.map((c) => ({ ...c, enabled: enabledCouriers.includes(c.code) })),
     });
@@ -89,6 +92,8 @@ export class AdminSettingsController {
       seo_title: body.seoTitle || '', seo_description: body.seoDescription || '',
       ai_base_url: body.aiBaseUrl || '', ai_api_key: body.aiApiKey || '',
       ai_model: body.aiModel || '', ai_enabled: body.aiEnabled ? 'true' : 'false',
+      rajaongkir_enabled: body.rajaOngkirEnabled ? 'true' : 'false',
+      shipping_mode: body.shippingMode || 'custom',
     };
 
     const courierArr = Array.isArray(body['couriers[]']) ? body['couriers[]'] : (body['couriers[]'] ? [body['couriers[]']] : []);
@@ -122,6 +127,17 @@ export class AdminSettingsController {
     const { bankName, accountNumber, accountHolder } = req.body as Record<string, string>;
     if (bankName && accountNumber && accountHolder) {
       await this.settingsService.addBankAccount({ bankName, accountNumber, accountHolder });
+    }
+    return res.redirect(302, '/admin/settings/bank-accounts');
+  }
+
+  @Post('/bank-accounts/:id')
+  async editBankAccount(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = await this.guardAdmin(req, res);
+    if (!auth) return;
+    const { bankName, accountNumber, accountHolder } = req.body as Record<string, string>;
+    if (bankName && accountNumber && accountHolder) {
+      await this.settingsService.editBankAccount(id, { bankName, accountNumber, accountHolder });
     }
     return res.redirect(302, '/admin/settings/bank-accounts');
   }
@@ -168,6 +184,17 @@ export class AdminSettingsController {
     const { name, rate, applyTo } = req.body as Record<string, string>;
     if (name && rate) {
       await this.settingsService.addTaxRate({ name, rate, applyTo: (applyTo as any) || 'subtotal' });
+    }
+    return res.redirect(302, '/admin/settings/taxes');
+  }
+
+  @Post('/taxes/:id')
+  async editTaxRate(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = await this.guardAdmin(req, res);
+    if (!auth) return;
+    const { name, rate, applyTo } = req.body as Record<string, string>;
+    if (name && rate) {
+      await this.settingsService.editTaxRate(id, { name, rate, applyTo: (applyTo as any) || 'subtotal' });
     }
     return res.redirect(302, '/admin/settings/taxes');
   }

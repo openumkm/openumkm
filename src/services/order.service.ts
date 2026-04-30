@@ -3,6 +3,8 @@ import { db } from '../db';
 import { orders, paymentConfirmations, products, productVariants, settings } from '../db/schema';
 import { eq, desc, and, like, sql, or, SQL } from 'drizzle-orm';
 
+const VALID_STATUSES = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shipped', 'completed', 'cancelled', 'expired'];
+
 @Injectable()
 export class OrderService {
   async list(opts: { search?: string; status?: string; page?: number; limit?: number } = {}) {
@@ -254,5 +256,35 @@ export class OrderService {
       totalOrders: count,
       avgOrderValue: count > 0 ? Math.round(total / count) : 0,
     };
+  }
+
+  async getRevenueBreakdown(period: 'daily' | 'weekly' | 'monthly' | 'yearly') {
+    const now = new Date();
+    let since: Date;
+
+    switch (period) {
+      case 'daily': since = new Date(now.getFullYear(), now.getMonth(), now.getDate()); break;
+      case 'weekly': since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); break;
+      case 'monthly': since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); break;
+      case 'yearly': since = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000); break;
+    }
+
+    const rows = await db.select({
+      status: orders.status,
+      count: sql<number>`count(*)`,
+    })
+      .from(orders)
+      .where(sql`${orders.createdAt} >= ${since}`)
+      .groupBy(orders.status);
+
+    const breakdown: Record<string, number> = {};
+    for (const s of VALID_STATUSES) breakdown[s] = 0;
+    for (const row of rows) {
+      if (row.status && row.status in breakdown) {
+        breakdown[row.status] = Number(row.count);
+      }
+    }
+
+    return breakdown;
   }
 }

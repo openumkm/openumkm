@@ -68,7 +68,7 @@ var taxOn = typeof taxEnabled !== 'undefined' ? taxEnabled : false;
         </thead>
         <tbody>
           <% taxes.forEach(function(tax) { %>
-          <tr>
+          <tr id="tax-row-<%= tax.id %>">
             <td><strong><%= tax.name %></strong></td>
             <td style="font: 600 14px/1.3 var(--font-family);"><%= tax.rate %>%</td>
             <td><%= tax.applyTo === 'subtotal_shipping' ? 'Subtotal + Shipping' : 'Subtotal only' %></td>
@@ -81,6 +81,9 @@ var taxOn = typeof taxEnabled !== 'undefined' ? taxEnabled : false;
             </td>
             <td>
               <div class="flex items-center gap-1">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="toggleEditTax('<%= tax.id %>')" title="Edit">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
                 <form action="/admin/settings/taxes/<%= tax.id %>/toggle" method="post" style="display:inline;">
                   <button type="submit" class="btn btn-ghost btn-sm" title="Toggle active">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -92,6 +95,20 @@ var taxOn = typeof taxEnabled !== 'undefined' ? taxEnabled : false;
                   </button>
                 </form>
               </div>
+            </td>
+          </tr>
+          <tr id="tax-edit-<%= tax.id %>" style="display:none;">
+            <td colspan="5">
+              <form action="/admin/settings/taxes/<%= tax.id %>" method="post" class="flex items-center gap-3" style="padding: var(--space-2) 0;">
+                <input type="text" name="name" value="<%= tax.name %>" class="input input-sm" required style="width:150px;" placeholder="Name">
+                <input type="number" name="rate" value="<%= tax.rate %>" class="input input-sm" required step="0.1" min="0" max="100" style="width:100px;" placeholder="Rate %">
+                <select name="applyTo" class="select select-sm">
+                  <option value="subtotal" <%= tax.applyTo === 'subtotal' ? 'selected' : '' %>>Subtotal only</option>
+                  <option value="subtotal_shipping" <%= tax.applyTo === 'subtotal_shipping' ? 'selected' : '' %>>Subtotal + Shipping</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="toggleEditTax('<%= tax.id %>')">Cancel</button>
+              </form>
             </td>
           </tr>
           <% }); %>
@@ -110,3 +127,16 @@ var taxOn = typeof taxEnabled !== 'undefined' ? taxEnabled : false;
 </div>
 </body>
 </html>
+<script>
+function toggleEditTax(id) {
+  var editRow = document.getElementById('tax-edit-' + id);
+  var row = document.getElementById('tax-row-' + id);
+  if (editRow.style.display === 'none' || editRow.style.display === '') {
+    editRow.style.display = '';
+    row.style.display = 'none';
+  } else {
+    editRow.style.display = 'none';
+    row.style.display = '';
+  }
+}
+</script>

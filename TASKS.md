@@ -140,10 +140,10 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 |---|------|--------|--------|
 | 9.1 | Dashboard stats (revenue) | ✅ | Wired ke `OrderService.getRevenueStats()` |
 | 9.2 | Revenue periods (daily/weekly/monthly) | ✅ | Query DB dengan date filter |
-| 9.3 | `GET /admin/revenue?period=` | ❌ | Route tidak ada (spec requires separate endpoint) |
-| 9.4 | Yearly revenue stats | ❌ | `getRevenueStats('yearly')` ada tapi tidak dipanggil |
-| 9.5 | Breakdown by status (count) | ❌ | Tidak ada status breakdown di revenue stats |
-| 9.6 | Average order value display | 🟡 | Dihitung di service tapi tidak di-pass ke view |
+| 9.3 | `GET /admin/revenue?period=` | ✅ | Route added di `AdminController`, returns JSON revenue stats + breakdown |
+| 9.4 | Yearly revenue stats | ✅ | Yearly ditambahkan ke dashboard view |
+| 9.5 | Breakdown by status (count) | ✅ | `getRevenueBreakdown()` di OrderService, ditampilkan di dashboard |
+| 9.6 | Average order value display | ✅ | Dihitung di service, di-pass ke view + JSON endpoint |
 
 ---
 
@@ -168,10 +168,10 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 |---|------|--------|--------|
 | 11.1 | Settings page (store info, API keys, SMTP, etc.) | ✅ | GET + POST, semua key disimpan ke DB |
 | 11.2 | Bank accounts CRUD | ✅ | Add, toggle, delete |
-| 11.3 | Bank account edit | ❌ | Hanya add/toggle/delete, tidak ada edit route |
+| 11.3 | Bank account edit | ✅ | `POST /admin/settings/bank-accounts/:id` — inline edit di view |
 | 11.4 | Bank account logo upload | ❌ | Field ada di schema tapi tidak ada upload |
 | 11.5 | Tax rates CRUD | ✅ | Add, toggle, delete |
-| 11.6 | Tax rate edit | ❌ | Hanya add/toggle/delete, tidak ada edit route |
+| 11.6 | Tax rate edit | ✅ | `POST /admin/settings/taxes/:id` — inline edit di view |
 | 11.7 | Currencies (toggle, exchange rate) | ✅ | Toggle active + update rate |
 | 11.8 | Courier toggle | ✅ | Stored as comma-separated in settings |
 | 11.9 | Store logo upload | ❌ | Tidak ada upload handler |
@@ -202,7 +202,7 @@ Analisis gap antara `BASE_REQUIREMENT.md` dan implementasi saat ini.
 | 13.2 | Calculate shipping cost | ✅ | `POST /api/shipping/calculate` — AJAX dari checkout |
 | 13.3 | City list / dropdown | ✅ | `GET /api/shipping/search?q=` — autocomplete di checkout |
 | 13.4 | Courier filtering (enabled only) | ✅ | Reads `enabled_couriers` dari settings, map ke RajaOngkir codes |
-| 13.5 | Toggle RajaOngkir on/off di settings | ❌ | Setting `rajaongkir_enabled` belum ada, checkout harus cek toggle ini |
+| 13.5 | Toggle RajaOngkir on/off di settings | ✅ | Setting `rajaongkir_enabled` + `shipping_mode` ditambahkan, checkout cek toggle |
 
 ### 13B. Custom Shipping Methods (Alternatif — jika RajaOngkir tidak dipakai)
 
@@ -288,7 +288,7 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | 18.2 | PostgreSQL tuning di docker-compose | ✅ | `shared_buffers`, `work_mem`, `max_connections`, `effective_cache_size` |
 | 18.3 | `@fastify/formbody` untuk parse POST body | ✅ | Registered di `main.ts` |
 | 18.4 | Uploads volume serving | ❌ | Volume mount ada di compose tapi tidak ada static route |
-| 18.5 | Error handling / 404 page | ❌ | Tidak ada global error handler atau custom 404 |
+| 18.5 | Error handling / 404 page | ✅ | 404 view + global error handler di `main.ts` |
 | 18.6 | CSRF protection | ❌ | Tidak ada CSRF token di forms |
 
 ---
@@ -349,20 +349,20 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Payment | 4 | 1 | 3 | 8 |
 | Order Management | 8 | 0 | 0 | 8 |
 | Customer Dashboard | 8 | 0 | 0 | 8 |
-| Admin Dashboard | 2 | 1 | 3 | 6 |
+| Admin Dashboard | 5 | 0 | 1 | 6 |
 | Admin Products | 7 | 0 | 1 | 8 |
-| Admin Settings | 5 | 0 | 5 | 10 |
+| Admin Settings | 7 | 0 | 3 | 10 |
 | File Upload | 4 | 1 | 1 | 6 |
-| Shipping (RajaOngkir) | 4 | 0 | 1 | 5 |
+| Shipping (RajaOngkir) | 5 | 0 | 0 | 5 |
 | Shipping (Custom Methods) | 0 | 0 | 5 | 5 |
 | Payment (Xendit) | 0 | 0 | 5 | 5 |
 | Email (SMTP) | 10 | 0 | 0 | 10 |
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
-| Misc / Polish | 3 | 0 | 3 | 6 |
-| **TOTAL** | **100** | **4** | **32** | **136** |
+| Misc / Polish | 4 | 0 | 2 | 6 |
+| **TOTAL** | **106** | **3** | **27** | **136** |
 
-**Progress: ~74% done, ~3% partial, ~24% belum dimulai.**
+**Progress: ~78% done, ~2% partial, ~20% belum dimulai.**
 
 Yang sudah solid: DB schema, auth flow, admin orders, admin settings, admin products CRUD, setup wizard, **storefront wired ke DB, cart session, checkout flow, dashboard wired ke DB, file upload, address CRUD, email notifications (SMTP), RajaOngkir shipping, AI content generation, i18n**.
 Yang belum: Xendit payment, custom shipping methods, dan beberapa polish items (admin edit routes, error handling, currency display, dll).

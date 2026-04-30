@@ -20,7 +20,9 @@ export class AdminController {
     const daily = await this.orderService.getRevenueStats('daily');
     const weekly = await this.orderService.getRevenueStats('weekly');
     const monthly = await this.orderService.getRevenueStats('monthly');
+    const yearly = await this.orderService.getRevenueStats('yearly');
     const { orders: recentOrders } = await this.orderService.list({ limit: 5 });
+    const breakdown = await this.orderService.getRevenueBreakdown('monthly');
 
     return res.view('admin/dashboard.ejs', {
       pageTitle: 'Admin Dashboard — Swift Commerce',
@@ -36,7 +38,9 @@ export class AdminController {
         { label: 'Daily', total: daily.totalRevenue, orders: daily.totalOrders },
         { label: 'Weekly', total: weekly.totalRevenue, orders: weekly.totalOrders },
         { label: 'Monthly', total: monthly.totalRevenue, orders: monthly.totalOrders },
+        { label: 'Yearly', total: yearly.totalRevenue, orders: yearly.totalOrders },
       ],
+      statusBreakdown: breakdown,
       recentOrders: recentOrders.map((o) => ({
         id: o.id,
         orderNumber: o.orderNumber,
@@ -46,5 +50,17 @@ export class AdminController {
         createdAt: o.createdAt,
       })),
     });
+  }
+
+  @Get('/revenue')
+  async revenueEndpoint(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+    const auth = getAuthFromRequest(req, this.authService);
+    if (!auth || auth.role !== 'seller') return res.status(401).send({ error: 'Unauthorized' });
+
+    const period = ((req.query as any).period || 'monthly') as 'daily' | 'weekly' | 'monthly' | 'yearly';
+    const stats = await this.orderService.getRevenueStats(period);
+    const breakdown = await this.orderService.getRevenueBreakdown(period);
+
+    return res.send({ ...stats, breakdown });
   }
 }

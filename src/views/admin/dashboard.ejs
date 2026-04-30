@@ -6,6 +6,7 @@ function formatRp(amount) {
 var s = typeof stats !== 'undefined' ? stats : {};
 var periods = typeof revenuePeriods !== 'undefined' ? revenuePeriods : [];
 var orders = typeof recentOrders !== 'undefined' ? recentOrders : [];
+var breakdown = typeof statusBreakdown !== 'undefined' ? statusBreakdown : {};
 %>
 <%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Admin Dashboard' }) %>
 <body>
@@ -33,7 +34,7 @@ var orders = typeof recentOrders !== 'undefined' ? recentOrders : [];
         <a href="?period=yearly" class="btn btn-ghost btn-sm">Yearly</a>
       </div>
       <% if (periods.length > 0) { %>
-      <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: var(--space-6);">
+      <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: var(--space-6);">
         <% periods.forEach(function(rp) { %>
         <div class="stat-card" style="text-align: center;">
           <div class="stat-card-label"><%= rp.label %></div>
@@ -46,6 +47,33 @@ var orders = typeof recentOrders !== 'undefined' ? recentOrders : [];
       <div style="text-align: center; padding: var(--space-8); color: var(--color-text-muted);">No revenue data available.</div>
       <% } %>
     </div>
+
+    <!-- Status Breakdown -->
+    <% if (Object.keys(breakdown).length > 0) { %>
+    <div style="margin-bottom: var(--space-8);">
+      <div class="dashboard-table-header" style="margin-bottom: var(--space-4);">
+        <h3>Order Status Breakdown (Monthly)</h3>
+      </div>
+      <div class="dashboard-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% Object.entries(breakdown).forEach(function(entry) { %>
+            <tr>
+              <td><span class="badge <%= entry[0] === 'completed' ? 'badge-success' : entry[0] === 'cancelled' || entry[0] === 'expired' ? 'badge-danger' : entry[0] === 'pending' ? 'badge-warning' : 'badge-info' %>"><%= entry[0].replace(/_/g, ' ') %></span></td>
+              <td><strong><%= entry[1] %></strong></td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
 
     <%- include('./partials/recent-orders-table', { recentOrders: orders, formatRp: formatRp, isAdmin: true }) %>
   </main>

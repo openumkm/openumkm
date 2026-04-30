@@ -230,6 +230,9 @@ export class StorefrontController {
 
     if (!destination) return res.send({ services: [] });
 
+    const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
+    if (!rajaOngkirEnabled) return res.send({ services: [] });
+
     // Get origin from settings
     const origin = await this.settingsService.get('origin_city');
     if (!origin) return res.send({ services: [], error: 'Origin city not configured.' });
@@ -269,6 +272,10 @@ export class StorefrontController {
     // Get enabled couriers
     const enabledCouriersStr = await this.settingsService.get('enabled_couriers');
     const enabledCodes = (enabledCouriersStr || '').split(',').filter(Boolean);
+
+    // RajaOngkir settings
+    const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
+    const shippingMode = (await this.settingsService.get('shipping_mode')) || 'custom';
 
     // Get bank accounts for manual transfer
     const bankAccounts = await this.settingsService.getBankAccounts();
