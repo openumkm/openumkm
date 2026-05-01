@@ -2,6 +2,7 @@ import { Controller, Get, Post, Param, Req, Res } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from '../services/auth.service';
 import { OrderService } from '../services/order.service';
+import { PaymentConfirmationService } from '../services/payment-confirmation.service';
 import { EmailService } from '../services/email.service';
 import { getAuthFromRequest } from '../common/auth.helper';
 
@@ -10,6 +11,7 @@ export class AdminOrdersController {
   constructor(
     private readonly authService: AuthService,
     private readonly orderService: OrderService,
+    private readonly paymentConfirmationService: PaymentConfirmationService,
     private readonly emailService: EmailService,
   ) {}
 
@@ -35,19 +37,12 @@ export class AdminOrdersController {
       userName: user?.name || 'Admin',
       adminPage: 'orders',
       orders: result.orders.map((o) => ({
-        id: o.id,
-        orderNumber: o.orderNumber,
+        id: o.id, orderNumber: o.orderNumber,
         customerName: (o.shippingAddress as any)?.recipientName || 'Guest',
         customerEmail: (o.shippingAddress as any)?.email || null,
-        total: o.total,
-        status: o.status,
-        paymentMethod: o.paymentMethod,
-        createdAt: o.createdAt,
+        total: o.total, status: o.status, paymentMethod: o.paymentMethod, createdAt: o.createdAt,
       })),
-      search: q,
-      filterStatus: status,
-      page: result.page,
-      pages: result.pages,
+      search: q, filterStatus: status, page: result.page, pages: result.pages,
     });
   }
 
@@ -60,20 +55,14 @@ export class AdminOrdersController {
     let order = await this.orderService.getById(id);
     if (!order) return res.status(404).send('Order not found');
 
-    // Check expiry on view
     order = await this.orderService.checkExpiry(order);
-
     const addr = (order.shippingAddress || {}) as Record<string, any>;
+
     return res.view('admin/order-detail.ejs', {
       pageTitle: `Order ${order.orderNumber} — Admin`,
       userName: user?.name || 'Admin',
       adminPage: 'orders',
-      order: {
-        ...order,
-        customerName: addr.recipientName || 'Guest',
-        customerEmail: addr.email || null,
-        taxTotal: order.taxTotal,
-      },
+      order: { ...order, customerName: addr.recipientName || 'Guest', customerEmail: addr.email || null, taxTotal: order.taxTotal },
     });
   }
 
@@ -85,16 +74,11 @@ export class AdminOrdersController {
     const { status } = req.body as Record<string, string>;
     const order = await this.orderService.updateStatus(id, status);
 
-    // Send email notifications based on status change
     if (order) {
       const addr = (order.shippingAddress || {}) as Record<string, any>;
       const customerEmail = addr.email || '';
-
       if (status === 'cancelled') {
-        await this.emailService.sendOrderCancelled(
-          { orderNumber: order.orderNumber, total: order.total },
-          customerEmail,
-        );
+        await this.emailService.sendOrderCancelled({ orderNumber: order.orderNumber, total: order.total }, customerEmail);
       } else if (status === 'shipped') {
         await this.emailService.sendOrderShipped(
           { orderNumber: order.orderNumber, courier: order.courier, courierService: order.courierService, trackingNumber: order.trackingNumber },
@@ -114,7 +98,6 @@ export class AdminOrdersController {
     const { trackingNumber } = req.body as Record<string, string>;
     await this.orderService.setTracking(id, trackingNumber);
 
-    // Send shipped email with tracking
     const order = await this.orderService.getById(id);
     if (order) {
       const addr = (order.shippingAddress || {}) as Record<string, any>;
@@ -134,7 +117,7 @@ export class AdminOrdersController {
 
     const user = await this.authService.getUserById(auth.sub);
     const status = (req.query as any).status || '';
-    const confirmations = await this.orderService.getPaymentConfirmations(status || undefined);
+    const confirmations = await this.paymentConfirmationService.list(status || undefined);
 
     return res.view('admin/payment-confirmations.ejs', {
       pageTitle: 'Payment Confirmations — Admin',
@@ -150,9 +133,7 @@ export class AdminOrdersController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
-    const pc = await this.orderService.approvePayment(id);
-
-    // Send payment confirmed email
+    const pc = await this.paymentConfirmationService.approve(id);
     if (pc) {
       const order = await this.orderService.getById(pc.orderId);
       if (order) {
@@ -173,11 +154,9 @@ export class AdminOrdersController {
     if (!auth) return;
 
     const { reason } = req.body as Record<string, string>;
-    await this.orderService.rejectPayment(id, reason || 'Rejected');
+    await this.paymentConfirmationService.reject(id, reason || 'Rejected');
 
-    // Send payment rejected email
-    // Need to get the confirmation to find the order
-    const order = await this.orderService.getOrderByConfirmationId(id);
+    const order = await this.paymentConfirmationService.getOrderByConfirmationId(id);
     if (order) {
       const addr = (order.shippingAddress || {}) as Record<string, any>;
       await this.emailService.sendPaymentRejected(

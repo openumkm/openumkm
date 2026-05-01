@@ -1,0 +1,539 @@
+/* ============================================================
+   pages.css — Page-specific Styles (Cart, Checkout, Payment, Auth)
+   Extracted from app.css for file size compliance
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   13. CART PAGE
+   ------------------------------------------------------------ */
+.cart-page {
+  padding-top: calc(var(--header-height) + var(--space-8));
+  padding-bottom: var(--space-20);
+}
+
+.cart-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cart-table th {
+  font: var(--font-label-sm);
+  color: var(--color-text-muted);
+  text-align: left;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cart-table td {
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  vertical-align: middle;
+}
+
+.cart-table .product-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.cart-table .product-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-gray-50);
+  flex-shrink: 0;
+}
+
+.cart-table .product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-table .product-name {
+  font: 500 16px/1.3 var(--font-family);
+  color: var(--color-text);
+}
+
+.cart-table .product-variant {
+  font: var(--font-label-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.cart-table .price-col {
+  font: 500 16px/1.3 var(--font-family);
+}
+
+.cart-table .subtotal-col {
+  font: 600 16px/1.3 var(--font-family);
+  color: var(--color-primary);
+}
+
+.cart-table .remove-btn {
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+  padding: var(--space-1);
+}
+
+.cart-table .remove-btn:hover {
+  color: var(--color-danger);
+}
+
+/* Cart summary sidebar */
+.cart-summary {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-6));
+}
+
+.cart-summary h3 {
+  margin-bottom: var(--space-6);
+}
+
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  font: var(--font-body-md);
+  color: var(--color-text-secondary);
+}
+
+.cart-summary-row.total {
+  border-top: 2px solid var(--color-border);
+  margin-top: var(--space-3);
+  padding-top: var(--space-5);
+  font: 600 20px/1.3 var(--font-family);
+  color: var(--color-text);
+}
+
+.cart-summary .btn {
+  width: 100%;
+  margin-top: var(--space-6);
+}
+
+.cart-empty {
+  text-align: center;
+  padding: var(--space-20) 0;
+}
+
+.cart-empty svg {
+  width: 80px;
+  height: 80px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-6);
+}
+
+.cart-empty h3 {
+  margin-bottom: var(--space-2);
+}
+
+.cart-empty p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-6);
+}
+
+/* ------------------------------------------------------------
+   14. CHECKOUT PAGE
+   ------------------------------------------------------------ */
+.checkout-page {
+  padding-top: calc(var(--header-height) + var(--space-8));
+  padding-bottom: var(--space-20);
+}
+
+.checkout-form {
+  padding-right: var(--space-8);
+}
+
+.checkout-form h3 {
+  margin-bottom: var(--space-6);
+}
+
+.checkout-summary {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-6));
+}
+
+/* Shipping method cards */
+.shipping-methods {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.shipping-method {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.shipping-method:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-subtle);
+}
+
+.shipping-method.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.shipping-method input[type="radio"] {
+  accent-color: var(--color-primary);
+}
+
+.shipping-method-content {
+  flex: 1;
+}
+
+.shipping-method-name {
+  font: 500 16px/1.3 var(--font-family);
+  color: var(--color-text);
+}
+
+.shipping-method-desc {
+  font: var(--font-label-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.shipping-method-price {
+  font: 600 16px/1.3 var(--font-family);
+  color: var(--color-primary);
+}
+
+/* Bank account list */
+.bank-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.bank-account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bank-account:hover {
+  border-color: var(--color-primary);
+}
+
+.bank-account.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.bank-account input[type="radio"] {
+  accent-color: var(--color-primary);
+}
+
+.bank-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 14px/1 var(--font-family);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.bank-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.bank-info {
+  flex: 1;
+}
+
+.bank-name {
+  font: 500 16px/1.3 var(--font-family);
+  color: var(--color-text);
+}
+
+.bank-number {
+  font: var(--font-label-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+/* Payment method tabs */
+.payment-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-6);
+}
+
+.payment-tab {
+  padding: var(--space-3) var(--space-6);
+  font: var(--font-label-sm);
+  color: var(--color-text-muted);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.payment-tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.payment-tab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.payment-tab-content {
+  display: none;
+}
+
+.payment-tab-content.active {
+  display: block;
+}
+
+/* ------------------------------------------------------------
+   15. PAYMENT CONFIRMATION PAGE
+   ------------------------------------------------------------ */
+.payment-confirmation {
+  padding-top: calc(var(--header-height) + var(--space-8));
+  padding-bottom: var(--space-20);
+}
+
+.payment-info-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.payment-info-card h3 {
+  margin-bottom: var(--space-6);
+}
+
+.payment-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  font: var(--font-body-md);
+}
+
+.payment-detail-row .label {
+  color: var(--color-text-secondary);
+}
+
+.payment-detail-row .value {
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: right;
+}
+
+.payment-total {
+  padding: var(--space-4) 0;
+  font-size: 20px;
+}
+
+.payment-timer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-warning-bg);
+  border-radius: var(--radius-md);
+  font: var(--font-label-sm);
+  color: #92400E;
+  margin-top: var(--space-6);
+}
+
+.payment-timer svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.payment-timer .countdown {
+  font-weight: 700;
+  margin-left: auto;
+}
+
+/* Upload area */
+.upload-area {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  background: var(--color-gray-50);
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.upload-area-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-4);
+  color: var(--color-text-muted);
+}
+
+.upload-area-text {
+  font: var(--font-label-sm);
+  color: var(--color-text-secondary);
+}
+
+.upload-area-text strong {
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.upload-area-hint {
+  font: var(--font-label-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+}
+
+.upload-preview {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.upload-preview-item {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--color-border);
+}
+
+.upload-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-preview-item .remove-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------
+   16. AUTH PAGES
+   ------------------------------------------------------------ */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: var(--color-bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-ambient);
+  padding: var(--space-12);
+}
+
+.auth-card-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.auth-card-header .logo {
+  font: 700 24px/1.2 var(--font-family);
+  color: var(--color-text);
+  margin-bottom: var(--space-4);
+}
+
+.auth-card-header .logo span {
+  color: var(--color-primary);
+}
+
+.auth-card-header h2 {
+  margin-bottom: var(--space-2);
+}
+
+.auth-card-header p {
+  font: var(--font-body-md);
+  color: var(--color-text-secondary);
+}
+
+.auth-card-footer {
+  text-align: center;
+  margin-top: var(--space-8);
+  font: var(--font-body-md);
+  color: var(--color-text-secondary);
+}
+
+.auth-card-footer a {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.auth-card-footer a:hover {
+  text-decoration: underline;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+  font: var(--font-label-xs);
+  color: var(--color-text-muted);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}

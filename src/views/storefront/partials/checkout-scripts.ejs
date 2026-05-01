@@ -1,0 +1,172 @@
+<%# Checkout page JavaScript — extracted partial %>
+<script>
+(function() {
+  var subtotal = <%= typeof subtotal !== 'undefined' ? subtotal : 0 %>;
+  var taxAmount = <%= taxAmount %>;
+  var selectedShipping = <%= (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) ? customShippingMethods[0].cost : 0 %>;
+
+  // ── Saved Addresses ──
+  <% if (hasSavedAddrs) { %>
+  var savedAddrs = <%- JSON.stringify(savedAddresses || []) %>;
+  var addrRadios = document.querySelectorAll('input[name="savedAddressId"]');
+  var nameInput = document.getElementById('name');
+  var phoneInput = document.getElementById('phone');
+  var addrLineInput = document.getElementById('address');
+  var destSearchInput = document.getElementById('destinationSearch');
+  var cityInput = document.getElementById('city');
+  var provinceInput = document.getElementById('province');
+  var postalInput = document.getElementById('postalCode');
+  var recipInput = document.getElementById('recipientName');
+
+  addrRadios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var addrId = radio.value;
+      var addr = savedAddrs.find(function(a) { return a.id === addrId; });
+      if (addr) {
+        if (recipInput) recipInput.value = addr.recipientName || '';
+        if (phoneInput) phoneInput.value = addr.phone || '';
+        if (addrLineInput) addrLineInput.value = addr.addressLine || '';
+        if (cityInput) cityInput.value = addr.city || '';
+        if (provinceInput) provinceInput.value = addr.province || '';
+        if (postalInput) postalInput.value = addr.postalCode || '';
+        if (destSearchInput) { destSearchInput.value = addr.city || ''; destSearchInput.readOnly = true; }
+        if (nameInput) { nameInput.value = addr.recipientName || ''; nameInput.readOnly = true; }
+        if (phoneInput) phoneInput.readOnly = true;
+        if (addrLineInput) addrLineInput.readOnly = true;
+        if (cityInput) cityInput.readOnly = true;
+        if (provinceInput) provinceInput.readOnly = true;
+        if (postalInput) postalInput.readOnly = true;
+      } else {
+        [nameInput, phoneInput, addrLineInput, cityInput, provinceInput, postalInput, recipInput, destSearchInput].forEach(function(f) {
+          if (f) { f.value = ''; f.readOnly = false; }
+        });
+      }
+    });
+  });
+  <% } %>
+
+  function formatRp(amount) {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
+  }
+
+  function updateTotal() {
+    document.getElementById('shippingSummary').textContent = selectedShipping > 0 ? formatRp(selectedShipping) : 'Select destination';
+    document.getElementById('totalSummary').textContent = formatRp(subtotal + taxAmount + selectedShipping);
+    document.getElementById('shippingCostInput').value = selectedShipping;
+  }
+
+  // ── Destination Search (autocomplete) ──
+  var searchInput = document.getElementById('destinationSearch');
+  var resultsDiv = document.getElementById('destinationResults');
+  var destIdInput = document.getElementById('destinationId');
+  var cityInput = document.getElementById('city');
+  var provinceInput = document.getElementById('province');
+  var destLabel = document.getElementById('destinationLabel');
+  var searchTimer = null;
+
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    var q = searchInput.value.trim();
+    if (q.length < 2) { resultsDiv.style.display = 'none'; return; }
+    searchTimer = setTimeout(function() {
+      fetch('/api/shipping/search?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (!data.results || data.results.length === 0) {
+            resultsDiv.innerHTML = '<div class="autocomplete-item text-muted">No results found</div>';
+            resultsDiv.style.display = 'block';
+            return;
+          }
+          resultsDiv.innerHTML = data.results.map(function(r) {
+            return '<div class="autocomplete-item" data-id="' + r.id + '" data-city="' + r.city + '" data-province="' + r.province + '" data-label="' + r.label + '">' + r.label + '</div>';
+          }).join('');
+          resultsDiv.style.display = 'block';
+          resultsDiv.querySelectorAll('.autocomplete-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+              searchInput.value = item.getAttribute('data-label');
+              destIdInput.value = item.getAttribute('data-id');
+              cityInput.value = item.getAttribute('data-city');
+              provinceInput.value = item.getAttribute('data-province');
+              destLabel.textContent = item.getAttribute('data-label');
+              resultsDiv.style.display = 'none';
+              calculateShipping(item.getAttribute('data-id'));
+            });
+          });
+        });
+    }, 300);
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!resultsDiv.contains(e.target) && e.target !== searchInput) resultsDiv.style.display = 'none';
+  });
+
+  // ── Shipping Calculation ──
+  function calculateShipping(destinationId) {
+    var methodsDiv = document.getElementById('shippingMethods');
+    methodsDiv.innerHTML = '<div class="text-muted p-4">Calculating shipping costs...</div>';
+    fetch('/api/shipping/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ destination: destinationId })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.services || data.services.length === 0) {
+        methodsDiv.innerHTML = '<div class="text-muted p-4">' + (data.error || 'No shipping services available.') + '</div>';
+        selectedShipping = 0;
+        updateTotal();
+        return;
+      }
+      methodsDiv.innerHTML = data.services.map(function(svc, idx) {
+        return '<label class="shipping-method' + (idx === 0 ? ' selected' : '') + '">' +
+          '<input type="radio" name="shippingOption" value="' + svc.cost + '" data-courier="' + svc.courier + '" data-service="' + svc.service + '"' + (idx === 0 ? ' checked' : '') + '>' +
+          '<div class="shipping-method-content"><p class="shipping-method-name">' + svc.courier + ' — ' + svc.service + '</p>' +
+          '<p class="shipping-method-desc">' + (svc.description ? svc.description + ' · ' : '') + 'Est. ' + svc.etd + ' days</p></div>' +
+          '<span class="shipping-method-price">' + formatRp(svc.cost) + '</span></label>';
+      }).join('');
+      selectedShipping = data.services[0].cost;
+      document.getElementById('courierInput').value = data.services[0].courier;
+      document.getElementById('courierServiceInput').value = data.services[0].service;
+      updateTotal();
+      methodsDiv.querySelectorAll('.shipping-method').forEach(function(method) {
+        method.addEventListener('click', function() {
+          methodsDiv.querySelectorAll('.shipping-method').forEach(function(m) { m.classList.remove('selected'); });
+          method.classList.add('selected');
+          var radio = method.querySelector('input[type="radio"]');
+          radio.checked = true;
+          selectedShipping = parseInt(radio.value, 10);
+          document.getElementById('courierInput').value = radio.getAttribute('data-courier');
+          document.getElementById('courierServiceInput').value = radio.getAttribute('data-service');
+          updateTotal();
+        });
+      });
+    })
+    .catch(function() {
+      methodsDiv.innerHTML = '<div class="text-muted p-4">Failed to calculate shipping.</div>';
+    });
+  }
+
+  // ── Payment Tabs ──
+  document.querySelectorAll('.payment-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.payment-tab').forEach(function(t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.querySelectorAll('.payment-tab-content').forEach(function(c) { c.classList.remove('active'); });
+      var target = document.getElementById(tab.getAttribute('data-tab'));
+      if (target) target.classList.add('active');
+      var methodInput = document.getElementById('paymentMethodInput');
+      if (methodInput) methodInput.value = tab.getAttribute('data-tab') === 'pay-xendit' ? 'xendit' : 'manual_transfer';
+    });
+  });
+
+  // ── Bank Account Selection ──
+  document.querySelectorAll('.bank-account').forEach(function(acct) {
+    acct.addEventListener('click', function() {
+      document.querySelectorAll('.bank-account').forEach(function(a) { a.classList.remove('selected'); });
+      acct.classList.add('selected');
+      acct.querySelector('input[type="radio"]').checked = true;
+    });
+  });
+})();
+</script>

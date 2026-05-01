@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { db } from '../db';
-import { orders, paymentConfirmations, products, productVariants, settings } from '../db/schema';
-import { eq, desc, and, like, sql, or, SQL } from 'drizzle-orm';
-
-const VALID_STATUSES = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shipped', 'completed', 'cancelled', 'expired'];
+import { orders, products, productVariants, settings } from '../db/schema';
+import { eq, desc, and, like, sql, SQL } from 'drizzle-orm';
 
 @Injectable()
 export class OrderService {
@@ -153,65 +151,6 @@ export class OrderService {
     }
   }
 
-  // Payment confirmations
-  async getPaymentConfirmations(status?: string) {
-    const conditions = status ? eq(paymentConfirmations.status, status as any) : undefined;
-    return db.select()
-      .from(paymentConfirmations)
-      .where(conditions)
-      .orderBy(desc(paymentConfirmations.createdAt));
-  }
-
-  async approvePayment(confirmationId: string) {
-    const [pc] = await db.update(paymentConfirmations)
-      .set({ status: 'approved', reviewedAt: new Date() })
-      .where(eq(paymentConfirmations.id, confirmationId))
-      .returning();
-
-    if (pc) {
-      await this.updateStatus(pc.orderId, 'paid');
-    }
-    return pc;
-  }
-
-  async rejectPayment(confirmationId: string, reason: string) {
-    await db.update(paymentConfirmations)
-      .set({ status: 'rejected', rejectionReason: reason, reviewedAt: new Date() })
-      .where(eq(paymentConfirmations.id, confirmationId));
-  }
-
-  /** Create a payment confirmation (buyer uploads transfer proof) */
-  async createPaymentConfirmation(data: {
-    orderId: string;
-    senderBank: string;
-    senderName: string;
-    amount: number;
-    transferDate: string;
-    receiptImage: string;
-    notes?: string | null;
-  }) {
-    const [pc] = await db.insert(paymentConfirmations).values({
-      orderId: data.orderId,
-      senderBank: data.senderBank,
-      senderName: data.senderName,
-      amount: data.amount,
-      transferDate: data.transferDate,
-      receiptImage: data.receiptImage,
-      notes: data.notes || null,
-    }).returning();
-    return pc;
-  }
-
-  /** Get order by payment confirmation ID */
-  async getOrderByConfirmationId(confirmationId: string) {
-    const [pc] = await db.select({ orderId: paymentConfirmations.orderId })
-      .from(paymentConfirmations)
-      .where(eq(paymentConfirmations.id, confirmationId))
-      .limit(1);
-    if (!pc) return null;
-    return this.getById(pc.orderId);
-  }
-
   /** Get orders by customer ID */
   async listByCustomer(customerId: string, opts: { page?: number; limit?: number } = {}) {
     const { page = 1, limit = 20 } = opts;
@@ -236,65 +175,4 @@ export class OrderService {
     };
   }
 
-  // Revenue stats
-  async getRevenueStats(period: 'daily' | 'weekly' | 'monthly' | 'yearly') {
-    const now = new Date();
-    let since: Date;
-
-    switch (period) {
-      case 'daily': since = new Date(now.getFullYear(), now.getMonth(), now.getDate()); break;
-      case 'weekly': since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); break;
-      case 'monthly': since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); break;
-      case 'yearly': since = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000); break;
-    }
-
-    const [result] = await db.select({
-      totalRevenue: sql<number>`coalesce(sum(${orders.total}), 0)`,
-      totalOrders: sql<number>`count(*)`,
-    })
-      .from(orders)
-      .where(and(
-        sql`${orders.createdAt} >= ${since}`,
-        sql`${orders.status} NOT IN ('cancelled', 'expired')`,
-      ));
-
-    const total = Number(result.totalRevenue);
-    const count = Number(result.totalOrders);
-
-    return {
-      totalRevenue: total,
-      totalOrders: count,
-      avgOrderValue: count > 0 ? Math.round(total / count) : 0,
-    };
-  }
-
-  async getRevenueBreakdown(period: 'daily' | 'weekly' | 'monthly' | 'yearly') {
-    const now = new Date();
-    let since: Date;
-
-    switch (period) {
-      case 'daily': since = new Date(now.getFullYear(), now.getMonth(), now.getDate()); break;
-      case 'weekly': since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); break;
-      case 'monthly': since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000); break;
-      case 'yearly': since = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000); break;
-    }
-
-    const rows = await db.select({
-      status: orders.status,
-      count: sql<number>`count(*)`,
-    })
-      .from(orders)
-      .where(sql`${orders.createdAt} >= ${since}`)
-      .groupBy(orders.status);
-
-    const breakdown: Record<string, number> = {};
-    for (const s of VALID_STATUSES) breakdown[s] = 0;
-    for (const row of rows) {
-      if (row.status && row.status in breakdown) {
-        breakdown[row.status] = Number(row.count);
-      }
-    }
-
-    return breakdown;
-  }
 }
