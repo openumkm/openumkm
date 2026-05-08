@@ -1,4 +1,7 @@
 <%# Settings: AI Configuration Section %>
+<%
+var currentModel = s.aiModel || '';
+%>
 <div class="admin-card mb-6">
   <div class="flex items-center justify-between mb-4">
     <h3 class="admin-card-title" style="margin-bottom: 0;"><%= t('admin.ai_config') %></h3>
@@ -13,14 +16,148 @@
     <label for="aiBaseUrl" class="form-label"><%= t('admin.f_ai_url', 'API Base URL') %></label>
     <input type="url" id="aiBaseUrl" name="aiBaseUrl" class="input" value="<%= s.aiBaseUrl || '' %>" placeholder="https://api.openai.com/v1">
   </div>
-  <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
-    <div class="form-group">
-      <label for="aiApiKey" class="form-label"><%= t('admin.f_ai_key', 'API Key') %></label>
-      <input type="password" id="aiApiKey" name="aiApiKey" class="input" value="<%= s.aiApiKey || '' %>" placeholder="sk-xxxxx">
+  <div class="form-group">
+    <label for="aiApiKey" class="form-label"><%= t('admin.f_ai_key', 'API Key') %></label>
+    <input type="password" id="aiApiKey" name="aiApiKey" class="input" value="<%= s.aiApiKey || '' %>" placeholder="sk-xxxxx">
+  </div>
+
+  <div class="form-group">
+    <label for="aiModel" class="form-label"><%= t('admin.f_ai_model', 'Model Name') %></label>
+    <div class="flex items-center gap-2" style="flex-wrap: wrap;">
+      <select id="aiModelSelect" class="select" style="flex: 1; min-width: 220px;">
+        <% if (currentModel) { %>
+        <option value="<%= currentModel %>" selected><%= currentModel %></option>
+        <% } else { %>
+        <option value="" selected disabled><%= t('admin.ai_model_placeholder', 'Fetch models or choose custom...') %></option>
+        <% } %>
+        <option value="__custom__"><%= t('admin.ai_model_custom', 'Custom (enter manually)') %></option>
+      </select>
+      <button type="button" id="aiFetchModelsBtn" class="btn btn-secondary btn-sm">
+        <%= t('admin.ai_fetch_models', 'Fetch Models') %>
+      </button>
     </div>
-    <div class="form-group">
-      <label for="aiModel" class="form-label"><%= t('admin.f_ai_model', 'Model Name') %></label>
-      <input type="text" id="aiModel" name="aiModel" class="input" value="<%= s.aiModel || '' %>" placeholder="gpt-4o-mini">
-    </div>
+    <input type="text" id="aiModel" name="aiModel" class="input mt-2" value="<%= currentModel %>" placeholder="gpt-4o-mini" style="display: <%= currentModel ? 'none' : 'block' %>;">
+    <span id="aiModelStatus" class="form-hint" style="display: none;"></span>
   </div>
 </div>
+
+<script>
+(function() {
+  var baseUrlInput = document.getElementById('aiBaseUrl');
+  var apiKeyInput = document.getElementById('aiApiKey');
+  var modelSelect = document.getElementById('aiModelSelect');
+  var modelInput = document.getElementById('aiModel');
+  var fetchBtn = document.getElementById('aiFetchModelsBtn');
+  var statusEl = document.getElementById('aiModelStatus');
+
+  if (!modelSelect || !modelInput || !fetchBtn) return;
+
+  function getCsrfToken() {
+    var m = document.cookie.match(/(?:^|; )_csrf=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
+  function setStatus(msg, kind) {
+    if (!statusEl) return;
+    if (!msg) { statusEl.style.display = 'none'; statusEl.textContent = ''; return; }
+    statusEl.style.display = 'block';
+    statusEl.textContent = msg;
+    statusEl.style.color = kind === 'error'
+      ? 'var(--color-danger, #dc2626)'
+      : (kind === 'success' ? 'var(--color-success, #16a34a)' : 'var(--color-text-muted)');
+  }
+
+  function showCustomInput(show) {
+    modelInput.style.display = show ? 'block' : 'none';
+    if (show) {
+      // Keep the user-typed value; clear it when the user picked custom via dropdown
+      // so they can type fresh.
+      modelInput.focus();
+    }
+  }
+
+  // Toggle between dropdown and manual text input
+  modelSelect.addEventListener('change', function() {
+    var val = modelSelect.value;
+    if (val === '__custom__') {
+      modelInput.value = '';
+      showCustomInput(true);
+    } else {
+      modelInput.value = val;
+      showCustomInput(false);
+    }
+  });
+
+  // If the select was loaded with the current model already, hide the custom input
+  if (modelSelect.value && modelSelect.value !== '__custom__') {
+    showCustomInput(false);
+  }
+
+  fetchBtn.addEventListener('click', function() {
+    var baseUrl = (baseUrlInput.value || '').trim();
+    var apiKey = (apiKeyInput.value || '').trim();
+    if (!baseUrl || !apiKey) {
+      setStatus('<%= t('admin.ai_fetch_need_creds', 'Enter Base URL and API Key first.') %>', 'error');
+      return;
+    }
+
+    fetchBtn.disabled = true;
+    var originalLabel = fetchBtn.textContent;
+    fetchBtn.textContent = '<%= t('admin.ai_fetching', 'Fetching...') %>';
+    setStatus('<%= t('admin.ai_fetching', 'Fetching...') %>', 'info');
+
+    fetch('/admin/ai/fetch-models', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ baseUrl: baseUrl, apiKey: apiKey, _csrf: getCsrfToken() })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.success) {
+        setStatus(data.error || '<%= t('admin.ai_fetch_failed', 'Failed to fetch models.') %>', 'error');
+        return;
+      }
+
+      // Rebuild the select: fetched models + "Custom..." pinned at end.
+      var prev = modelInput.value || modelSelect.value;
+      modelSelect.innerHTML = '';
+
+      data.models.forEach(function(id) {
+        var opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = id;
+        modelSelect.appendChild(opt);
+      });
+
+      var customOpt = document.createElement('option');
+      customOpt.value = '__custom__';
+      customOpt.textContent = '<%= t('admin.ai_model_custom', 'Custom (enter manually)') %>';
+      modelSelect.appendChild(customOpt);
+
+      // Prefer the previously-selected model if the API still returns it,
+      // otherwise select the first fetched model.
+      if (prev && data.models.indexOf(prev) !== -1) {
+        modelSelect.value = prev;
+        modelInput.value = prev;
+        showCustomInput(false);
+      } else {
+        modelSelect.value = data.models[0];
+        modelInput.value = data.models[0];
+        showCustomInput(false);
+      }
+
+      setStatus(
+        data.models.length + ' <%= t('admin.ai_models_loaded', 'models loaded.') %>',
+        'success'
+      );
+    })
+    .catch(function() {
+      setStatus('<%= t('admin.ai_connect_failed', 'Failed to connect to AI service.') %>', 'error');
+    })
+    .finally(function() {
+      fetchBtn.disabled = false;
+      fetchBtn.textContent = originalLabel;
+    });
+  });
+})();
+</script>
