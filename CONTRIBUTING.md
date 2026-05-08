@@ -108,6 +108,26 @@ src/
 - Ikuti pattern yang sudah ada di codebase
 - Nama file: `kebab-case` (contoh: `admin-orders.controller.ts`)
 
+### File Size Guidelines
+
+Jaga agar setiap file tetap fokus pada satu responsibility. Berikut batas line-of-code per tipe file:
+
+| Tipe file | Ideal | Maks |
+|---|---|---|
+| Controller (`.controller.ts`) | <200 | 300 |
+| Service (`.service.ts`) | <250 | 400 |
+| Schema / types | <300 | 500 |
+| View (`.ejs`) | <200 | 350 |
+| Helper / utility | <100 | 150 |
+
+**Kalau file mulai melebihi batas "Maks":**
+- Controller → split per resource atau per action group
+- Service → extract helper functions atau sub-service
+- View → extract ke partials (`partials/` folder)
+- Helper → split per concern
+
+> Contoh: `admin-products.controller.ts` (293 lines) mendekati batas karena menangani CRUD + image + variant + AI config. Jika bertambah, pertimbangkan split ke `admin-product-images.controller.ts`.
+
 ## Design Principles
 
 - **Simplicity first** — hindari over-engineering
