@@ -8,6 +8,12 @@
 
 Self-hosted eCommerce engine built for small sellers. Optimized for 1 vCPU / 1GB RAM single-node deployment.
 
+## Community
+
+- 💡 [Feature Requests & Voting](https://openumkm.fider.io/) — suggest and vote on features
+- 💬 [Telegram Group](https://t.me/openumkm) — discuss anything OpenUMKM
+- 🐛 [GitHub Issues](https://github.com/openumkm/openumkm/issues) — bug reports
+
 ## Tech Stack
 
 | Layer | Technology |
