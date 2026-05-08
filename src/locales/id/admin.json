@@ -205,6 +205,7 @@
   "ai_fetching": "Mengambil...",
   "ai_fetch_need_creds": "Masukkan Base URL dan API Key dulu.",
   "ai_fetch_failed": "Gagal mengambil daftar model.",
+  "ai_fetch_empty": "API tidak mengembalikan model apa pun.",
   "ai_models_loaded": "model dimuat.",
   "ai_model_custom": "Kustom (isi manual)",
   "ai_model_placeholder": "Ambil model atau pilih kustom...",

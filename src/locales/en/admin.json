@@ -204,6 +204,7 @@
   "ai_fetching": "Fetching...",
   "ai_fetch_need_creds": "Enter Base URL and API Key first.",
   "ai_fetch_failed": "Failed to fetch models.",
+  "ai_fetch_empty": "No models returned by the API.",
   "ai_models_loaded": "models loaded.",
   "ai_model_custom": "Custom (enter manually)",
   "ai_model_placeholder": "Fetch models or choose custom...",

@@ -52,11 +52,6 @@ var currentModel = s.aiModel || '';
 
   if (!modelSelect || !modelInput || !fetchBtn) return;
 
-  function getCsrfToken() {
-    var m = document.cookie.match(/(?:^|; )_csrf=([^;]+)/);
-    return m ? decodeURIComponent(m[1]) : '';
-  }
-
   function setStatus(msg, kind) {
     if (!statusEl) return;
     if (!msg) { statusEl.style.display = 'none'; statusEl.textContent = ''; return; }
@@ -69,14 +64,9 @@ var currentModel = s.aiModel || '';
 
   function showCustomInput(show) {
     modelInput.style.display = show ? 'block' : 'none';
-    if (show) {
-      // Keep the user-typed value; clear it when the user picked custom via dropdown
-      // so they can type fresh.
-      modelInput.focus();
-    }
+    if (show) modelInput.focus();
   }
 
-  // Toggle between dropdown and manual text input
   modelSelect.addEventListener('change', function() {
     var val = modelSelect.value;
     if (val === '__custom__') {
@@ -88,13 +78,28 @@ var currentModel = s.aiModel || '';
     }
   });
 
-  // If the select was loaded with the current model already, hide the custom input
   if (modelSelect.value && modelSelect.value !== '__custom__') {
     showCustomInput(false);
   }
 
+  // Extract model IDs from the various response shapes (OpenAI, Ollama, etc.)
+  function extractModelIds(data) {
+    var ids = {};
+    function push(v) {
+      if (typeof v === 'string' && v.trim()) ids[v.trim()] = 1;
+      else if (v && typeof v === 'object') {
+        if (typeof v.id === 'string' && v.id.trim()) ids[v.id.trim()] = 1;
+        else if (typeof v.name === 'string' && v.name.trim()) ids[v.name.trim()] = 1;
+      }
+    }
+    if (Array.isArray(data)) data.forEach(push);
+    if (data && Array.isArray(data.data)) data.data.forEach(push);
+    if (data && Array.isArray(data.models)) data.models.forEach(push);
+    return Object.keys(ids).sort();
+  }
+
   fetchBtn.addEventListener('click', function() {
-    var baseUrl = (baseUrlInput.value || '').trim();
+    var baseUrl = (baseUrlInput.value || '').trim().replace(/\/+$/, '');
     var apiKey = (apiKeyInput.value || '').trim();
     if (!baseUrl || !apiKey) {
       setStatus('<%= t('admin.ai_fetch_need_creds', 'Enter Base URL and API Key first.') %>', 'error');
@@ -106,26 +111,37 @@ var currentModel = s.aiModel || '';
     fetchBtn.textContent = '<%= t('admin.ai_fetching', 'Fetching...') %>';
     setStatus('<%= t('admin.ai_fetching', 'Fetching...') %>', 'info');
 
-    fetch('/admin/ai/fetch-models', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ baseUrl: baseUrl, apiKey: apiKey, _csrf: getCsrfToken() })
+    fetch(baseUrl + '/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Accept': 'application/json'
+      }
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      return r.text().then(function(text) {
+        if (!r.ok) {
+          var msg = 'HTTP ' + r.status;
+          try { var j = JSON.parse(text); if (j && (j.error?.message || j.error || j.message)) msg += ': ' + (j.error?.message || j.error || j.message); }
+          catch (e) { if (text) msg += ': ' + text.slice(0, 200); }
+          throw new Error(msg);
+        }
+        try { return JSON.parse(text); } catch (e) { throw new Error('Invalid JSON response from API'); }
+      });
+    })
     .then(function(data) {
-      if (!data.success) {
-        setStatus(data.error || '<%= t('admin.ai_fetch_failed', 'Failed to fetch models.') %>', 'error');
+      var models = extractModelIds(data);
+      if (!models.length) {
+        setStatus('<%= t('admin.ai_fetch_empty', 'No models returned by the API.') %>', 'error');
         return;
       }
 
-      // Rebuild the select: fetched models + "Custom..." pinned at end.
       var prev = modelInput.value || modelSelect.value;
       modelSelect.innerHTML = '';
 
-      data.models.forEach(function(id) {
+      models.forEach(function(id) {
         var opt = document.createElement('option');
-        opt.value = id;
-        opt.textContent = id;
+        opt.value = id; opt.textContent = id;
         modelSelect.appendChild(opt);
       });
 
@@ -134,25 +150,19 @@ var currentModel = s.aiModel || '';
       customOpt.textContent = '<%= t('admin.ai_model_custom', 'Custom (enter manually)') %>';
       modelSelect.appendChild(customOpt);
 
-      // Prefer the previously-selected model if the API still returns it,
-      // otherwise select the first fetched model.
-      if (prev && data.models.indexOf(prev) !== -1) {
+      if (prev && models.indexOf(prev) !== -1) {
         modelSelect.value = prev;
         modelInput.value = prev;
-        showCustomInput(false);
       } else {
-        modelSelect.value = data.models[0];
-        modelInput.value = data.models[0];
-        showCustomInput(false);
+        modelSelect.value = models[0];
+        modelInput.value = models[0];
       }
+      showCustomInput(false);
 
-      setStatus(
-        data.models.length + ' <%= t('admin.ai_models_loaded', 'models loaded.') %>',
-        'success'
-      );
+      setStatus(models.length + ' <%= t('admin.ai_models_loaded', 'models loaded.') %>', 'success');
     })
-    .catch(function() {
-      setStatus('<%= t('admin.ai_connect_failed', 'Failed to connect to AI service.') %>', 'error');
+    .catch(function(err) {
+      setStatus((err && err.message) ? err.message : '<%= t('admin.ai_connect_failed', 'Failed to connect to AI service.') %>', 'error');
     })
     .finally(function() {
       fetchBtn.disabled = false;

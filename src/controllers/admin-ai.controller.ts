@@ -71,35 +71,4 @@ export class AdminAiController {
 
     return res.send({ success: true, text: result });
   }
-
-  /**
-   * POST /admin/ai/fetch-models
-   * AJAX endpoint — fetches the model list from an OpenAI-compatible API.
-   *
-   * Body: { baseUrl, apiKey }
-   *   If omitted/blank, falls back to stored settings values.
-   *
-   * Response: { success: true, models: string[] } or { success: false, error: '...' }
-   */
-  @Post('/fetch-models')
-  async fetchModels(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-    const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') {
-      return res.status(401).send({ success: false, error: 'Unauthorized' });
-    }
-
-    const body = (req.body || {}) as Record<string, string>;
-    const baseUrl = (body.baseUrl || '').trim();
-    const apiKey = (body.apiKey || '').trim();
-
-    if (!baseUrl || !apiKey) {
-      return res.send({ success: false, error: 'Base URL and API key are required.' });
-    }
-
-    const result = await this.aiService.listModels(baseUrl, apiKey);
-    if ('error' in result) {
-      return res.send({ success: false, error: result.error });
-    }
-    return res.send({ success: true, models: result.models });
-  }
 }
