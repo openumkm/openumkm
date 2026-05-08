@@ -1,0 +1,188 @@
+<%# Setup Wizard: i18n + Step Navigation + Password Strength Scripts %>
+<style>
+  .lang-option:hover {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 4px var(--color-primary-subtle);
+  }
+  .lang-option.selected {
+    border-color: var(--color-primary) !important;
+    background: var(--color-primary-subtle) !important;
+  }
+  .setup-step-indicator.completed {
+    background: var(--color-success) !important;
+  }
+</style>
+
+<script>
+(function() {
+  /* ── Translation dictionary ─────────────────────── */
+  var DICT = {
+    id: {
+      tagline: 'Atur toko Anda dalam beberapa langkah',
+      lang_title: 'Pilih bahasa',
+      lang_subtitle: 'Pilih bahasa yang akan digunakan selama setup',
+      store_title: 'Informasi Toko',
+      store_subtitle: 'Ceritakan tentang toko Anda',
+      store_name: 'Nama Toko',
+      store_name_ph: 'Toko Kerennya Saya',
+      store_email: 'Email Toko',
+      store_email_ph: 'hello@tokosaya.com',
+      store_email_hint: 'Digunakan sebagai pengirim notifikasi ke pelanggan',
+      store_phone: 'Telepon Toko',
+      default_currency: 'Mata Uang Default',
+      invoice_prefix: 'Awalan Invoice',
+      invoice_hint: 'Nomor pesanan akan tampil seperti: INV/20260430/001',
+      payment_title: 'Pengaturan Pembayaran',
+      payment_subtitle: 'Pilih cara pembayaran pelanggan',
+      pay_manual: 'Transfer Bank Manual',
+      pay_manual_desc: 'Pelanggan transfer ke rekening Anda lalu upload bukti',
+      pay_xendit: 'Pembayaran Online Xendit',
+      pay_xendit_desc: 'Terima kartu kredit, e-wallet, VA, dan lainnya via Xendit',
+      bank_title: 'Tambah Rekening Bank',
+      bank_optional: '(opsional, bisa ditambah nanti)',
+      bank_name: 'Nama Bank',
+      account_number: 'Nomor Rekening',
+      account_holder: 'Nama Pemilik Rekening',
+      payment_deadline: 'Batas Waktu Pembayaran (jam)',
+      payment_deadline_hint: 'Pesanan kedaluwarsa otomatis setelah waktu ini tanpa pembayaran',
+      admin_title: 'Akun Admin',
+      admin_subtitle: 'Buat login admin Anda',
+      admin_email: 'Email Admin',
+      admin_email_ph: 'admin@tokosaya.com',
+      password: 'Kata Sandi',
+      password_ph: 'Min. 8 karakter',
+      confirm_password: 'Konfirmasi Kata Sandi',
+      confirm_password_ph: 'Masukkan ulang kata sandi',
+      back: '\u2190 Kembali',
+      next: 'Lanjut \u2192',
+      submit: 'Buat Toko Anda \u2192',
+      pw_weak: 'Lemah',
+      pw_fair: 'Cukup',
+      pw_strong: 'Kuat'
+    },
+    en: {
+      tagline: 'Set up your store in a few steps',
+      lang_title: 'Choose your language',
+      lang_subtitle: 'Pick your preferred language for the rest of the setup',
+      store_title: 'Store Information',
+      store_subtitle: 'Tell us about your store',
+      store_name: 'Store Name',
+      store_name_ph: 'My Awesome Store',
+      store_email: 'Store Email',
+      store_email_ph: 'hello@mystore.com',
+      store_email_hint: 'Used as sender for customer notifications',
+      store_phone: 'Store Phone',
+      default_currency: 'Default Currency',
+      invoice_prefix: 'Invoice Prefix',
+      invoice_hint: 'Order numbers will look like: INV/20260430/001',
+      payment_title: 'Payment Setup',
+      payment_subtitle: 'Choose how customers will pay',
+      pay_manual: 'Manual Bank Transfer',
+      pay_manual_desc: 'Customers transfer to your bank account and upload proof',
+      pay_xendit: 'Xendit Online Payment',
+      pay_xendit_desc: 'Accept credit cards, e-wallets, VA, and more via Xendit',
+      bank_title: 'Add a Bank Account',
+      bank_optional: '(optional, can add later)',
+      bank_name: 'Bank Name',
+      account_number: 'Account Number',
+      account_holder: 'Account Holder Name',
+      payment_deadline: 'Payment Deadline (hours)',
+      payment_deadline_hint: 'Orders auto-expire after this many hours without payment',
+      admin_title: 'Admin Account',
+      admin_subtitle: 'Create your admin login',
+      admin_email: 'Admin Email',
+      admin_email_ph: 'admin@mystore.com',
+      password: 'Password',
+      password_ph: 'Min. 8 characters',
+      confirm_password: 'Confirm Password',
+      confirm_password_ph: 'Re-enter your password',
+      back: '\u2190 Back',
+      next: 'Next \u2192',
+      submit: 'Create Your Store \u2192',
+      pw_weak: 'Weak',
+      pw_fair: 'Fair',
+      pw_strong: 'Strong'
+    }
+  };
+
+  var currentStep = 0;
+  var totalSteps = 4;
+  var currentLang = 'id';
+
+  function applyLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    var d = DICT[lang] || DICT.en;
+
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n');
+      if (d[key]) el.textContent = d[key];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-ph');
+      if (d[key]) el.setAttribute('placeholder', d[key]);
+    });
+
+    document.getElementById('defaultLanguage').value = lang;
+
+    document.querySelectorAll('.lang-option').forEach(function(btn) {
+      btn.classList.toggle('selected', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  document.querySelectorAll('.lang-option').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.getAttribute('data-lang');
+      applyLang(lang);
+    });
+  });
+
+  window.goStep = function(step) {
+    if (step > currentStep && currentStep === 1) {
+      var storeName = document.getElementById('storeName');
+      if (!storeName.value.trim()) { storeName.focus(); return; }
+    }
+
+    for (var i = 0; i < totalSteps; i++) {
+      var panel = document.getElementById('step-' + i);
+      var ind = document.getElementById('ind-' + i);
+      if (panel) panel.style.display = i === step ? 'block' : 'none';
+      if (ind) {
+        if (i < step) {
+          ind.style.background = 'var(--color-success)';
+        } else if (i === step) {
+          ind.style.background = 'var(--color-primary)';
+        } else {
+          ind.style.background = 'var(--color-border-light)';
+        }
+      }
+    }
+    currentStep = step;
+    window.scrollTo(0, 0);
+  };
+
+  // Password strength
+  var password = document.getElementById('password');
+  var fill = document.getElementById('strengthFill');
+  var text = document.getElementById('strengthText');
+  if (password && fill && text) {
+    password.addEventListener('input', function() {
+      var val = password.value;
+      var score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      if (val.length >= 12) score++;
+      fill.style.width = (score * 20) + '%';
+      var d = DICT[currentLang] || DICT.en;
+      if (score <= 1) { fill.style.background = 'var(--color-danger)'; text.textContent = d.pw_weak; text.style.color = 'var(--color-danger)'; }
+      else if (score <= 3) { fill.style.background = 'var(--color-warning)'; text.textContent = d.pw_fair; text.style.color = 'var(--color-warning)'; }
+      else { fill.style.background = 'var(--color-success)'; text.textContent = d.pw_strong; text.style.color = 'var(--color-success)'; }
+    });
+  }
+
+  // Initial language
+  applyLang('id');
+})();
+</script>
