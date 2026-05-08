@@ -216,7 +216,6 @@ var ai = typeof aiConfig !== 'undefined' && aiConfig ? aiConfig : { enabled: fal
 <script>
 (function() {
   var AI = {
-    enabled: <%= ai.enabled ? 'true' : 'false' %>,
     baseUrl: <%- JSON.stringify(ai.baseUrl) %>,
     apiKey: <%- JSON.stringify(ai.apiKey) %>,
     model: <%- JSON.stringify(ai.model) %>,
@@ -224,6 +223,10 @@ var ai = typeof aiConfig !== 'undefined' && aiConfig ? aiConfig : { enabled: fal
   };
 
   var langLabel = AI.lang === 'id' ? 'Bahasa Indonesia' : 'English';
+
+  function isAiReady() {
+    return !!(AI.baseUrl && AI.apiKey && AI.model);
+  }
 
   // Build the system + user prompts for each generation type.
   function buildPrompts(type, productName, description) {
@@ -254,7 +257,7 @@ var ai = typeof aiConfig !== 'undefined' && aiConfig ? aiConfig : { enabled: fal
 
   document.querySelectorAll('.ai-gen-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      if (!AI.enabled) {
+      if (!isAiReady()) {
         alert('<%= t('admin.ai_not_configured', 'AI is not configured. Enable it in Settings → AI Configuration.') %>');
         return;
       }

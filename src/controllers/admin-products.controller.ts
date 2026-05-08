@@ -31,11 +31,12 @@ export class AdminProductsController {
     const s = await this.settingsService.getMany([
       'ai_enabled', 'ai_base_url', 'ai_api_key', 'ai_model', 'default_language',
     ]);
+    const enabled = s.ai_enabled === 'true' || s.ai_enabled === '1';
     return {
-      enabled: s.ai_enabled === 'true' && !!s.ai_base_url && !!s.ai_api_key && !!s.ai_model,
-      baseUrl: (s.ai_base_url || '').replace(/\/+$/, ''),
-      apiKey: s.ai_api_key || '',
-      model: s.ai_model || '',
+      enabled,
+      baseUrl: enabled ? (s.ai_base_url || '').replace(/\/+$/, '') : '',
+      apiKey: enabled ? (s.ai_api_key || '') : '',
+      model: enabled ? (s.ai_model || '') : '',
       lang: s.default_language || 'en',
     };
   }
