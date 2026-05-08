@@ -3,7 +3,12 @@
 (function() {
   var uploadZone = document.getElementById('productUploadZone');
   var fileInput = document.getElementById('productImages');
+
   if (uploadZone && fileInput) {
+    // Accumulated files list (since native file input replaces on each pick)
+    var filesList = [];
+    var primaryIdx = 0;
+
     uploadZone.addEventListener('click', function() { fileInput.click(); });
     uploadZone.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
 
@@ -14,39 +19,103 @@
       e.preventDefault();
       uploadZone.classList.remove('drag-over');
       if (e.dataTransfer && e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+        addFiles(e.dataTransfer.files);
       }
     });
 
-    // Show preview when files are selected
     fileInput.addEventListener('change', function() {
-      var existingPreview = uploadZone.parentElement.querySelector('.image-preview-grid-new');
-      if (existingPreview) existingPreview.remove();
+      if (fileInput.files && fileInput.files.length) {
+        addFiles(fileInput.files);
+      }
+    });
 
-      var files = fileInput.files;
-      if (!files || !files.length) return;
+    function addFiles(newFiles) {
+      for (var i = 0; i < newFiles.length; i++) {
+        if (newFiles[i].type.startsWith('image/')) {
+          filesList.push(newFiles[i]);
+        }
+      }
+      syncFileInput();
+      renderPreview();
+    }
+
+    function removeFile(idx) {
+      filesList.splice(idx, 1);
+      // Adjust primary index
+      if (filesList.length === 0) {
+        primaryIdx = 0;
+      } else if (idx === primaryIdx) {
+        primaryIdx = 0;
+      } else if (idx < primaryIdx) {
+        primaryIdx--;
+      }
+      syncFileInput();
+      renderPreview();
+    }
+
+    function setPrimary(idx) {
+      primaryIdx = idx;
+      renderPreview();
+    }
+
+    // Sync the accumulated files back into the file input using DataTransfer
+    function syncFileInput() {
+      var dt = new DataTransfer();
+      // Reorder: primary first, then the rest in original order
+      if (filesList.length > 0) {
+        dt.items.add(filesList[primaryIdx]);
+        for (var i = 0; i < filesList.length; i++) {
+          if (i !== primaryIdx) dt.items.add(filesList[i]);
+        }
+      }
+      fileInput.files = dt.files;
+    }
+
+    function renderPreview() {
+      var existing = uploadZone.parentElement.querySelector('.image-preview-grid-new');
+      if (existing) existing.remove();
+
+      if (!filesList.length) return;
 
       var grid = document.createElement('div');
       grid.className = 'image-preview-grid image-preview-grid-new mt-4';
 
-      Array.prototype.forEach.call(files, function(file, idx) {
-        if (!file.type.startsWith('image/')) return;
+      filesList.forEach(function(file, idx) {
+        var item = document.createElement('div');
+        item.className = 'image-preview-item';
+
         var reader = new FileReader();
         reader.onload = function(e) {
-          var item = document.createElement('div');
-          item.className = 'image-preview-item';
+          var isPrimary = (idx === primaryIdx);
           item.innerHTML = '<img src="' + e.target.result + '" alt="Preview ' + (idx + 1) + '">'
-            + (idx === 0 ? '<span class="badge badge-primary" style="position:absolute;top:4px;left:4px;">Primary</span>' : '');
-          grid.appendChild(item);
+            + (isPrimary ? '<span class="badge badge-primary" style="position:absolute;top:4px;left:4px;"><%= t("admin.primary", "Primary") %></span>' : '')
+            + '<div class="image-actions">'
+            + (!isPrimary ? '<button type="button" class="btn-img-action btn-set-primary" title="<%= t("admin.set_primary", "Set as Primary") %>" data-idx="' + idx + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>' : '')
+            + '<button type="button" class="btn-img-action btn-img-action-danger btn-remove-file" title="<%= t("admin.delete", "Delete") %>" data-idx="' + idx + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+            + '</div>';
         };
         reader.readAsDataURL(file);
+        grid.appendChild(item);
       });
 
       uploadZone.parentElement.appendChild(grid);
-    });
+
+      // Delegate events on the grid
+      grid.addEventListener('click', function(e) {
+        var setPrimBtn = e.target.closest('.btn-set-primary');
+        if (setPrimBtn) {
+          setPrimary(parseInt(setPrimBtn.getAttribute('data-idx'), 10));
+          return;
+        }
+        var removeBtn = e.target.closest('.btn-remove-file');
+        if (removeBtn) {
+          removeFile(parseInt(removeBtn.getAttribute('data-idx'), 10));
+        }
+      });
+    }
   }
 
+  // Auto-generate slug from name
   var nameInput = document.getElementById('name');
   var slugInput = document.getElementById('slug');
   if (nameInput && slugInput) {
@@ -58,6 +127,7 @@
     slugInput.addEventListener('input', function() { slugInput.dataset.manual = '1'; });
   }
 
+  // Variants
   var variantIdx = <%= typeof variants !== 'undefined' ? variants.length : 0 %>;
   var addBtn = document.getElementById('addVariantBtn');
   var container = document.getElementById('variantsContainer');
