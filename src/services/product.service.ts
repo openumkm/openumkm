@@ -126,6 +126,16 @@ export class ProductService {
     return img;
   }
 
+  async setPrimaryImage(productId: string, imageId: string) {
+    // Unset all images for this product, then set the target one
+    await db.update(productImages)
+      .set({ isPrimary: false })
+      .where(eq(productImages.productId, productId));
+    await db.update(productImages)
+      .set({ isPrimary: true })
+      .where(eq(productImages.id, imageId));
+  }
+
   async deleteImage(imageId: string) {
     const [img] = await db.delete(productImages).where(eq(productImages.id, imageId)).returning();
     return img;

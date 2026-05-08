@@ -273,6 +273,8 @@
   "or_drag_drop": "atau drag dan drop",
   "upload_hint": "JPG, PNG hingga 5MB. Gambar pertama akan jadi gambar utama.",
   "primary": "Utama",
+  "set_primary": "Jadikan Utama",
+  "delete_image_confirm": "Hapus gambar ini?",
   "variants": "Varian",
   "add_variant": "Tambah Varian",
   "no_variants": "Belum ada varian. Produk tanpa varian pakai harga dan stok utama.",

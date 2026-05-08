@@ -241,6 +241,20 @@ export class AdminProductsController {
     return res.redirect(302, `/admin/products/${id}/edit`);
   }
 
+  @Post('/:id/images/:imageId/primary')
+  async setPrimaryImage(
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+    @Req() req: FastifyRequest,
+    @Res() res: FastifyReply,
+  ) {
+    const auth = await this.guardAdmin(req, res);
+    if (!auth) return;
+
+    await this.productService.setPrimaryImage(id, imageId);
+    return res.redirect(302, `/admin/products/${id}/edit`);
+  }
+
   /* ── Variant Management ──────────────────────── */
 
   @Post('/:id/variants')

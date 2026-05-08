@@ -272,6 +272,8 @@
   "or_drag_drop": "or drag and drop",
   "upload_hint": "JPG, PNG up to 5MB. First image will be the primary image.",
   "primary": "Primary",
+  "set_primary": "Set as Primary",
+  "delete_image_confirm": "Delete this image?",
   "variants": "Variants",
   "add_variant": "Add Variant",
   "no_variants": "No variants added. Products without variants use the main price and stock.",
