@@ -2,6 +2,18 @@
 <%
 var s = typeof settings !== 'undefined' ? settings : {};
 var courierList = typeof couriers !== 'undefined' ? couriers : [];
+
+// Sub-tabs within the "General" section. Each entry maps a slug to a label and partial.
+var subTabs = [
+  { slug: 'store',    label: t('admin.store_info'),                  partial: 'settings-store' },
+  { slug: 'api',      label: t('admin.api_keys'),                    partial: 'settings-api-keys' },
+  { slug: 'smtp',     label: t('admin.smtp_config'),                 partial: 'settings-smtp' },
+  { slug: 'payment',  label: t('admin.payment_settings'),            partial: 'settings-payment' },
+  { slug: 'shipping', label: t('admin.shipping', 'Shipping'),        partial: 'settings-shipping' },
+  { slug: 's3',       label: t('admin.s3_title', 'S3 / Storage'),    partial: 'settings-s3' },
+  { slug: 'seo',      label: t('admin.seo_settings'),                partial: 'settings-seo' },
+  { slug: 'ai',       label: t('admin.ai_config'),                   partial: 'settings-ai' }
+];
 %>
 <%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Settings' }) %>
 <body>
@@ -18,15 +30,23 @@ var courierList = typeof couriers !== 'undefined' ? couriers : [];
 
     <%- include('./partials/settings-nav', { settingsActive: 'general' }) %>
 
-    <form action="/admin/settings" method="post" enctype="multipart/form-data">
-      <%- include('./partials/settings-store', { s: s }) %>
-      <%- include('./partials/settings-api-keys', { s: s }) %>
-      <%- include('./partials/settings-smtp', { s: s }) %>
-      <%- include('./partials/settings-payment', { s: s }) %>
-      <%- include('./partials/settings-shipping', { couriers: courierList, s: s }) %>
-      <%- include('./partials/settings-s3', { s: s }) %>
-      <%- include('./partials/settings-seo', { s: s }) %>
-      <%- include('./partials/settings-ai', { s: s }) %>
+    <div class="settings-subtabs" role="tablist">
+      <% subTabs.forEach(function(tab, i) { %>
+      <button type="button"
+              class="settings-subtab<%= i === 0 ? ' active' : '' %>"
+              role="tab"
+              data-target="<%= tab.slug %>"
+              aria-selected="<%= i === 0 ? 'true' : 'false' %>"><%= tab.label %></button>
+      <% }); %>
+    </div>
+
+    <form action="/admin/settings" method="post" enctype="multipart/form-data" id="settingsForm">
+      <input type="hidden" name="_activeTab" id="_activeTab" value="">
+      <% subTabs.forEach(function(tab, i) { %>
+      <div class="settings-panel<%= i === 0 ? ' active' : '' %>" data-panel="<%= tab.slug %>" role="tabpanel">
+        <%- include('./partials/' + tab.partial, { s: s, couriers: courierList }) %>
+      </div>
+      <% }); %>
 
       <div style="padding-top: var(--space-6); border-top: 1px solid var(--color-border-light);">
         <button type="submit" class="btn btn-primary btn-lg"><%= t('admin.save_all_settings', 'Save All Settings') %></button>
@@ -34,5 +54,54 @@ var courierList = typeof couriers !== 'undefined' ? couriers : [];
     </form>
   </main>
 </div>
+
+<script>
+(function() {
+  var STORAGE_KEY = 'adminSettingsActiveTab';
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.settings-subtab'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.settings-panel'));
+  var activeInput = document.getElementById('_activeTab');
+  if (!tabs.length || !panels.length) return;
+
+  var validSlugs = tabs.map(function(b) { return b.getAttribute('data-target'); });
+
+  function activate(slug, opts) {
+    opts = opts || {};
+    if (validSlugs.indexOf(slug) === -1) slug = validSlugs[0];
+    tabs.forEach(function(btn) {
+      var match = btn.getAttribute('data-target') === slug;
+      btn.classList.toggle('active', match);
+      btn.setAttribute('aria-selected', match ? 'true' : 'false');
+    });
+    panels.forEach(function(p) {
+      p.classList.toggle('active', p.getAttribute('data-panel') === slug);
+    });
+    if (activeInput) activeInput.value = slug;
+    try { localStorage.setItem(STORAGE_KEY, slug); } catch (e) {}
+    if (opts.updateHash !== false) {
+      if (history.replaceState) history.replaceState(null, '', '#' + slug);
+      else location.hash = slug;
+    }
+  }
+
+  // Initial activation: hash > localStorage > first tab
+  var initial = (location.hash || '').replace(/^#/, '');
+  if (!initial) {
+    try { initial = localStorage.getItem(STORAGE_KEY) || ''; } catch (e) {}
+  }
+  activate(initial || validSlugs[0], { updateHash: !!location.hash });
+
+  tabs.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      activate(btn.getAttribute('data-target'));
+    });
+  });
+
+  window.addEventListener('hashchange', function() {
+    var slug = (location.hash || '').replace(/^#/, '');
+    if (slug) activate(slug, { updateHash: false });
+  });
+})();
+</script>
 </body>
 </html>

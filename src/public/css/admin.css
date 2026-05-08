@@ -1,5 +1,5 @@
 /* ============================================================
-   admin.css — Admin Panel Styles
+   admin.css ï¿½ Admin Panel Styles
    Extracted from app.css for file size compliance
    ============================================================ */
 
@@ -415,6 +415,56 @@
   background: var(--color-primary-light);
   color: var(--color-primary);
   font-weight: 600;
+}
+
+/* Settings sub-tabs (within General tab) */
+.settings-subtabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
+  overflow-x: auto;
+}
+
+.settings-subtab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: var(--space-3) var(--space-4);
+  font: var(--font-label-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+  margin-bottom: -1px;
+}
+
+.settings-subtab:hover {
+  color: var(--color-text);
+  background: var(--color-gray-50);
+}
+
+.settings-subtab.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.settings-subtab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.settings-panel {
+  display: none;
+}
+
+.settings-panel.active {
+  display: block;
 }
 
 /* ------------------------------------------------------------
