@@ -295,7 +295,8 @@ var ai = typeof aiConfig !== 'undefined' && aiConfig ? aiConfig : { enabled: fal
             { role: 'user', content: prompts.user }
           ],
           max_tokens: 1024,
-          temperature: 0.7
+          temperature: 0.7,
+          stream: false
         })
       })
       .then(function(r) {
