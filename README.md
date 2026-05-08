@@ -1,5 +1,9 @@
 # OpenUMKM — Lightweight eCommerce Engine
 
+<p align="center">
+  <img src="docs/assets/openumkm.png" alt="OpenUMKM Logo" width="200">
+</p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Self-hosted eCommerce engine built for small sellers. Optimized for 1 vCPU / 1GB RAM single-node deployment.
