@@ -6,6 +6,45 @@
   if (uploadZone && fileInput) {
     uploadZone.addEventListener('click', function() { fileInput.click(); });
     uploadZone.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+
+    // Drag & drop support
+    uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', function() { uploadZone.classList.remove('drag-over'); });
+    uploadZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      if (e.dataTransfer && e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
+    // Show preview when files are selected
+    fileInput.addEventListener('change', function() {
+      var existingPreview = uploadZone.parentElement.querySelector('.image-preview-grid-new');
+      if (existingPreview) existingPreview.remove();
+
+      var files = fileInput.files;
+      if (!files || !files.length) return;
+
+      var grid = document.createElement('div');
+      grid.className = 'image-preview-grid image-preview-grid-new mt-4';
+
+      Array.prototype.forEach.call(files, function(file, idx) {
+        if (!file.type.startsWith('image/')) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var item = document.createElement('div');
+          item.className = 'image-preview-item';
+          item.innerHTML = '<img src="' + e.target.result + '" alt="Preview ' + (idx + 1) + '">'
+            + (idx === 0 ? '<span class="badge badge-primary" style="position:absolute;top:4px;left:4px;">Primary</span>' : '');
+          grid.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      uploadZone.parentElement.appendChild(grid);
+    });
   }
 
   var nameInput = document.getElementById('name');
