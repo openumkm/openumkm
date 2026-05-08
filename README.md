@@ -1,5 +1,7 @@
 # OpenUMKM — Lightweight eCommerce Engine
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Self-hosted eCommerce engine built for small sellers. Optimized for 1 vCPU / 1GB RAM single-node deployment.
 
 ## Tech Stack
@@ -29,7 +31,7 @@ Self-hosted eCommerce engine built for small sellers. Optimized for 1 vCPU / 1GB
 - Revenue dashboard (daily / weekly / monthly / yearly + breakdown by status)
 - Multi-currency (IDR / USD) with manual exchange rates
 - Configurable tax rates (multiple rates, togglable)
-- AI content generation (product description, SEO meta)
+- AI content generation (product description, SEO meta) — client-side via OpenAI-compatible API
 - Bilingual UI (Bahasa Indonesia / English) with cookie-persisted switcher
 - Email notifications (order created, payment confirmed, shipped, cancelled, password reset)
 - CSRF protection (Double Submit Cookie)
@@ -88,7 +90,6 @@ src/
 ├── common/           # Shared helpers (auth cookie, CSRF, i18n, view helpers)
 ├── controllers/      # HTTP route handlers
 │   ├── admin.controller.ts
-│   ├── admin-ai.controller.ts
 │   ├── admin-orders.controller.ts
 │   ├── admin-products.controller.ts
 │   ├── admin-settings.controller.ts
@@ -106,7 +107,6 @@ src/
 │   └── xendit-webhook.controller.ts
 ├── services/         # Business logic
 │   ├── address.service.ts
-│   ├── ai.service.ts
 │   ├── auth.service.ts
 │   ├── email.service.ts
 │   ├── order.service.ts
@@ -123,7 +123,7 @@ src/
 │   ├── index.ts      # Drizzle + pg pool
 │   ├── schema.ts     # All table definitions
 │   └── migrations/   # Generated SQL
-├── mail/templates/   # EJS email templates (8 templates)
+├── mail/templates/   # EJS email templates (9 templates)
 ├── locales/
 │   ├── id/           # Bahasa Indonesia translations
 │   └── en/           # English translations
@@ -219,7 +219,6 @@ Most runtime config (SMTP, Xendit, RajaOngkir, AI, store info) is configured at 
 - `GET /admin/settings/taxes` + CRUD
 - `GET /admin/settings/currencies` + toggle/rate
 - `GET /admin/settings/shipping-methods` + CRUD
-- `POST /admin/ai/generate` — AI content generation (AJAX)
 
 ### System
 - `GET /health` — Health check
@@ -252,6 +251,10 @@ Before deploying:
 - Server-side rendering only, minimal client JS
 - Target: <800MB RAM, 10–30 concurrent users
 
+## Contributing
+
+Contributions welcome! Lihat [CONTRIBUTING.md](CONTRIBUTING.md) untuk panduan lengkap.
+
 ## License
 
-Private project.
+[MIT License](LICENSE) — free to use, modify, and distribute.
