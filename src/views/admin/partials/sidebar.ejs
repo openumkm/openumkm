@@ -1,4 +1,4 @@
-<%# Admin Sidebar Partial %>
+<%# Admin Sidebar Partial — Modern %>
 <%
   const userNameVal = typeof userName !== 'undefined' ? userName : 'Admin';
   const activePage = typeof adminPage !== 'undefined' ? adminPage : '';
@@ -6,52 +6,69 @@
   const brandInitial = (brandName.trim()[0] || 'O').toUpperCase();
   const brandRest = brandName.trim().slice(1);
 %>
-<aside class="dashboard-sidebar" aria-label="Admin navigation">
-  <div class="dashboard-sidebar-logo">
-    <span><%= brandInitial %></span><%= brandRest %>
-  </div>
-
-  <div class="flex items-center gap-3" style="padding: var(--space-3); background: var(--color-primary-light); border-radius: var(--radius-md); margin-bottom: var(--space-6);">
-    <div class="avatar" style="width: 44px; height: 44px; font-size: 16px; background: var(--color-primary); color: #fff;" aria-hidden="true"><%= userNameVal.charAt(0).toUpperCase() %></div>
-    <div>
-      <p style="font: var(--font-label-sm); color: var(--color-text); margin-bottom: 0;"><%= userNameVal %></p>
-      <p style="font: var(--font-label-xs); color: var(--color-primary); font-weight: 600;"><%= t('admin.administrator') %></p>
+<aside class="admin-sidebar dashboard-sidebar" aria-label="Admin navigation">
+  <div class="admin-sidebar-header">
+    <div class="admin-sidebar-logo">
+      <div class="admin-logo-icon"><%= brandInitial %></div>
+      <span class="admin-logo-text"><%= brandRest %></span>
     </div>
   </div>
 
-  <div style="font: var(--font-label-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 0 var(--space-3); margin-bottom: var(--space-2);"><%= t('admin.admin_panel') %></div>
+  <div class="admin-user-card">
+    <div class="admin-user-avatar"><%= userNameVal.charAt(0).toUpperCase() %></div>
+    <div class="admin-user-info">
+      <p class="admin-user-name"><%= userNameVal %></p>
+      <p class="admin-user-role"><%= t('admin.administrator') %></p>
+    </div>
+  </div>
 
-  <nav class="sidebar-nav" aria-label="Admin menu">
-    <a href="/admin" class="sidebar-nav-item<%= activePage === 'dashboard' ? ' active' : '' %>">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      <%= t('admin.dashboard') %>
+  <div class="admin-nav-label"><%= t('admin.admin_panel') %></div>
+
+  <nav class="admin-nav" aria-label="Admin menu">
+    <a href="/admin" class="admin-nav-item<%= activePage === 'dashboard' ? ' active' : '' %>">
+      <div class="admin-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <span><%= t('admin.dashboard') %></span>
     </a>
-    <a href="/admin/products" class="sidebar-nav-item<%= activePage === 'products' ? ' active' : '' %>">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-      <%= t('admin.products') %>
+    <a href="/admin/products" class="admin-nav-item<%= activePage === 'products' ? ' active' : '' %>">
+      <div class="admin-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      </div>
+      <span><%= t('admin.products') %></span>
     </a>
-    <a href="/admin/orders" class="sidebar-nav-item<%= activePage === 'orders' ? ' active' : '' %>">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <%= t('admin.orders') %>
+    <a href="/admin/orders" class="admin-nav-item<%= activePage === 'orders' ? ' active' : '' %>">
+      <div class="admin-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <span><%= t('admin.orders') %></span>
     </a>
-    <a href="/admin/payments/confirmations" class="sidebar-nav-item<%= activePage === 'payments' ? ' active' : '' %>">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      <%= t('admin.payments') %>
+    <a href="/admin/payments/confirmations" class="admin-nav-item<%= activePage === 'payments' ? ' active' : '' %>">
+      <div class="admin-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      </div>
+      <span><%= t('admin.payments') %></span>
     </a>
-    <a href="/admin/settings" class="sidebar-nav-item<%= activePage === 'settings' ? ' active' : '' %>">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <%= t('admin.settings') %>
+    <a href="/admin/settings" class="admin-nav-item<%= activePage === 'settings' ? ' active' : '' %>">
+      <div class="admin-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <span><%= t('admin.settings') %></span>
     </a>
   </nav>
 
-  <div class="sidebar-footer">
-    <a href="/" class="sidebar-nav-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <%= t('admin.back_to_store') %>
+  <div class="admin-sidebar-footer">
+    <a href="/" class="admin-nav-item">
+      <div class="admin-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <span><%= t('admin.back_to_store') %></span>
     </a>
-    <a href="/auth/logout" class="sidebar-nav-item" style="color: var(--color-danger);">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      <%= t('admin.logout') %>
+    <a href="/auth/logout" class="admin-nav-item admin-nav-danger">
+      <div class="admin-nav-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <span><%= t('admin.logout') %></span>
     </a>
   </div>
 </aside>

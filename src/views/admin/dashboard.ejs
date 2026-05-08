@@ -1,4 +1,4 @@
-<%# Admin Dashboard Page %>
+<%# Admin Dashboard Page — Modern %>
 <%
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
@@ -7,74 +7,114 @@ var s = typeof stats !== 'undefined' ? stats : {};
 var periods = typeof revenuePeriods !== 'undefined' ? revenuePeriods : [];
 var orders = typeof recentOrders !== 'undefined' ? recentOrders : [];
 var breakdown = typeof statusBreakdown !== 'undefined' ? statusBreakdown : {};
+var currentPeriod = typeof period !== 'undefined' ? period : 'daily';
 %>
 <%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Admin Dashboard' }) %>
 <body>
-<div class="dashboard-layout">
+<div class="admin-layout">
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'dashboard' }) %>
 
-  <main class="dashboard-main">
-    <div class="dashboard-header">
-      <div>
-        <h2><%= t('admin.dashboard') %></h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.dashboard_subtitle', 'Overview of your store performance.') %></p>
+  <main class="admin-main">
+    <!-- Top bar -->
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <h1 class="admin-page-title"><%= t('admin.dashboard') %></h1>
+        <p class="admin-page-subtitle"><%= t('admin.dashboard_subtitle', 'Overview of your store performance.') %></p>
+      </div>
+      <div class="admin-topbar-right">
+        <div class="admin-date-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span><%= new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+        </div>
       </div>
     </div>
 
+    <!-- Stats -->
     <%- include('./partials/dashboard-stats', { stats: s }) %>
 
-    <div style="margin-bottom: var(--space-8);">
-      <div class="dashboard-table-header" style="margin-bottom: var(--space-4);">
-        <h3><%= t('admin.revenue', 'Revenue') %></h3>
-      </div>
-      <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
-        <a href="?period=daily" class="btn btn-ghost btn-sm"><%= t('admin.daily') %></a>
-        <a href="?period=weekly" class="btn btn-ghost btn-sm"><%= t('admin.weekly') %></a>
-        <a href="?period=monthly" class="btn btn-ghost btn-sm"><%= t('admin.monthly') %></a>
-        <a href="?period=yearly" class="btn btn-ghost btn-sm"><%= t('admin.yearly', 'Yearly') %></a>
+    <!-- Revenue Section -->
+    <div class="admin-card admin-card-revenue">
+      <div class="admin-card-header">
+        <div class="admin-card-title-wrap">
+          <h3><%= t('admin.revenue', 'Revenue') %></h3>
+        </div>
+        <div class="admin-period-tabs">
+          <a href="?period=daily" class="admin-period-tab<%= currentPeriod === 'daily' ? ' active' : '' %>"><%= t('admin.daily') %></a>
+          <a href="?period=weekly" class="admin-period-tab<%= currentPeriod === 'weekly' ? ' active' : '' %>"><%= t('admin.weekly') %></a>
+          <a href="?period=monthly" class="admin-period-tab<%= currentPeriod === 'monthly' ? ' active' : '' %>"><%= t('admin.monthly') %></a>
+          <a href="?period=yearly" class="admin-period-tab<%= currentPeriod === 'yearly' ? ' active' : '' %>"><%= t('admin.yearly', 'Yearly') %></a>
+        </div>
       </div>
       <% if (periods.length > 0) { %>
-      <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: var(--space-6);">
+      <div class="admin-revenue-grid">
         <% periods.forEach(function(rp) { %>
-        <div class="stat-card" style="text-align: center;">
-          <div class="stat-card-label"><%= rp.label %></div>
-          <div class="stat-card-value" style="font-size: 24px; margin-bottom: var(--space-2);"><%= formatRp(rp.total) %></div>
-          <div style="font: var(--font-body-md); color: var(--color-text-muted);"><%= rp.orders %> <%= t('admin.orders').toLowerCase() %></div>
+        <div class="admin-revenue-item">
+          <div class="admin-revenue-label"><%= rp.label %></div>
+          <div class="admin-revenue-value"><%= formatRp(rp.total) %></div>
+          <div class="admin-revenue-orders"><%= rp.orders %> <%= t('admin.orders').toLowerCase() %></div>
         </div>
         <% }); %>
       </div>
       <% } else { %>
-      <div style="text-align: center; padding: var(--space-8); color: var(--color-text-muted);"><%= t('admin.no_data') %>.</div>
+      <div class="admin-empty-state">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <p><%= t('admin.no_data') %></p>
+      </div>
       <% } %>
     </div>
 
-    <!-- Status Breakdown -->
-    <% if (Object.keys(breakdown).length > 0) { %>
-    <div style="margin-bottom: var(--space-8);">
-      <div class="dashboard-table-header" style="margin-bottom: var(--space-4);">
-        <h3><%= t('admin.status_breakdown', 'Order Status Breakdown') %> (<%= t('admin.monthly') %>)</h3>
+    <!-- Two-column layout: Status Breakdown + Recent Orders -->
+    <div class="admin-grid-2col">
+      <!-- Status Breakdown -->
+      <% if (Object.keys(breakdown).length > 0) { %>
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><%= t('admin.status_breakdown', 'Order Status') %></h3>
+          <span class="admin-card-badge"><%= t('admin.monthly') %></span>
+        </div>
+        <div class="admin-status-list">
+          <% Object.entries(breakdown).forEach(function(entry) { %>
+          <div class="admin-status-row">
+            <div class="admin-status-info">
+              <span class="admin-status-dot admin-status-dot-<%= entry[0] %>"></span>
+              <span class="admin-status-name"><%= t('admin.' + entry[0], entry[0].replace(/_/g, ' ')) %></span>
+            </div>
+            <span class="admin-status-count"><%= entry[1] %></span>
+          </div>
+          <% }); %>
+        </div>
       </div>
-      <div class="dashboard-table-wrap">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th><%= t('admin.status') %></th>
-              <th><%= t('admin.count', 'Count') %></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% Object.entries(breakdown).forEach(function(entry) { %>
-            <tr>
-              <td><span class="badge <%= entry[0] === 'completed' ? 'badge-success' : entry[0] === 'cancelled' || entry[0] === 'expired' ? 'badge-danger' : entry[0] === 'pending' ? 'badge-warning' : 'badge-info' %>"><%= t('admin.' + entry[0], entry[0].replace(/_/g, ' ')) %></span></td>
-              <td><strong><%= entry[1] %></strong></td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
+      <% } %>
+
+      <!-- Quick Actions -->
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3><%= t('admin.quick_actions', 'Quick Actions') %></h3>
+        </div>
+        <div class="admin-quick-actions">
+          <a href="/admin/products/new" class="admin-quick-action">
+            <div class="admin-quick-action-icon admin-quick-action-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <span><%= t('admin.add_product', 'Add Product') %></span>
+          </a>
+          <a href="/admin/orders" class="admin-quick-action">
+            <div class="admin-quick-action-icon admin-quick-action-blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <span><%= t('admin.view_orders', 'View Orders') %></span>
+          </a>
+          <a href="/admin/settings" class="admin-quick-action">
+            <div class="admin-quick-action-icon admin-quick-action-gray">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </div>
+            <span><%= t('admin.settings') %></span>
+          </a>
+        </div>
       </div>
     </div>
-    <% } %>
 
+    <!-- Recent Orders -->
     <%- include('./partials/recent-orders-table', { recentOrders: orders, formatRp: formatRp, isAdmin: true }) %>
   </main>
 </div>

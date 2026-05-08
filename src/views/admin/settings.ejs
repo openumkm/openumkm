@@ -1,18 +1,17 @@
-<%# Admin Settings Page %>
+<%# Admin Settings Page — Modern %>
 <%
 var s = typeof settings !== 'undefined' ? settings : {};
 var courierList = typeof couriers !== 'undefined' ? couriers : [];
 
-// Sub-tabs within the "General" section. Each entry maps a slug to a label and partial.
 var subTabs = [
-  { slug: 'store',    label: t('admin.store_info'),                  partial: 'settings-store' },
-  { slug: 'api',      label: t('admin.api_keys'),                    partial: 'settings-api-keys' },
-  { slug: 'smtp',     label: t('admin.smtp_config'),                 partial: 'settings-smtp' },
-  { slug: 'payment',  label: t('admin.payment_settings'),            partial: 'settings-payment' },
-  { slug: 'shipping', label: t('admin.shipping', 'Shipping'),        partial: 'settings-shipping' },
-  { slug: 's3',       label: t('admin.s3_title', 'S3 / Storage'),    partial: 'settings-s3' },
-  { slug: 'seo',      label: t('admin.seo_settings'),                partial: 'settings-seo' },
-  { slug: 'ai',       label: t('admin.ai_config'),                   partial: 'settings-ai' }
+  { slug: 'store',    icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', label: t('admin.store_info'), partial: 'settings-store' },
+  { slug: 'api',      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', label: t('admin.api_keys'), partial: 'settings-api-keys' },
+  { slug: 'smtp',     icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>', label: t('admin.smtp_config'), partial: 'settings-smtp' },
+  { slug: 'payment',  icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>', label: t('admin.payment_settings'), partial: 'settings-payment' },
+  { slug: 'shipping', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>', label: t('admin.shipping', 'Shipping'), partial: 'settings-shipping' },
+  { slug: 's3',       icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>', label: t('admin.s3_title', 'S3 / Storage'), partial: 'settings-s3' },
+  { slug: 'seo',      icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>', label: t('admin.seo_settings'), partial: 'settings-seo' },
+  { slug: 'ai',       icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14H8a4 4 0 0 0-4 4v2h16v-2a4 4 0 0 0-4-4z"/></svg>', label: t('admin.ai_config'), partial: 'settings-ai' }
 ];
 %>
 <%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Settings' }) %>
@@ -21,22 +20,26 @@ var subTabs = [
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'settings' }) %>
 
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <div>
-        <h2><%= t('admin.settings') %></h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.settings_subtitle', 'Configure your store settings.') %></p>
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <h1 class="admin-page-title"><%= t('admin.settings') %></h1>
+        <p class="admin-page-subtitle"><%= t('admin.settings_subtitle', 'Configure your store settings.') %></p>
       </div>
     </div>
 
     <%- include('./partials/settings-nav', { settingsActive: 'general' }) %>
 
-    <div class="settings-subtabs" role="tablist">
+    <!-- Settings tabs -->
+    <div class="admin-settings-tabs" role="tablist">
       <% subTabs.forEach(function(tab, i) { %>
       <button type="button"
-              class="settings-subtab<%= i === 0 ? ' active' : '' %>"
+              class="admin-settings-tab<%= i === 0 ? ' active' : '' %>"
               role="tab"
               data-target="<%= tab.slug %>"
-              aria-selected="<%= i === 0 ? 'true' : 'false' %>"><%= tab.label %></button>
+              aria-selected="<%= i === 0 ? 'true' : 'false' %>">
+        <%- tab.icon %>
+        <span><%= tab.label %></span>
+      </button>
       <% }); %>
     </div>
 
@@ -48,8 +51,11 @@ var subTabs = [
       </div>
       <% }); %>
 
-      <div style="padding-top: var(--space-6); border-top: 1px solid var(--color-border-light);">
-        <button type="submit" class="btn btn-primary btn-lg"><%= t('admin.save_all_settings', 'Save All Settings') %></button>
+      <div class="admin-settings-save">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <%= t('admin.save_all_settings', 'Save All Settings') %>
+        </button>
       </div>
     </form>
   </main>
@@ -58,7 +64,7 @@ var subTabs = [
 <script>
 (function() {
   var STORAGE_KEY = 'adminSettingsActiveTab';
-  var tabs = Array.prototype.slice.call(document.querySelectorAll('.settings-subtab'));
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.admin-settings-tab'));
   var panels = Array.prototype.slice.call(document.querySelectorAll('.settings-panel'));
   var activeInput = document.getElementById('_activeTab');
   if (!tabs.length || !panels.length) return;
@@ -84,7 +90,6 @@ var subTabs = [
     }
   }
 
-  // Initial activation: hash > localStorage > first tab
   var initial = (location.hash || '').replace(/^#/, '');
   if (!initial) {
     try { initial = localStorage.getItem(STORAGE_KEY) || ''; } catch (e) {}

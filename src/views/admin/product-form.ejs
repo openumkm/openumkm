@@ -1,4 +1,4 @@
-<%# Admin Product Form (New / Edit) %>
+<%# Admin Product Form (New / Edit) — Modern %>
 <%
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
@@ -15,208 +15,258 @@ var variants = p.variants || [];
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'products' }) %>
 
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <div class="flex items-center gap-3">
-        <a href="/admin/products" style="color: var(--color-text-muted); display: flex;" title="<%= t('admin.back_to_products', 'Back to products') %>">
+    <!-- Header -->
+    <div class="admin-topbar">
+      <div class="admin-topbar-left" style="display:flex; align-items:center; gap:var(--space-4);">
+        <a href="/admin/products" class="admin-back-btn" title="<%= t('admin.back_to_products', 'Back to products') %>">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </a>
         <div>
-          <h2><%= isEdit ? t('admin.edit_product') : t('admin.new_product') %></h2>
-          <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= isEdit ? t('admin.product_update_hint', 'Update product details.') : t('admin.product_new_hint', 'Add a new product to your catalog.') %></p>
+          <h1 class="admin-page-title"><%= isEdit ? t('admin.edit_product') : t('admin.new_product') %></h1>
+          <p class="admin-page-subtitle"><%= isEdit ? t('admin.product_update_hint', 'Update product details.') : t('admin.product_new_hint', 'Add a new product to your catalog.') %></p>
         </div>
       </div>
     </div>
 
     <% if (typeof error !== 'undefined' && error) { %>
-    <div class="alert alert-danger mb-6" role="alert">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div class="admin-alert admin-alert-danger">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span><%= error %></span>
     </div>
     <% } %>
 
     <form action="<%= formAction %>" method="post" enctype="multipart/form-data" id="productForm">
-      <div class="grid">
-        <div class="col-8">
-          <div class="admin-card mb-6">
-            <h3 class="admin-card-title"><%= t('admin.basic_info', 'Basic Information') %></h3>
-            <div class="form-group">
-              <label for="name" class="form-label form-label-required"><%= t('admin.product_name') %></label>
-              <input type="text" id="name" name="name" class="input" required value="<%= p.name %>" placeholder="e.g. Sneaker Urban 01">
-            </div>
-            <div class="form-group">
-              <label for="slug" class="form-label"><%= t('admin.f_slug', 'Slug') %></label>
-              <input type="text" id="slug" name="slug" class="input" value="<%= p.slug %>" placeholder="auto-generated-from-name">
-              <span class="form-hint"><%= t('admin.f_slug_hint', 'Leave empty to auto-generate from product name.') %></span>
-            </div>
-            <div class="form-group">
-              <label for="description" class="form-label"><%= t('admin.product_description') %></label>
-              <div class="flex items-center gap-2 mb-2">
-                <button type="button" class="btn btn-ghost btn-sm ai-gen-btn" data-type="product_description" data-target="description">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                  <%= t('admin.generate_with_ai', 'Generate with AI') %>
-                </button>
-              </div>
-              <textarea id="description" name="description" class="textarea" rows="5" placeholder="<%= t('admin.product_desc_ph', 'Describe your product...') %>"><%= p.description %></textarea>
-            </div>
-          </div>
+      <div class="admin-form-grid">
+        <!-- Left column -->
+        <div class="admin-form-main">
 
-          <div class="admin-card mb-6">
-            <h3 class="admin-card-title"><%= t('admin.pricing_inventory', 'Pricing & Inventory') %></h3>
-            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
-              <div class="form-group">
-                <label for="price" class="form-label form-label-required"><%= t('admin.product_price') %> (IDR)</label>
-                <input type="number" id="price" name="price" class="input" required value="<%= p.price %>" min="0" step="1" placeholder="350000">
-                <span class="form-hint"><%= t('admin.price_hint', 'In smallest currency unit (e.g. Rupiah).') %></span>
+          <!-- Basic Info -->
+          <div class="admin-form-card">
+            <div class="admin-form-card-header">
+              <div class="admin-form-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
               </div>
-              <div class="form-group">
-                <label for="weight" class="form-label form-label-required"><%= t('admin.product_weight') %></label>
-                <input type="number" id="weight" name="weight" class="input" required value="<%= p.weight %>" min="0" placeholder="800">
-              </div>
+              <h3><%= t('admin.basic_info', 'Basic Information') %></h3>
             </div>
-            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div class="admin-form-card-body">
               <div class="form-group">
-                <label for="stock" class="form-label form-label-required"><%= t('admin.product_stock') %></label>
-                <input type="number" id="stock" name="stock" class="input" required value="<%= p.stock %>" min="0" placeholder="25">
+                <label for="name" class="form-label form-label-required"><%= t('admin.product_name') %></label>
+                <input type="text" id="name" name="name" class="input" required value="<%= p.name %>" placeholder="e.g. Sneaker Urban 01">
               </div>
               <div class="form-group">
-                <label for="minOrder" class="form-label"><%= t('admin.min_order', 'Minimum Order') %></label>
-                <input type="number" id="minOrder" name="minOrder" class="input" value="<%= p.minOrder || 1 %>" min="1" placeholder="1">
+                <label for="slug" class="form-label"><%= t('admin.f_slug', 'Slug') %></label>
+                <input type="text" id="slug" name="slug" class="input" value="<%= p.slug %>" placeholder="auto-generated-from-name">
+                <span class="form-hint"><%= t('admin.f_slug_hint', 'Leave empty to auto-generate from product name.') %></span>
+              </div>
+              <div class="form-group">
+                <label for="description" class="form-label"><%= t('admin.product_description') %></label>
+                <div class="admin-ai-bar">
+                  <button type="button" class="admin-ai-btn ai-gen-btn" data-type="product_description" data-target="description">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <%= t('admin.generate_with_ai', 'Generate with AI') %>
+                  </button>
+                </div>
+                <textarea id="description" name="description" class="textarea" rows="5" placeholder="<%= t('admin.product_desc_ph', 'Describe your product...') %>"><%= p.description %></textarea>
               </div>
             </div>
           </div>
 
-          <div class="admin-card mb-6">
-            <h3 class="admin-card-title"><%= t('admin.images', 'Images') %></h3>
-            <div class="upload-area" id="productUploadZone" tabindex="0" role="button" aria-label="<%= t('admin.upload_images', 'Upload product images') %>">
-              <div class="upload-area-icon">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <!-- Pricing & Inventory -->
+          <div class="admin-form-card">
+            <div class="admin-form-card-header">
+              <div class="admin-form-card-icon admin-form-card-icon-green">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
-              <p class="upload-area-text"><strong><%= t('admin.click_upload', 'Click to upload') %></strong> <%= t('admin.or_drag_drop', 'or drag and drop') %></p>
-              <p class="upload-area-hint"><%= t('admin.upload_hint', 'JPG, PNG up to 5MB. First image will be the primary image.') %></p>
+              <h3><%= t('admin.pricing_inventory', 'Pricing & Inventory') %></h3>
             </div>
-            <input type="file" id="productImages" name="images" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
-            <% if (images.length > 0) { %>
-            <div class="image-preview-grid mt-4">
-              <% images.forEach(function(img, idx) { %>
-              <div class="image-preview-item">
-                <img src="<%= img.url %>" alt="Product image <%= idx + 1 %>">
-                <% if (img.isPrimary) { %>
-                <span class="badge badge-primary" style="position:absolute;top:4px;left:4px;"><%= t('admin.primary', 'Primary') %></span>
-                <% } %>
-                <div class="image-actions">
-                  <% if (!img.isPrimary) { %>
-                  <form method="post" action="/admin/products/<%= p.id %>/images/<%= img.id %>/primary" style="display:inline;">
-                    <button type="submit" class="btn-img-action" title="<%= t('admin.set_primary', 'Set as Primary') %>">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    </button>
-                  </form>
-                  <% } %>
-                  <form method="post" action="/admin/products/<%= p.id %>/images/<%= img.id %>/delete" style="display:inline;" onsubmit="return confirm('<%= t('admin.delete_image_confirm', 'Delete this image?') %>')">
-                    <button type="submit" class="btn-img-action btn-img-action-danger" title="<%= t('admin.delete', 'Delete') %>">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
-                  </form>
+            <div class="admin-form-card-body">
+              <div class="admin-form-row">
+                <div class="form-group">
+                  <label for="price" class="form-label form-label-required"><%= t('admin.product_price') %> (IDR)</label>
+                  <input type="number" id="price" name="price" class="input" required value="<%= p.price %>" min="0" step="1" placeholder="350000">
+                  <span class="form-hint"><%= t('admin.price_hint', 'In smallest currency unit (e.g. Rupiah).') %></span>
+                </div>
+                <div class="form-group">
+                  <label for="weight" class="form-label form-label-required"><%= t('admin.product_weight') %> (gram)</label>
+                  <input type="number" id="weight" name="weight" class="input" required value="<%= p.weight %>" min="0" placeholder="800">
                 </div>
               </div>
-              <% }); %>
+              <div class="admin-form-row">
+                <div class="form-group">
+                  <label for="stock" class="form-label form-label-required"><%= t('admin.product_stock') %></label>
+                  <input type="number" id="stock" name="stock" class="input" required value="<%= p.stock %>" min="0" placeholder="25">
+                </div>
+                <div class="form-group">
+                  <label for="minOrder" class="form-label"><%= t('admin.min_order', 'Minimum Order') %></label>
+                  <input type="number" id="minOrder" name="minOrder" class="input" value="<%= p.minOrder || 1 %>" min="1" placeholder="1">
+                </div>
+              </div>
             </div>
-            <% } %>
           </div>
 
-          <div class="admin-card mb-6">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="admin-card-title" style="margin-bottom:0;"><%= t('admin.variants', 'Variants') %></h3>
-              <button type="button" class="btn btn-ghost btn-sm" id="addVariantBtn">
+          <!-- Images -->
+          <div class="admin-form-card">
+            <div class="admin-form-card-header">
+              <div class="admin-form-card-icon admin-form-card-icon-blue">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <h3><%= t('admin.images', 'Images') %></h3>
+            </div>
+            <div class="admin-form-card-body">
+              <div class="admin-upload-zone" id="productUploadZone" tabindex="0" role="button" aria-label="<%= t('admin.upload_images', 'Upload product images') %>">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p class="admin-upload-text"><strong><%= t('admin.click_upload', 'Click to upload') %></strong> <%= t('admin.or_drag_drop', 'or drag and drop') %></p>
+                <p class="admin-upload-hint"><%= t('admin.upload_hint', 'JPG, PNG up to 5MB. First image will be the primary image.') %></p>
+              </div>
+              <input type="file" id="productImages" name="images" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
+              <% if (images.length > 0) { %>
+              <div class="image-preview-grid mt-4">
+                <% images.forEach(function(img, idx) { %>
+                <div class="image-preview-item">
+                  <img src="<%= img.url %>" alt="Product image <%= idx + 1 %>">
+                  <% if (img.isPrimary) { %>
+                  <span class="admin-img-primary-badge"><%= t('admin.primary', 'Primary') %></span>
+                  <% } %>
+                  <div class="image-actions">
+                    <% if (!img.isPrimary) { %>
+                    <form method="post" action="/admin/products/<%= p.id %>/images/<%= img.id %>/primary" style="display:inline;">
+                      <button type="submit" class="btn-img-action" title="<%= t('admin.set_primary', 'Set as Primary') %>">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      </button>
+                    </form>
+                    <% } %>
+                    <form method="post" action="/admin/products/<%= p.id %>/images/<%= img.id %>/delete" style="display:inline;" onsubmit="return confirm('<%= t('admin.delete_image_confirm', 'Delete this image?') %>')">
+                      <button type="submit" class="btn-img-action btn-img-action-danger" title="<%= t('admin.delete', 'Delete') %>">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+                <% }); %>
+              </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Variants -->
+          <div class="admin-form-card">
+            <div class="admin-form-card-header">
+              <div class="admin-form-card-icon admin-form-card-icon-amber">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              </div>
+              <h3><%= t('admin.variants', 'Variants') %></h3>
+              <button type="button" class="btn btn-ghost btn-sm" id="addVariantBtn" style="margin-left:auto;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <%= t('admin.add_variant', 'Add Variant') %>
               </button>
             </div>
-            <div id="variantsContainer">
-              <% if (variants.length > 0) { %>
-              <% variants.forEach(function(v, idx) { %>
-              <div class="variant-row" data-index="<%= idx %>">
-                <div class="grid" style="grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap: var(--space-3); align-items: end;">
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label"><%= t('admin.tax_name_label', 'Name') %></label>
-                    <input type="text" name="variants[<%= idx %>][name]" class="input" value="<%= v.name %>" placeholder="Red / XL">
+            <div class="admin-form-card-body">
+              <div id="variantsContainer">
+                <% if (variants.length > 0) { %>
+                <% variants.forEach(function(v, idx) { %>
+                <div class="admin-variant-row" data-index="<%= idx %>">
+                  <div class="admin-variant-fields">
+                    <div class="form-group">
+                      <label class="form-label"><%= t('admin.tax_name_label', 'Name') %></label>
+                      <input type="text" name="variants[<%= idx %>][name]" class="input" value="<%= v.name %>" placeholder="Red / XL">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><%= t('admin.size', 'Size') %></label>
+                      <input type="text" name="variants[<%= idx %>][size]" class="input" value="<%= v.size || '' %>" placeholder="XL">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><%= t('admin.color', 'Color') %></label>
+                      <input type="text" name="variants[<%= idx %>][color]" class="input" value="<%= v.color || '' %>" placeholder="Red">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><%= t('admin.product_price') %></label>
+                      <input type="number" name="variants[<%= idx %>][price]" class="input" value="<%= v.price || '' %>" placeholder="Override">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><%= t('admin.product_stock') %></label>
+                      <input type="number" name="variants[<%= idx %>][stock]" class="input" value="<%= v.stock %>" placeholder="0">
+                    </div>
+                    <button type="button" class="admin-variant-remove remove-variant-btn" title="<%= t('admin.remove_variant', 'Remove variant') %>">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
                   </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label"><%= t('admin.size', 'Size') %></label>
-                    <input type="text" name="variants[<%= idx %>][size]" class="input" value="<%= v.size || '' %>" placeholder="XL">
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label"><%= t('admin.color', 'Color') %></label>
-                    <input type="text" name="variants[<%= idx %>][color]" class="input" value="<%= v.color || '' %>" placeholder="Red">
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label"><%= t('admin.product_price') %></label>
-                    <input type="number" name="variants[<%= idx %>][price]" class="input" value="<%= v.price || '' %>" placeholder="<%= t('admin.override', 'Override') %>">
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label"><%= t('admin.product_stock') %></label>
-                    <input type="number" name="variants[<%= idx %>][stock]" class="input" value="<%= v.stock %>" placeholder="0">
-                  </div>
-                  <button type="button" class="btn btn-ghost btn-sm remove-variant-btn" style="color: var(--color-danger); margin-bottom: 2px;" title="<%= t('admin.remove_variant', 'Remove variant') %>">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
                 </div>
+                <% }); %>
+                <% } else { %>
+                <div class="admin-variant-empty">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <p><%= t('admin.no_variants', 'No variants added. Products without variants use the main price and stock.') %></p>
+                </div>
+                <% } %>
               </div>
-              <% }); %>
-              <% } else { %>
-              <p class="text-muted" style="font: var(--font-body-md); padding: var(--space-4) 0;"><%= t('admin.no_variants', 'No variants added. Products without variants use the main price and stock.') %></p>
-              <% } %>
             </div>
           </div>
         </div>
 
-        <div class="col-4">
-          <div class="admin-card mb-6">
-            <h3 class="admin-card-title"><%= t('admin.status') %></h3>
-            <label class="toggle">
-              <input type="checkbox" name="isActive" value="1" <%= p.isActive ? 'checked' : '' %>>
-              <span class="toggle-track"></span>
-              <span class="toggle-label"><%= t('admin.product_active') %></span>
-            </label>
-            <p class="form-hint mt-2"><%= t('admin.inactive_hint', 'Inactive products are hidden from the storefront.') %></p>
-          </div>
-
-          <div class="admin-card mb-6">
-            <h3 class="admin-card-title"><%= t('admin.seo', 'SEO') %></h3>
-            <div class="form-group">
-              <label for="metaTitle" class="form-label"><%= t('admin.meta_title', 'Meta Title') %></label>
-              <div class="flex items-center gap-2 mb-1">
-                <button type="button" class="btn btn-ghost btn-sm ai-gen-btn" style="padding: 2px 6px; font-size: 11px;" data-type="meta_title" data-target="metaTitle">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                  AI
-                </button>
-              </div>
-              <input type="text" id="metaTitle" name="metaTitle" class="input" value="<%= p.metaTitle || '' %>" placeholder="<%= t('admin.meta_title_ph', 'SEO title for search engines') %>">
+        <!-- Right sidebar -->
+        <div class="admin-form-sidebar">
+          <!-- Status -->
+          <div class="admin-form-card">
+            <div class="admin-form-card-header">
+              <h3><%= t('admin.status') %></h3>
             </div>
-            <div class="form-group">
-              <label for="metaDescription" class="form-label"><%= t('admin.meta_desc', 'Meta Description') %></label>
-              <div class="flex items-center gap-2 mb-1">
-                <button type="button" class="btn btn-ghost btn-sm ai-gen-btn" style="padding: 2px 6px; font-size: 11px;" data-type="meta_description" data-target="metaDescription">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                  AI
-                </button>
-              </div>
-              <textarea id="metaDescription" name="metaDescription" class="textarea" rows="3" placeholder="<%= t('admin.meta_desc_ph', 'SEO description...') %>"><%= p.metaDescription || '' %></textarea>
-            </div>
-            <div class="form-group">
-              <label for="ogImage" class="form-label"><%= t('admin.og_image', 'OG Image') %></label>
-              <% if (p.ogImage) { %>
-              <div class="mb-2"><img src="<%= p.ogImage %>" alt="OG Image preview" style="max-width:200px;max-height:100px;border-radius:var(--radius-md);"></div>
-              <% } %>
-              <input type="file" id="ogImage" name="ogImage" class="input" accept="image/jpeg,image/png,image/webp">
-              <span class="form-hint"><%= t('admin.og_hint', 'Social sharing image. JPG, PNG up to 5MB.') %></span>
+            <div class="admin-form-card-body">
+              <label class="toggle">
+                <input type="checkbox" name="isActive" value="1" <%= p.isActive ? 'checked' : '' %>>
+                <span class="toggle-track"></span>
+                <span class="toggle-label"><%= t('admin.product_active') %></span>
+              </label>
+              <p class="form-hint" style="margin-top:var(--space-3);"><%= t('admin.inactive_hint', 'Inactive products are hidden from the storefront.') %></p>
             </div>
           </div>
 
-          <div class="flex flex-col gap-3">
-            <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <!-- SEO -->
+          <div class="admin-form-card">
+            <div class="admin-form-card-header">
+              <div class="admin-form-card-icon admin-form-card-icon-purple">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <h3><%= t('admin.seo', 'SEO') %></h3>
+            </div>
+            <div class="admin-form-card-body">
+              <div class="form-group">
+                <label for="metaTitle" class="form-label"><%= t('admin.meta_title', 'Meta Title') %></label>
+                <div class="admin-ai-bar">
+                  <button type="button" class="admin-ai-btn ai-gen-btn" data-type="meta_title" data-target="metaTitle">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    AI
+                  </button>
+                </div>
+                <input type="text" id="metaTitle" name="metaTitle" class="input" value="<%= p.metaTitle || '' %>" placeholder="<%= t('admin.meta_title_ph', 'SEO title for search engines') %>">
+              </div>
+              <div class="form-group">
+                <label for="metaDescription" class="form-label"><%= t('admin.meta_desc', 'Meta Description') %></label>
+                <div class="admin-ai-bar">
+                  <button type="button" class="admin-ai-btn ai-gen-btn" data-type="meta_description" data-target="metaDescription">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    AI
+                  </button>
+                </div>
+                <textarea id="metaDescription" name="metaDescription" class="textarea" rows="3" placeholder="<%= t('admin.meta_desc_ph', 'SEO description...') %>"><%= p.metaDescription || '' %></textarea>
+              </div>
+              <div class="form-group">
+                <label for="ogImage" class="form-label"><%= t('admin.og_image', 'OG Image') %></label>
+                <% if (p.ogImage) { %>
+                <div class="admin-og-preview"><img src="<%= p.ogImage %>" alt="OG Image preview"></div>
+                <% } %>
+                <input type="file" id="ogImage" name="ogImage" class="input" accept="image/jpeg,image/png,image/webp">
+                <span class="form-hint"><%= t('admin.og_hint', 'Social sharing image. JPG, PNG up to 5MB.') %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="admin-form-actions">
+            <button type="submit" class="btn btn-primary btn-lg admin-form-submit">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               <%= isEdit ? t('admin.update_product', 'Update Product') : t('admin.create_product', 'Create Product') %>
             </button>
-            <a href="/admin/products" class="btn btn-ghost" style="width: 100%;"><%= t('admin.cancel') %></a>
+            <a href="/admin/products" class="btn btn-ghost admin-form-cancel"><%= t('admin.cancel') %></a>
           </div>
         </div>
       </div>
@@ -244,7 +294,6 @@ var ai = typeof aiConfig !== 'undefined' && aiConfig ? aiConfig : { enabled: fal
     return !!(AI.baseUrl && AI.apiKey && AI.model);
   }
 
-  // Build the system + user prompts for each generation type.
   function buildPrompts(type, productName, description) {
     switch (type) {
       case 'product_description':

@@ -1,13 +1,20 @@
 <%# Checkout page JavaScript — extracted partial %>
+<%
+var _subtotal = typeof subtotal !== 'undefined' ? subtotal : 0;
+var _tax = typeof tax !== 'undefined' ? tax : 0;
+var _savedAddresses = typeof savedAddresses !== 'undefined' ? savedAddresses : [];
+var _hasSavedAddrs = _savedAddresses.length > 0;
+var _customShippingMethods = typeof customShippingMethods !== 'undefined' ? customShippingMethods : [];
+%>
 <script>
 (function() {
-  var subtotal = <%= typeof subtotal !== 'undefined' ? subtotal : 0 %>;
-  var taxAmount = <%= taxAmount %>;
-  var selectedShipping = <%= (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) ? customShippingMethods[0].cost : 0 %>;
+  var subtotal = <%= _subtotal %>;
+  var taxAmount = <%= _tax %>;
+  var selectedShipping = <%= (_customShippingMethods.length > 0) ? _customShippingMethods[0].cost : 0 %>;
 
   // ── Saved Addresses ──
-  <% if (hasSavedAddrs) { %>
-  var savedAddrs = <%- JSON.stringify(savedAddresses || []) %>;
+  <% if (_hasSavedAddrs) { %>
+  var savedAddrs = <%- JSON.stringify(_savedAddresses) %>;
   var addrRadios = document.querySelectorAll('input[name="savedAddressId"]');
   var nameInput = document.getElementById('name');
   var phoneInput = document.getElementById('phone');
@@ -20,6 +27,10 @@
 
   addrRadios.forEach(function(radio) {
     radio.addEventListener('change', function() {
+      // Update visual selection
+      document.querySelectorAll('.address-card').forEach(function(c) { c.classList.remove('selected'); });
+      radio.closest('.address-card').classList.add('selected');
+
       var addrId = radio.value;
       var addr = savedAddrs.find(function(a) { return a.id === addrId; });
       if (addr) {
@@ -147,9 +158,9 @@
   }
 
   // ── Payment Tabs ──
-  document.querySelectorAll('.payment-tab').forEach(function(tab) {
+  document.querySelectorAll('.payment-tab-modern').forEach(function(tab) {
     tab.addEventListener('click', function() {
-      document.querySelectorAll('.payment-tab').forEach(function(t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      document.querySelectorAll('.payment-tab-modern').forEach(function(t) { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       document.querySelectorAll('.payment-tab-content').forEach(function(c) { c.classList.remove('active'); });

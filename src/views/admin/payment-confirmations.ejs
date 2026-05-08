@@ -1,4 +1,4 @@
-<%# Admin Payment Confirmations Page %>
+<%# Admin Payment Confirmations Page — Modern %>
 <%
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
@@ -12,109 +12,120 @@ var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'payments' }) %>
 
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <div>
-        <h2><%= t('admin.payment_confirmations') %></h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.payments_subtitle', 'Review manual transfer payment proofs.') %></p>
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <h1 class="admin-page-title"><%= t('admin.payment_confirmations') %></h1>
+        <p class="admin-page-subtitle"><%= t('admin.payments_subtitle', 'Review manual transfer payment proofs.') %></p>
       </div>
     </div>
 
-    <div class="dashboard-toolbar">
-      <div class="flex items-center gap-2">
-        <a href="/admin/payments/confirmations" class="btn btn-ghost btn-sm<%= !statusFilter ? ' active' : '' %>"><%= t('admin.all', 'All') %></a>
-        <a href="/admin/payments/confirmations?status=pending" class="btn btn-ghost btn-sm<%= statusFilter === 'pending' ? ' active' : '' %>"><%= t('admin.pending') %></a>
-        <a href="/admin/payments/confirmations?status=approved" class="btn btn-ghost btn-sm<%= statusFilter === 'approved' ? ' active' : '' %>"><%= t('admin.approved', 'Approved') %></a>
-        <a href="/admin/payments/confirmations?status=rejected" class="btn btn-ghost btn-sm<%= statusFilter === 'rejected' ? ' active' : '' %>"><%= t('admin.rejected', 'Rejected') %></a>
-      </div>
+    <!-- Filter tabs -->
+    <div class="admin-filter-tabs">
+      <a href="/admin/payments/confirmations" class="admin-filter-tab<%= !statusFilter ? ' active' : '' %>">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+        <%= t('admin.all', 'All') %>
+      </a>
+      <a href="/admin/payments/confirmations?status=pending" class="admin-filter-tab<%= statusFilter === 'pending' ? ' active' : '' %>">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <%= t('admin.pending') %>
+      </a>
+      <a href="/admin/payments/confirmations?status=approved" class="admin-filter-tab<%= statusFilter === 'approved' ? ' active' : '' %>">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <%= t('admin.approved', 'Approved') %>
+      </a>
+      <a href="/admin/payments/confirmations?status=rejected" class="admin-filter-tab<%= statusFilter === 'rejected' ? ' active' : '' %>">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <%= t('admin.rejected', 'Rejected') %>
+      </a>
     </div>
 
     <% if (confirmations.length > 0) { %>
-    <div class="flex flex-col gap-4">
+    <div class="admin-payments-list">
       <% confirmations.forEach(function(pc) { %>
-      <div class="admin-card" style="<%= pc.status === 'pending' ? 'border-left: 3px solid var(--color-warning);' : '' %>">
-        <div class="grid" style="grid-template-columns: 1fr 1fr auto; gap: var(--space-6); align-items: start;">
-          <div>
-            <div class="flex items-center gap-2 mb-3">
-              <strong style="color: var(--color-primary);">#<%= pc.orderNumber %></strong>
-              <span class="status status-<%= pc.status === 'approved' ? 'completed' : pc.status === 'rejected' ? 'cancelled' : 'waiting_confirmation' %>"><%= t('admin.' + pc.status, pc.status) %></span>
+      <div class="admin-payment-card<%= pc.status === 'pending' ? ' admin-payment-pending' : '' %>">
+        <div class="admin-payment-grid">
+          <!-- Info -->
+          <div class="admin-payment-info">
+            <div class="admin-payment-header">
+              <span class="admin-order-num">#<%= pc.orderNumber %></span>
+              <span class="admin-badge admin-badge-<%= pc.status === 'approved' ? 'completed' : pc.status === 'rejected' ? 'cancelled' : 'pending' %>"><%= t('admin.' + pc.status, pc.status) %></span>
             </div>
-            <div class="flex flex-col gap-2" style="font: var(--font-body-md); color: var(--color-text-secondary);">
-              <div class="flex gap-6">
-                <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.sender_bank', 'Sender Bank') %></span>
-                  <p style="margin-bottom: 0; font-weight: 500; color: var(--color-text);"><%= pc.senderBank %></p>
-                </div>
-                <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.sender_name', 'Sender Name') %></span>
-                  <p style="margin-bottom: 0; font-weight: 500; color: var(--color-text);"><%= pc.senderName %></p>
-                </div>
+            <div class="admin-payment-details">
+              <div class="admin-payment-detail">
+                <span class="admin-payment-detail-label"><%= t('admin.sender_bank', 'Sender Bank') %></span>
+                <span class="admin-payment-detail-value"><%= pc.senderBank %></span>
               </div>
-              <div class="flex gap-6">
-                <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.amount', 'Amount') %></span>
-                  <p style="margin-bottom: 0; font: 600 16px/1.3 var(--font-family); color: var(--color-text);"><%= formatRp(pc.amount) %></p>
-                </div>
-                <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.transfer_date', 'Transfer Date') %></span>
-                  <p style="margin-bottom: 0; font-weight: 500; color: var(--color-text);"><%= pc.transferDate %></p>
-                </div>
+              <div class="admin-payment-detail">
+                <span class="admin-payment-detail-label"><%= t('admin.sender_name', 'Sender Name') %></span>
+                <span class="admin-payment-detail-value"><%= pc.senderName %></span>
               </div>
-              <% if (pc.notes) { %>
-              <div>
-                <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.notes', 'Notes') %></span>
-                <p style="margin-bottom: 0; color: var(--color-text-secondary);"><%= pc.notes %></p>
+              <div class="admin-payment-detail">
+                <span class="admin-payment-detail-label"><%= t('admin.amount', 'Amount') %></span>
+                <span class="admin-payment-detail-value admin-payment-amount"><%= formatRp(pc.amount) %></span>
               </div>
-              <% } %>
+              <div class="admin-payment-detail">
+                <span class="admin-payment-detail-label"><%= t('admin.transfer_date', 'Transfer Date') %></span>
+                <span class="admin-payment-detail-value"><%= pc.transferDate %></span>
+              </div>
             </div>
+            <% if (pc.notes) { %>
+            <div class="admin-payment-notes">
+              <span class="admin-payment-detail-label"><%= t('admin.notes', 'Notes') %></span>
+              <p><%= pc.notes %></p>
+            </div>
+            <% } %>
           </div>
 
-          <div>
-            <span style="color: var(--color-text-muted); font: var(--font-label-xs); display: block; margin-bottom: var(--space-2);"><%= t('admin.receipt_image', 'Receipt Image') %></span>
+          <!-- Receipt -->
+          <div class="admin-payment-receipt">
+            <span class="admin-payment-detail-label"><%= t('admin.receipt_image', 'Receipt') %></span>
             <% if (pc.receiptImage) { %>
-            <a href="<%= pc.receiptImage %>" target="_blank" style="display: block; width: 160px; height: 120px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border-light);">
-              <img src="<%= pc.receiptImage %>" alt="Payment receipt" style="width: 100%; height: 100%; object-fit: cover;">
+            <a href="<%= pc.receiptImage %>" target="_blank" class="admin-receipt-thumb">
+              <img src="<%= pc.receiptImage %>" alt="Payment receipt">
+              <div class="admin-receipt-overlay">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+              </div>
             </a>
             <% } else { %>
-            <div style="width: 160px; height: 120px; border-radius: var(--radius-md); background: var(--color-gray-50); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted);">
+            <div class="admin-receipt-empty">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
             <% } %>
           </div>
 
-          <% if (pc.status === 'pending') { %>
-          <div class="flex flex-col gap-2">
+          <!-- Actions -->
+          <div class="admin-payment-actions">
+            <% if (pc.status === 'pending') { %>
             <form action="/admin/payments/<%= pc.id %>/approve" method="post">
-              <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <button type="submit" class="btn btn-primary btn-sm admin-payment-action-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 <%= t('admin.approve') %>
               </button>
             </form>
             <form action="/admin/payments/<%= pc.id %>/reject" method="post" onsubmit="var r=prompt('<%= t('admin.rejection_reason') %>:'); if(!r){return false;} this.querySelector('[name=reason]').value=r;">
               <input type="hidden" name="reason" value="">
-              <button type="submit" class="btn btn-ghost btn-sm" style="width: 100%; color: var(--color-danger);">
+              <button type="submit" class="btn btn-ghost btn-sm admin-payment-action-btn admin-payment-reject-btn">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 <%= t('admin.reject') %>
               </button>
             </form>
+            <% } else if (pc.status === 'rejected' && pc.rejectionReason) { %>
+            <div class="admin-payment-rejection">
+              <span class="admin-payment-detail-label"><%= t('admin.rejection_reason') %></span>
+              <p><%= pc.rejectionReason %></p>
+            </div>
+            <% } %>
           </div>
-          <% } else if (pc.status === 'rejected' && pc.rejectionReason) { %>
-          <div>
-            <span style="color: var(--color-text-muted); font: var(--font-label-xs); display: block; margin-bottom: var(--space-1);"><%= t('admin.rejection_reason') %></span>
-            <p style="font: var(--font-body-md); color: var(--color-danger); margin-bottom: 0;"><%= pc.rejectionReason %></p>
-          </div>
-          <% } %>
         </div>
       </div>
       <% }); %>
     </div>
 
     <% } else { %>
-    <div class="dashboard-table-wrap">
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        </div>
-        <h3><%= t('admin.no_payments', 'No payment confirmations') %></h3>
+    <div class="admin-card">
+      <div class="admin-empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <h4><%= t('admin.no_payments', 'No payment confirmations') %></h4>
         <p><%= statusFilter ? t('admin.no_status_confirmations', 'No confirmations with that status.') : t('admin.payments_empty_hint', 'Payment confirmations from manual transfers will appear here.') %></p>
       </div>
     </div>

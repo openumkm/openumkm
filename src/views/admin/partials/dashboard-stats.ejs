@@ -1,37 +1,51 @@
-<%# Admin Dashboard Stats Cards Partial %>
+<%# Admin Dashboard Stats Cards — Modern %>
 <%
 function fmtRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
 }
 var s = typeof stats !== 'undefined' ? stats : {};
 %>
-<div class="admin-stats">
-  <div class="stat-card">
-    <div class="stat-card-icon primary">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+<div class="admin-stats-grid">
+  <div class="admin-stat-card">
+    <div class="admin-stat-header">
+      <div class="admin-stat-icon admin-stat-icon-primary">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="admin-stat-trend admin-stat-trend-up">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
     </div>
-    <div class="stat-card-label"><%= t('admin.revenue_today') %></div>
-    <div class="stat-card-value"><%= fmtRp(s.revenueToday) %></div>
+    <div class="admin-stat-value"><%= fmtRp(s.revenueToday) %></div>
+    <div class="admin-stat-label"><%= t('admin.revenue_today') %></div>
   </div>
-  <div class="stat-card">
-    <div class="stat-card-icon success">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+
+  <div class="admin-stat-card">
+    <div class="admin-stat-header">
+      <div class="admin-stat-icon admin-stat-icon-blue">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </div>
     </div>
-    <div class="stat-card-label"><%= t('admin.orders_today') %></div>
-    <div class="stat-card-value"><%= s.ordersToday || 0 %></div>
+    <div class="admin-stat-value"><%= s.ordersToday || 0 %></div>
+    <div class="admin-stat-label"><%= t('admin.orders_today') %></div>
   </div>
-  <div class="stat-card">
-    <div class="stat-card-icon warning">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+
+  <div class="admin-stat-card">
+    <div class="admin-stat-header">
+      <div class="admin-stat-icon admin-stat-icon-amber">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
     </div>
-    <div class="stat-card-label"><%= t('admin.total_revenue') %></div>
-    <div class="stat-card-value"><%= fmtRp(s.totalRevenue) %></div>
+    <div class="admin-stat-value"><%= fmtRp(s.totalRevenue) %></div>
+    <div class="admin-stat-label"><%= t('admin.total_revenue') %></div>
   </div>
-  <div class="stat-card">
-    <div class="stat-card-icon success">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+
+  <div class="admin-stat-card">
+    <div class="admin-stat-header">
+      <div class="admin-stat-icon admin-stat-icon-green">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
     </div>
-    <div class="stat-card-label"><%= t('admin.total_orders') %></div>
-    <div class="stat-card-value"><%= s.totalOrders || 0 %></div>
+    <div class="admin-stat-value"><%= s.totalOrders || 0 %></div>
+    <div class="admin-stat-label"><%= t('admin.total_orders') %></div>
   </div>
 </div>

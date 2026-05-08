@@ -2,6 +2,9 @@
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
 }
+var productList = typeof products !== 'undefined' ? products : [];
+var featuredProducts = productList.filter(function(p, i) { return i < 3 && p.stock > 0; });
+var hasSearch = typeof search !== 'undefined' && search;
 %>
 <!DOCTYPE html>
 <html lang="<%= typeof currentLang !== 'undefined' ? currentLang : 'en' %>">
@@ -9,38 +12,87 @@ function formatRp(amount) {
 <body>
 <%- include('../partials/header.ejs', { isLoggedIn, isAdmin: false, cartCount, currentPage: 'home' }) %>
 
-<section class="hero">
+<!-- Hero Section -->
+<section class="hero-modern">
+  <div class="hero-modern-bg">
+    <div class="hero-gradient-orb hero-orb-1"></div>
+    <div class="hero-gradient-orb hero-orb-2"></div>
+    <div class="hero-gradient-orb hero-orb-3"></div>
+  </div>
   <div class="container">
-    <div class="hero-content">
-      <div class="hero-badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+    <div class="hero-modern-content">
+      <div class="hero-modern-badge">
+        <span class="hero-badge-dot"></span>
         <%= t('storefront.new_collection', 'New Collection 2026') %>
       </div>
-      <h1><%= t('storefront.hero_title', 'Discover Curated Essentials') %></h1>
-      <p><%= t('storefront.hero_subtitle', 'Premium products handpicked for your lifestyle. From fashion to electronics, find everything you need in one place.') %></p>
-      <form action="/" method="get" class="hero-actions" role="search">
-        <div class="input-icon-wrap" style="flex:1;min-width:260px">
-          <input type="search" name="search" class="input input-search" placeholder="<%= t('storefront.search_placeholder') %>" value="<%= typeof search !== 'undefined' ? search : '' %>" aria-label="<%= t('storefront.search') %>">
+      <h1 class="hero-modern-title"><%= t('storefront.hero_title', 'Discover Curated Essentials') %></h1>
+      <p class="hero-modern-subtitle"><%= t('storefront.hero_subtitle', 'Premium products handpicked for your lifestyle. From fashion to electronics, find everything you need in one place.') %></p>
+      <form action="/" method="get" class="hero-search-form" role="search">
+        <div class="hero-search-wrap">
+          <svg class="hero-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" name="q" class="hero-search-input" placeholder="<%= t('storefront.search_placeholder') %>" value="<%= typeof search !== 'undefined' ? search : '' %>" aria-label="<%= t('storefront.search') %>">
+          <button type="submit" class="hero-search-btn"><%= t('storefront.explore', 'Explore') %></button>
         </div>
-        <button type="submit" class="btn btn-primary btn-lg"><%= t('storefront.explore', 'Explore') %></button>
-        <a href="#products" class="btn btn-secondary btn-lg"><%= t('storefront.browse_all', 'Browse All') %></a>
       </form>
+      <div class="hero-modern-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num"><%= productList.length %>+</span>
+          <span class="hero-stat-label"><%= t('storefront.products', 'Products') %></span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">24/7</span>
+          <span class="hero-stat-label"><%= t('storefront.customer_service', 'Support') %></span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">100%</span>
+          <span class="hero-stat-label"><%= t('storefront.secure_checkout', 'Secure') %></span>
+        </div>
+      </div>
     </div>
+
+    <% if (featuredProducts.length > 0) { %>
+    <div class="hero-featured-cards">
+      <% featuredProducts.slice(0, 3).forEach(function(product, idx) { %>
+      <a href="/product/<%= product.slug %>" class="hero-featured-card" style="animation-delay: <%= idx * 100 %>ms">
+        <div class="hero-featured-img">
+          <img src="<%= product.image %>" alt="<%= product.name %>" loading="eager">
+        </div>
+        <div class="hero-featured-info">
+          <p class="hero-featured-name"><%= product.name %></p>
+          <p class="hero-featured-price"><%= formatRp(product.price) %></p>
+        </div>
+      </a>
+      <% }); %>
+    </div>
+    <% } %>
   </div>
 </section>
 
-<section id="products" class="section" aria-labelledby="products-heading">
+<!-- Products Section -->
+<section id="products" class="products-section" aria-labelledby="products-heading">
   <div class="container">
-    <div class="flex items-center justify-between mb-8">
-      <h2 id="products-heading"><%= typeof search !== 'undefined' && search ? t('storefront.search_results') : t('storefront.all_products', 'All Products') %></h2>
-      <% if (typeof search !== 'undefined' && search) { %>
-      <a href="/" class="btn btn-ghost btn-sm"><%= t('storefront.clear_search', 'Clear Search') %></a>
-      <% } %>
+    <div class="products-section-header">
+      <div>
+        <h2 id="products-heading"><%= hasSearch ? t('storefront.search_results') : t('storefront.all_products', 'All Products') %></h2>
+        <% if (hasSearch) { %>
+        <p class="products-search-info">Showing results for "<strong><%= search %></strong>"</p>
+        <% } %>
+      </div>
+      <div class="products-section-actions">
+        <% if (hasSearch) { %>
+        <a href="/" class="btn btn-secondary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <%= t('storefront.clear_search', 'Clear Search') %>
+        </a>
+        <% } %>
+      </div>
     </div>
 
-    <% if (typeof products !== 'undefined' && products.length > 0) { %>
+    <% if (productList.length > 0) { %>
     <div class="product-grid">
-      <% products.forEach(function(product, index) { %>
+      <% productList.forEach(function(product, index) { %>
       <a href="/product/<%= product.slug %>" class="product-card">
         <div class="product-card-image">
           <img src="<%= product.image %>" alt="<%= product.name %>" loading="<%= index < 4 ? 'eager' : 'lazy' %>">
@@ -52,6 +104,11 @@ function formatRp(amount) {
             <span class="badge badge-success"><%= t('storefront.featured', 'Featured') %></span>
             <% } %>
           </div>
+          <div class="product-card-actions">
+            <span class="btn-icon btn-secondary" title="<%= t('storefront.add_to_cart') %>">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            </span>
+          </div>
         </div>
         <div class="product-card-body">
           <% if (product.category) { %><p class="product-card-category"><%= product.category %></p><% } %>
@@ -61,13 +118,32 @@ function formatRp(amount) {
       </a>
       <% }); %>
     </div>
+
+    <% if (typeof pages !== 'undefined' && pages > 1) { %>
+    <div class="pagination">
+      <% if (page > 1) { %>
+      <a href="/?page=<%= page - 1 %><%= hasSearch ? '&q=' + search : '' %>" class="pagination-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <%= t('storefront.previous', 'Previous') %>
+      </a>
+      <% } %>
+      <span class="pagination-info"><%= t('storefront.page', 'Page') %> <%= page %> <%= t('storefront.of', 'of') %> <%= pages %></span>
+      <% if (page < pages) { %>
+      <a href="/?page=<%= page + 1 %><%= hasSearch ? '&q=' + search : '' %>" class="pagination-btn">
+        <%= t('storefront.next', 'Next') %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <% } %>
+    </div>
+    <% } %>
+
     <% } else { %>
     <div class="empty-state">
       <div class="empty-state-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </div>
       <h3><%= t('storefront.no_products') %></h3>
-      <% if (typeof search !== 'undefined' && search) { %>
+      <% if (hasSearch) { %>
       <p><%= t('storefront.no_products_search', "We couldn't find anything matching") %> "<strong><%= search %></strong>". <%= t('storefront.try_different', 'Try a different keyword.') %></p>
       <% } %>
       <a href="/" class="btn btn-primary"><%= t('storefront.view_all_products', 'View All Products') %></a>
@@ -77,5 +153,16 @@ function formatRp(amount) {
 </section>
 
 <%- include('../partials/footer.ejs') %>
+
+<script>
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
 </body>
 </html>

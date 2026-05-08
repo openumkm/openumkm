@@ -98,6 +98,11 @@ var variants = (typeof product !== 'undefined' && product.variants) ? product.va
 
           <% if (!outOfStock) { %>
           <form action="/cart/add" method="post" class="product-actions">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="productId" value="<%= product.id %>">
+            <% if (product.variants && product.variants.length > 0 && product.variants[0].id) { %>
+            <input type="hidden" name="variantId" id="selectedVariantId" value="<%= product.variants[0].id %>">
+            <% } %>
             <div class="qty-selector">
               <button type="button" class="qty-btn" onclick="var i=this.nextElementSibling;i.value=Math.max(1,+i.value-1)">-</button>
               <input type="number" name="qty" class="qty-input" value="1" min="1" max="<%= stock %>" aria-label="<%= t('storefront.quantity') %>">

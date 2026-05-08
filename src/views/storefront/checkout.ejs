@@ -17,7 +17,25 @@ var hasSavedAddrs = savedAddrs.length > 0;
 
 <main class="checkout-page">
   <div class="container">
-    <h1 class="mb-8"><%= t('storefront.checkout_title') %></h1>
+    <div class="checkout-header">
+      <h1><%= t('storefront.checkout_title') %></h1>
+      <div class="checkout-steps">
+        <div class="checkout-step active">
+          <span class="checkout-step-num">1</span>
+          <span class="checkout-step-label"><%= t('storefront.contact_info', 'Contact') %></span>
+        </div>
+        <div class="checkout-step-line"></div>
+        <div class="checkout-step active">
+          <span class="checkout-step-num">2</span>
+          <span class="checkout-step-label"><%= t('storefront.checkout_shipping', 'Shipping') %></span>
+        </div>
+        <div class="checkout-step-line"></div>
+        <div class="checkout-step active">
+          <span class="checkout-step-num">3</span>
+          <span class="checkout-step-label"><%= t('storefront.checkout_payment', 'Payment') %></span>
+        </div>
+      </div>
+    </div>
 
     <div class="grid">
       <div class="col-8 md:col-6">
@@ -25,73 +43,124 @@ var hasSavedAddrs = savedAddrs.length > 0;
           <form action="/checkout/submit" method="post" id="checkoutForm">
 
             <% if (hasSavedAddrs) { %>
-            <section class="mb-12">
-              <h3><%= t('storefront.saved_addresses', 'Saved Addresses') %></h3>
-              <div class="flex flex-col gap-3">
+            <section class="checkout-section">
+              <div class="checkout-section-header">
+                <div class="checkout-section-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <h3><%= t('storefront.saved_addresses', 'Saved Addresses') %></h3>
+              </div>
+              <div class="saved-addresses-list">
                 <% savedAddrs.forEach(function(addr, idx) { %>
-                <label class="shipping-method<%= idx === 0 ? ' selected' : '' %>">
+                <label class="address-card<%= idx === 0 ? ' selected' : '' %>">
                   <input type="radio" name="savedAddressId" value="<%= addr.id %>" <%= idx === 0 ? 'checked' : '' %>>
-                  <div class="shipping-method-content" style="width:100%">
-                    <p class="shipping-method-name"><%= addr.label %></p>
-                    <p class="shipping-method-desc"><%= addr.recipientName %> — <%= addr.phone %> — <%= addr.addressLine %>, <%= addr.city %>, <%= addr.province %>, <%= addr.postalCode %></p>
+                  <div class="address-card-check">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div class="address-card-content">
+                    <p class="address-card-label"><%= addr.label %></p>
+                    <p class="address-card-detail"><%= addr.recipientName %> · <%= addr.phone %></p>
+                    <p class="address-card-detail"><%= addr.addressLine %>, <%= addr.city %>, <%= addr.province %> <%= addr.postalCode %></p>
                   </div>
                 </label>
                 <% }); %>
-                <label class="shipping-method">
+                <label class="address-card address-card-new">
                   <input type="radio" name="savedAddressId" value="">
-                  <div class="shipping-method-content" style="width:100%">
-                    <p class="shipping-method-name"><%= t('storefront.enter_new_address', 'Enter a new address') %></p>
+                  <div class="address-card-check">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </div>
+                  <div class="address-card-content">
+                    <p class="address-card-label"><%= t('storefront.enter_new_address', 'Enter a new address') %></p>
                   </div>
                 </label>
               </div>
             </section>
             <% } %>
 
-            <section class="mb-12">
-              <h3>1. <%= t('storefront.contact_info', 'Contact Information') %></h3>
-              <div class="form-group">
-                <label for="name" class="form-label form-label-required"><%= t('storefront.checkout_recipient') %></label>
-                <input type="text" id="name" name="name" class="input" required>
-              </div>
-              <div class="form-group">
-                <label for="email" class="form-label"><%= t('storefront.checkout_email') %> <span class="text-muted">(<%= t('storefront.optional', 'optional') %>)</span></label>
-                <input type="email" id="email" name="email" class="input" placeholder="you@example.com">
-              </div>
-              <div class="form-group">
-                <label for="phone" class="form-label form-label-required"><%= t('storefront.checkout_phone') %></label>
-                <input type="tel" id="phone" name="phone" class="input" required placeholder="+62 812-3456-7890">
-              </div>
-            </section>
-
-            <section class="mb-12">
-              <h3>2. <%= t('storefront.checkout_shipping') %></h3>
-              <div class="form-group">
-                <label for="address" class="form-label form-label-required"><%= t('storefront.checkout_address') %></label>
-                <textarea id="address" name="addressLine" class="textarea" required></textarea>
-              </div>
-              <div class="form-group">
-                <label for="destinationSearch" class="form-label form-label-required"><%= t('storefront.checkout_city') %> / <%= t('storefront.district', 'District') %></label>
-                <input type="text" id="destinationSearch" class="input" placeholder="<%= t('storefront.city_search_ph', 'Type to search city...') %>" autocomplete="off">
-                <input type="hidden" id="destinationId" name="destinationId" value="">
-                <input type="hidden" id="city" name="city" value="">
-                <input type="hidden" id="province" name="province" value="">
-                <div id="destinationResults" class="autocomplete-dropdown" style="display:none;"></div>
-                <span class="form-hint" id="destinationLabel"></span>
-              </div>
-              <div class="grid" style="grid-template-columns:1fr 1fr;gap:var(--space-4)">
-                <div class="form-group">
-                  <label for="postalCode" class="form-label form-label-required"><%= t('storefront.checkout_postal') %></label>
-                  <input type="text" id="postalCode" name="postalCode" class="input" required placeholder="12345">
+            <section class="checkout-section">
+              <div class="checkout-section-header">
+                <div class="checkout-section-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
+                <h3><%= t('storefront.contact_info', 'Contact Information') %></h3>
+              </div>
+              <div class="checkout-fields">
                 <div class="form-group">
-                  <label for="recipientName" class="form-label form-label-required"><%= t('storefront.checkout_recipient') %></label>
-                  <input type="text" id="recipientName" name="recipientName" class="input" required>
+                  <label for="name" class="form-label form-label-required"><%= t('storefront.checkout_recipient') %></label>
+                  <div class="input-icon-wrap">
+                    <span class="input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                    <input type="text" id="name" name="name" class="input" required placeholder="<%= t('storefront.name_placeholder', 'Full name') %>">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="email" class="form-label"><%= t('storefront.checkout_email') %> <span class="text-muted">(<%= t('storefront.optional', 'optional') %>)</span></label>
+                    <div class="input-icon-wrap">
+                      <span class="input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+                      <input type="email" id="email" name="email" class="input" placeholder="you@example.com">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="phone" class="form-label form-label-required"><%= t('storefront.checkout_phone') %></label>
+                    <div class="input-icon-wrap">
+                      <span class="input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+                      <input type="tel" id="phone" name="phone" class="input" required placeholder="+62 812-3456-7890">
+                    </div>
+                  </div>
                 </div>
               </div>
             </section>
 
-            <section class="mb-12">
-              <h3>3. <%= t('storefront.shipping_method', 'Shipping Method') %></h3>
+            <section class="checkout-section">
+              <div class="checkout-section-header">
+                <div class="checkout-section-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                </div>
+                <h3><%= t('storefront.checkout_shipping', 'Shipping Information') %></h3>
+              </div>
+              <div class="checkout-fields">
+                <div class="form-group">
+                  <label for="address" class="form-label form-label-required"><%= t('storefront.checkout_address') %></label>
+                  <textarea id="address" name="addressLine" class="textarea" required placeholder="<%= t('storefront.address_placeholder', 'Street address, building, apartment...') %>"></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="destinationSearch" class="form-label form-label-required"><%= t('storefront.checkout_city') %> / <%= t('storefront.district', 'District') %></label>
+                  <div class="input-icon-wrap">
+                    <span class="input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                    <input type="text" id="destinationSearch" class="input" placeholder="<%= t('storefront.city_search_ph', 'Type to search city or district...') %>" autocomplete="off">
+                  </div>
+                  <input type="hidden" id="destinationId" name="destinationId" value="">
+                  <input type="hidden" id="city" name="city" value="">
+                  <input type="hidden" id="province" name="province" value="">
+                  <div id="destinationResults" class="autocomplete-dropdown" style="display:none;"></div>
+                  <span class="form-hint" id="destinationLabel"></span>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="postalCode" class="form-label form-label-required"><%= t('storefront.checkout_postal') %></label>
+                    <div class="input-icon-wrap">
+                      <span class="input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+                      <input type="text" id="postalCode" name="postalCode" class="input" required placeholder="12345">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="recipientName" class="form-label form-label-required"><%= t('storefront.checkout_recipient') %></label>
+                    <div class="input-icon-wrap">
+                      <span class="input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                      <input type="text" id="recipientName" name="recipientName" class="input" required placeholder="<%= t('storefront.recipient_placeholder', 'Recipient name') %>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="checkout-section">
+              <div class="checkout-section-header">
+                <div class="checkout-section-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                </div>
+                <h3><%= t('storefront.shipping_method', 'Shipping Method') %></h3>
+              </div>
               <div class="shipping-methods" id="shippingMethods">
                 <% if (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) { %>
                 <% customShippingMethods.forEach(function(m, idx) { %>
@@ -105,7 +174,10 @@ var hasSavedAddrs = savedAddrs.length > 0;
                 </label>
                 <% }); %>
                 <% } else { %>
-                <div class="text-muted p-4" id="shippingPlaceholder"><%= t('storefront.select_city_first', 'Select a city above to see shipping options.') %></div>
+                <div class="shipping-placeholder" id="shippingPlaceholder">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  <p><%= t('storefront.select_city_first', 'Select a city above to see shipping options.') %></p>
+                </div>
                 <% } %>
               </div>
               <input type="hidden" name="shippingCost" id="shippingCostInput" value="<%= typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0 ? customShippingMethods[0].cost : 0 %>">
@@ -113,17 +185,28 @@ var hasSavedAddrs = savedAddrs.length > 0;
               <input type="hidden" name="courierService" id="courierServiceInput" value="<%= typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0 ? (customShippingMethods[0].description || customShippingMethods[0].name) : '' %>">
             </section>
 
-            <section class="mb-12">
-              <h3>4. <%= t('storefront.checkout_payment') %></h3>
-              <div class="payment-tabs" role="tablist">
-                <button type="button" class="payment-tab active" role="tab" data-tab="pay-xendit"><%= t('storefront.checkout_payment_xendit') %></button>
-                <button type="button" class="payment-tab" role="tab" data-tab="pay-transfer"><%= t('storefront.checkout_payment_manual') %></button>
+            <section class="checkout-section">
+              <div class="checkout-section-header">
+                <div class="checkout-section-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                </div>
+                <h3><%= t('storefront.checkout_payment') %></h3>
+              </div>
+              <div class="payment-tabs-modern" role="tablist">
+                <button type="button" class="payment-tab-modern active" role="tab" data-tab="pay-xendit" aria-selected="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  <span><%= t('storefront.checkout_payment_xendit') %></span>
+                </button>
+                <button type="button" class="payment-tab-modern" role="tab" data-tab="pay-transfer" aria-selected="false">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                  <span><%= t('storefront.checkout_payment_manual') %></span>
+                </button>
               </div>
 
               <div class="payment-tab-content active" id="pay-xendit" role="tabpanel">
-                <div class="alert alert-info mb-4">
+                <div class="payment-info-box">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                  <span><%= t('storefront.xendit_hint', 'After placing your order, you will be redirected to Xendit to complete payment.') %></span>
+                  <span><%= t('storefront.xendit_hint', 'After placing your order, you will be redirected to Xendit to complete payment securely.') %></span>
                 </div>
                 <input type="hidden" name="paymentMethod" value="xendit" id="paymentMethodInput">
               </div>
@@ -138,7 +221,7 @@ var hasSavedAddrs = savedAddrs.length > 0;
                     <div class="bank-logo"><%= (bank.name || bank.bankName || '').substring(0, 3).toUpperCase() %></div>
                     <div class="bank-info">
                       <p class="bank-name"><%= bank.name || bank.bankName %></p>
-                      <p class="bank-number"><%= bank.number || bank.accountNumber %> &middot; a/n <%= bank.holder || bank.accountHolder %></p>
+                      <p class="bank-number"><%= bank.number || bank.accountNumber %> · a/n <%= bank.holder || bank.accountHolder %></p>
                     </div>
                   </label>
                   <% }); %>
@@ -158,43 +241,50 @@ var hasSavedAddrs = savedAddrs.length > 0;
         <div class="checkout-summary">
           <h3><%= t('storefront.checkout_summary') %></h3>
           <% if (typeof cartItems !== 'undefined' && cartItems.length > 0) { %>
-          <div class="flex flex-col gap-4 mb-6">
+          <div class="checkout-items">
             <% cartItems.forEach(function(item) { %>
-            <div class="flex items-center gap-3">
-              <div style="width:56px;height:56px;border-radius:var(--radius-md);overflow:hidden;flex-shrink:0;background:var(--color-gray-50)">
-                <img src="<%= item.image %>" alt="<%= item.name %>" style="width:100%;height:100%;object-fit:cover">
+            <div class="checkout-item">
+              <div class="checkout-item-img">
+                <img src="<%= item.image %>" alt="<%= item.name %>">
+                <span class="checkout-item-qty"><%= item.qty %></span>
               </div>
-              <div style="flex:1;min-width:0">
-                <p class="truncate" style="font:500 14px/1.3 var(--font-family)"><%= item.name %></p>
-                <p class="text-muted" style="font:var(--font-label-xs)"><%= t('admin.qty', 'Qty') %>: <%= item.qty %></p>
+              <div class="checkout-item-info">
+                <p class="checkout-item-name"><%= item.name %></p>
+                <% if (item.variant) { %><p class="checkout-item-variant"><%= item.variant %></p><% } %>
               </div>
-              <span style="font:600 14px/1.3 var(--font-family);white-space:nowrap"><%= formatRp(item.price * (item.qty || 1)) %></span>
+              <span class="checkout-item-price"><%= formatRp(item.price * (item.qty || 1)) %></span>
             </div>
             <% }); %>
           </div>
           <% } %>
 
-          <div class="cart-summary-row">
-            <span><%= t('storefront.checkout_subtotal') %></span>
-            <span class="font-semibold"><%= formatRp(typeof subtotal !== 'undefined' ? subtotal : 0) %></span>
-          </div>
-          <div class="cart-summary-row">
-            <span><%= t('storefront.checkout_tax') %></span>
-            <span><%= formatRp(taxAmount) %></span>
-          </div>
-          <div class="cart-summary-row">
-            <span><%= t('storefront.checkout_shipping_cost') %></span>
-            <span id="shippingSummary"><%= shippingCost > 0 ? formatRp(shippingCost) : t('storefront.select_destination', 'Select destination') %></span>
-          </div>
-          <div class="cart-summary-row total">
-            <span><%= t('storefront.checkout_total') %></span>
-            <span id="totalSummary"><%= formatRp(totalAmount) %></span>
+          <div class="checkout-summary-totals">
+            <div class="cart-summary-row">
+              <span><%= t('storefront.checkout_subtotal') %></span>
+              <span><%= formatRp(typeof subtotal !== 'undefined' ? subtotal : 0) %></span>
+            </div>
+            <div class="cart-summary-row">
+              <span><%= t('storefront.checkout_tax') %></span>
+              <span><%= formatRp(taxAmount) %></span>
+            </div>
+            <div class="cart-summary-row">
+              <span><%= t('storefront.checkout_shipping_cost') %></span>
+              <span id="shippingSummary"><%= shippingCost > 0 ? formatRp(shippingCost) : t('storefront.select_destination', 'Pilih tujuan') %></span>
+            </div>
+            <div class="cart-summary-row total">
+              <span><%= t('storefront.checkout_total') %></span>
+              <span id="totalSummary"><%= formatRp(totalAmount) %></span>
+            </div>
           </div>
 
-          <button type="submit" form="checkoutForm" class="btn btn-primary btn-lg w-full">
+          <button type="submit" form="checkoutForm" class="btn btn-primary btn-lg w-full checkout-submit-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <%= t('storefront.checkout_submit') %>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
+          <p class="checkout-secure-note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <%= t('storefront.secure_checkout', 'Secure checkout — your data is encrypted') %>
+          </p>
         </div>
       </aside>
     </div>

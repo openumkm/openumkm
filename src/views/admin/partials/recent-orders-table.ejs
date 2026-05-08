@@ -1,49 +1,57 @@
-<%# Recent Orders Table Partial — used in admin dashboard %>
+<%# Recent Orders Table — Modern %>
 <%
 var orders = typeof recentOrders !== 'undefined' ? recentOrders : [];
 var admin = typeof isAdmin !== 'undefined' ? isAdmin : false;
 var basePath = admin ? '/admin/orders' : '/dashboard/orders';
 %>
-<div class="dashboard-table-wrap">
-  <div class="dashboard-table-header">
+<div class="admin-card">
+  <div class="admin-card-header">
     <h3><%= t('admin.recent_orders') %></h3>
+    <% if (orders.length > 0) { %>
+    <a href="<%= basePath %>" class="btn btn-ghost btn-sm">
+      <%= t('admin.view_all', 'View All') %>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </a>
+    <% } %>
   </div>
   <% if (orders.length > 0) { %>
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th><%= t('admin.order_number') %></th>
-        <th><%= t('admin.customer') %></th>
-        <th><%= t('admin.total') %></th>
-        <th><%= t('admin.status') %></th>
-        <th><%= t('admin.date', 'Date') %></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% orders.forEach(function(order) { %>
-      <tr style="cursor: pointer;" onclick="window.location.href='<%= basePath %>/<%= order.id %>'">
-        <td><strong>#<%= order.orderNumber || order.id %></strong></td>
-        <td>
-          <div class="customer-cell">
-            <div class="avatar"><%= order.customerName ? order.customerName.charAt(0).toUpperCase() : 'G' %></div>
-            <span><%= order.customerName || t('admin.guest', 'Guest') %></span>
-          </div>
-        </td>
-        <td class="amount">Rp <%= order.total ? order.total.toLocaleString('id-ID') : '0' %></td>
-        <td>
-          <span class="status status-<%= (order.status || 'pending').toLowerCase() %>"><%= t('admin.' + (order.status || 'pending'), (order.status || 'pending').replace(/_/g, ' ')) %></span>
-        </td>
-        <td><%= order.createdAt || '—' %></td>
-      </tr>
-      <% }); %>
-    </tbody>
-  </table>
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th><%= t('admin.order_number') %></th>
+          <th><%= t('admin.customer') %></th>
+          <th><%= t('admin.total') %></th>
+          <th><%= t('admin.status') %></th>
+          <th><%= t('admin.date', 'Date') %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(function(order) { %>
+        <tr onclick="window.location.href='<%= basePath %>/<%= order.id %>'">
+          <td>
+            <span class="admin-order-num">#<%= order.orderNumber || order.id %></span>
+          </td>
+          <td>
+            <div class="admin-customer-cell">
+              <div class="admin-customer-avatar"><%= order.customerName ? order.customerName.charAt(0).toUpperCase() : 'G' %></div>
+              <span><%= order.customerName || t('admin.guest', 'Guest') %></span>
+            </div>
+          </td>
+          <td><span class="admin-amount">Rp <%= order.total ? order.total.toLocaleString('id-ID') : '0' %></span></td>
+          <td>
+            <span class="admin-badge admin-badge-<%= (order.status || 'pending').toLowerCase() %>"><%= t('admin.' + (order.status || 'pending'), (order.status || 'pending').replace(/_/g, ' ')) %></span>
+          </td>
+          <td><span class="admin-date"><%= order.createdAt || '—' %></span></td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
   <% } else { %>
-  <div class="empty-state">
-    <div class="empty-state-icon">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-    </div>
-    <h3><%= t('admin.no_orders_yet', 'No orders yet') %></h3>
+  <div class="admin-empty-state">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <h4><%= t('admin.no_orders_yet', 'No orders yet') %></h4>
     <p><%= t('admin.no_orders_hint', 'Recent orders will appear here once customers start placing them.') %></p>
   </div>
   <% } %>

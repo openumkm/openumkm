@@ -1,4 +1,4 @@
-<%# Admin Product List Page %>
+<%# Admin Product List Page — Modern %>
 <%
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
@@ -14,115 +14,124 @@ var totalPages = typeof pages !== 'undefined' ? pages : 1;
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'products' }) %>
 
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <div>
-        <h2><%= t('admin.products') %></h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.products_subtitle', 'Manage your product catalog.') %></p>
+    <div class="admin-topbar">
+      <div class="admin-topbar-left">
+        <h1 class="admin-page-title"><%= t('admin.products') %></h1>
+        <p class="admin-page-subtitle"><%= t('admin.products_subtitle', 'Manage your product catalog.') %></p>
       </div>
-      <a href="/admin/products/new" class="btn btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <%= t('admin.add_product', 'Add Product') %>
-      </a>
+      <div class="admin-topbar-right">
+        <a href="/admin/products/new" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <%= t('admin.add_product', 'Add Product') %>
+        </a>
+      </div>
     </div>
 
-    <div class="dashboard-toolbar">
-      <form action="/admin/products" method="get" class="flex items-center gap-3" style="flex:1; max-width: 400px;">
-        <input type="search" name="q" class="input" placeholder="<%= t('admin.search_products_placeholder', 'Search products...') %>" value="<%= searchQuery %>" style="flex:1;">
-        <button type="submit" class="btn btn-secondary btn-sm"><%= t('admin.search') %></button>
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+      <form action="/admin/products" method="get" class="admin-toolbar-search">
+        <div class="admin-search-wrap">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" name="q" class="admin-search-input" placeholder="<%= t('admin.search_products_placeholder', 'Search products...') %>" value="<%= searchQuery %>">
+        </div>
       </form>
-      <div class="flex items-center gap-2">
-        <span style="font: var(--font-label-xs); color: var(--color-text-muted);"><%= productList.length %> <%= t('admin.products').toLowerCase() %></span>
+      <div class="admin-toolbar-meta">
+        <span class="admin-count-badge"><%= productList.length %> <%= t('admin.products').toLowerCase() %></span>
       </div>
     </div>
 
     <% if (productList.length > 0) { %>
-    <div class="dashboard-table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th><%= t('admin.product', 'Product') %></th>
-            <th><%= t('admin.product_price') %></th>
-            <th><%= t('admin.product_stock') %></th>
-            <th><%= t('admin.status') %></th>
-            <th><%= t('admin.created_at') %></th>
-            <th><span class="sr-only"><%= t('admin.actions') %></span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% productList.forEach(function(product) { %>
-          <tr>
-            <td>
-              <div class="flex items-center gap-3">
-                <div style="width: 56px; height: 56px; border-radius: var(--radius-md); overflow: hidden; background: var(--color-gray-50); flex-shrink: 0;">
-                  <% if (product.image) { %>
-                  <img src="<%= product.image %>" alt="<%= product.name %>" style="width: 100%; height: 100%; object-fit: cover;">
-                  <% } else { %>
-                  <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted);">
+    <div class="admin-card">
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th><%= t('admin.product', 'Product') %></th>
+              <th><%= t('admin.product_price') %></th>
+              <th><%= t('admin.product_stock') %></th>
+              <th><%= t('admin.status') %></th>
+              <th><%= t('admin.created_at') %></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% productList.forEach(function(product) { %>
+            <tr>
+              <td>
+                <div class="admin-product-cell">
+                  <div class="admin-product-thumb">
+                    <% if (product.image) { %>
+                    <img src="<%= product.image %>" alt="<%= product.name %>">
+                    <% } else { %>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <% } %>
                   </div>
-                  <% } %>
+                  <div class="admin-product-info">
+                    <p class="admin-product-name"><%= product.name %></p>
+                    <p class="admin-product-slug"><%= product.slug %></p>
+                  </div>
                 </div>
-                <div style="min-width: 0;">
-                  <p style="font: 500 14px/1.3 var(--font-family); color: var(--color-text); margin-bottom: 2px;"><%= product.name %></p>
-                  <p style="font: var(--font-label-xs); color: var(--color-text-muted);"><%= product.slug %></p>
+              </td>
+              <td><span class="admin-amount"><%= formatRp(product.price) %></span></td>
+              <td>
+                <% if (product.stock === 0) { %>
+                <span class="admin-badge admin-badge-cancelled"><%= t('admin.out_of_stock', 'Out of Stock') %></span>
+                <% } else if (product.stock <= 5) { %>
+                <span class="admin-badge admin-badge-pending"><%= product.stock %> <%= t('admin.left', 'left') %></span>
+                <% } else { %>
+                <span class="admin-stock-num"><%= product.stock %></span>
+                <% } %>
+              </td>
+              <td>
+                <% if (product.isActive) { %>
+                <span class="admin-badge admin-badge-completed"><%= t('admin.product_active') %></span>
+                <% } else { %>
+                <span class="admin-badge" style="background: var(--color-gray-100); color: var(--color-gray-600);"><%= t('admin.archived', 'Archived') %></span>
+                <% } %>
+              </td>
+              <td><span class="admin-date"><%= product.createdAt %></span></td>
+              <td>
+                <div class="admin-actions">
+                  <a href="/admin/products/<%= product.id %>/edit" class="admin-action-btn" title="<%= t('admin.edit') %>">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </a>
+                  <form action="/admin/products/<%= product.id %>/delete" method="post" style="display:inline;" onsubmit="return confirm('<%= t('admin.confirm_delete_product', 'Are you sure you want to delete this product?') %>');">
+                    <button type="submit" class="admin-action-btn admin-action-danger" title="<%= t('admin.delete') %>">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </form>
                 </div>
-              </div>
-            </td>
-            <td style="font: 600 14px/1.3 var(--font-family);"><%= formatRp(product.price) %></td>
-            <td>
-              <% if (product.stock === 0) { %>
-              <span class="badge badge-danger"><%= t('admin.out_of_stock', 'Out of Stock') %></span>
-              <% } else if (product.stock <= 5) { %>
-              <span class="badge badge-warning"><%= product.stock %> <%= t('admin.left', 'left') %></span>
-              <% } else { %>
-              <span style="font: var(--font-label-sm);"><%= product.stock %></span>
-              <% } %>
-            </td>
-            <td>
-              <% if (product.isActive) { %>
-              <span class="badge badge-success"><%= t('admin.product_active') %></span>
-              <% } else { %>
-              <span class="badge badge-neutral"><%= t('admin.archived', 'Archived') %></span>
-              <% } %>
-            </td>
-            <td style="font: var(--font-label-xs); color: var(--color-text-muted);"><%= product.createdAt %></td>
-            <td>
-              <div class="flex items-center gap-1">
-                <a href="/admin/products/<%= product.id %>/edit" class="btn btn-ghost btn-sm" title="<%= t('admin.edit') %>">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                </a>
-                <form action="/admin/products/<%= product.id %>/delete" method="post" style="display:inline;" onsubmit="return confirm('<%= t('admin.confirm_delete_product', 'Are you sure you want to delete this product?') %>');">
-                  <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--color-danger);" title="<%= t('admin.delete') %>">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          <% }); %>
-        </tbody>
-      </table>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <% if (totalPages > 1) { %>
-    <div class="pagination">
+    <div class="admin-pagination">
       <% if (currentPageNum > 1) { %>
-      <a href="/admin/products?page=<%= currentPageNum - 1 %><%= searchQuery ? '&q=' + searchQuery : '' %>" class="btn btn-ghost btn-sm">&larr; <%= t('admin.previous', 'Previous') %></a>
+      <a href="/admin/products?page=<%= currentPageNum - 1 %><%= searchQuery ? '&q=' + searchQuery : '' %>" class="pagination-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        <%= t('admin.previous', 'Previous') %>
+      </a>
       <% } %>
-      <span style="font: var(--font-label-sm); color: var(--color-text-muted);"><%= t('admin.page', 'Page') %> <%= currentPageNum %> <%= t('admin.of', 'of') %> <%= totalPages %></span>
+      <span class="pagination-info"><%= t('admin.page', 'Page') %> <%= currentPageNum %> <%= t('admin.of', 'of') %> <%= totalPages %></span>
       <% if (currentPageNum < totalPages) { %>
-      <a href="/admin/products?page=<%= currentPageNum + 1 %><%= searchQuery ? '&q=' + searchQuery : '' %>" class="btn btn-ghost btn-sm"><%= t('admin.next', 'Next') %> &rarr;</a>
+      <a href="/admin/products?page=<%= currentPageNum + 1 %><%= searchQuery ? '&q=' + searchQuery : '' %>" class="pagination-btn">
+        <%= t('admin.next', 'Next') %>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
       <% } %>
     </div>
     <% } %>
 
     <% } else { %>
-    <div class="dashboard-table-wrap">
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-        </div>
-        <h3><%= t('admin.no_products_yet', 'No products yet') %></h3>
+    <div class="admin-card">
+      <div class="admin-empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <h4><%= t('admin.no_products_yet', 'No products yet') %></h4>
         <p><%= t('admin.no_products_hint', 'Start building your catalog by adding your first product.') %></p>
         <a href="/admin/products/new" class="btn btn-primary"><%= t('admin.add_product', 'Add Product') %></a>
       </div>
