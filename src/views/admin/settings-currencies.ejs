@@ -2,7 +2,7 @@
 <%
 var currencyList = typeof currencies !== 'undefined' ? currencies : [];
 %>
-<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Currencies' }) %>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : t('admin.currencies') }) %>
 <body>
 <div class="dashboard-layout">
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'settings' }) %>
@@ -10,18 +10,12 @@ var currencyList = typeof currencies !== 'undefined' ? currencies : [];
   <main class="dashboard-main">
     <div class="dashboard-header">
       <div>
-        <h2>Currencies</h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Manage available currencies and exchange rates.</p>
+        <h2><%= t('admin.currencies') %></h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.currencies_subtitle', 'Manage available currencies and exchange rates.') %></p>
       </div>
     </div>
 
-    <div class="settings-nav mb-6">
-      <a href="/admin/settings" class="btn btn-ghost btn-sm">General</a>
-      <a href="/admin/settings/bank-accounts" class="btn btn-ghost btn-sm">Bank Accounts</a>
-      <a href="/admin/settings/taxes" class="btn btn-ghost btn-sm">Tax Rates</a>
-      <a href="/admin/settings/currencies" class="btn btn-ghost btn-sm active">Currencies</a>
-      <a href="/admin/settings/shipping-methods" class="btn btn-ghost btn-sm">Shipping Methods</a>
-    </div>
+    <%- include('./partials/settings-nav', { settingsActive: 'currencies' }) %>
 
     <% if (currencyList.length > 0) { %>
     <div class="flex flex-col gap-4">
@@ -36,12 +30,12 @@ var currencyList = typeof currencies !== 'undefined' ? currencies : [];
               <div class="flex items-center gap-2">
                 <p style="font: 600 16px/1.3 var(--font-family); margin-bottom: 2px;"><%= cur.code %></p>
                 <% if (cur.isDefault) { %>
-                <span class="badge badge-primary">Default</span>
+                <span class="badge badge-primary"><%= t('admin.default_badge', 'Default') %></span>
                 <% } %>
                 <% if (cur.isActive) { %>
-                <span class="badge badge-success">Active</span>
+                <span class="badge badge-success"><%= t('admin.product_active') %></span>
                 <% } else { %>
-                <span class="badge badge-neutral">Inactive</span>
+                <span class="badge badge-neutral"><%= t('admin.product_inactive') %></span>
                 <% } %>
               </div>
               <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;"><%= cur.name %></p>
@@ -51,12 +45,12 @@ var currencyList = typeof currencies !== 'undefined' ? currencies : [];
           <div class="flex items-center gap-4">
             <% if (!cur.isDefault) { %>
             <form action="/admin/settings/currencies/<%= cur.code %>/rate" method="post" class="flex items-center gap-2">
-              <label style="font: var(--font-label-xs); color: var(--color-text-muted); white-space: nowrap;">Exchange Rate:</label>
+              <label style="font: var(--font-label-xs); color: var(--color-text-muted); white-space: nowrap;"><%= t('admin.exchange_rate', 'Exchange Rate') %>:</label>
               <input type="number" name="exchangeRate" class="input" value="<%= cur.exchangeRate %>" step="0.000001" min="0" style="width: 140px;">
-              <button type="submit" class="btn btn-secondary btn-sm">Update</button>
+              <button type="submit" class="btn btn-secondary btn-sm"><%= t('admin.update', 'Update') %></button>
             </form>
             <% } else { %>
-            <span style="font: var(--font-label-sm); color: var(--color-text-muted);">Base currency (1.0)</span>
+            <span style="font: var(--font-label-sm); color: var(--color-text-muted);"><%= t('admin.base_currency', 'Base currency') %> (1.0)</span>
             <% } %>
 
             <form action="/admin/settings/currencies/toggle" method="post">
@@ -74,8 +68,8 @@ var currencyList = typeof currencies !== 'undefined' ? currencies : [];
     <% } else { %>
     <div class="dashboard-table-wrap">
       <div class="empty-state">
-        <h3>No currencies configured</h3>
-        <p>Currency configuration will be available after initial setup.</p>
+        <h3><%= t('admin.no_currencies', 'No currencies configured') %></h3>
+        <p><%= t('admin.no_currencies_hint', 'Currency configuration will be available after initial setup.') %></p>
       </div>
     </div>
     <% } %>

@@ -1,16 +1,20 @@
-<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Sign In' }) %>
-
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : t('auth.login') }) %>
 <body>
-<%- include('../partials/header', { isLoggedIn: typeof isLoggedIn !== 'undefined' ? isLoggedIn : false, cartCount: typeof cartCount !== 'undefined' ? cartCount : 0 }) %>
+<%- include('../partials/header', { isLoggedIn: false, cartCount: typeof cartCount !== 'undefined' ? cartCount : 0 }) %>
+
+<%
+const brandName = typeof storeName !== 'undefined' && storeName ? storeName : 'OpenUMKM';
+const brandInitial = (brandName.trim()[0] || 'O').toUpperCase();
+%>
 
 <main class="auth-page">
   <div class="auth-card">
     <div class="auth-card-header">
       <div class="logo">
-        <span>S</span>wift Commerce
+        <span><%= brandInitial %></span><%= brandName.trim().slice(1) %>
       </div>
-      <h2>Welcome Back</h2>
-      <p>Sign in to your account</p>
+      <h2><%= t('auth.welcome_back', 'Welcome Back') %></h2>
+      <p><%= t('auth.login_subtitle') %></p>
     </div>
 
     <% if (typeof error !== 'undefined' && error) { %>
@@ -22,38 +26,15 @@
 
     <form action="/auth/login" method="POST" novalidate>
       <div class="form-group">
-        <label for="email" class="form-label form-label-required">Email Address</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          class="input"
-          placeholder="you@example.com"
-          required
-          autocomplete="email"
-          autofocus
-        >
+        <label for="email" class="form-label form-label-required"><%= t('auth.email') %></label>
+        <input type="email" id="email" name="email" class="input" placeholder="you@example.com" required autocomplete="email" autofocus>
       </div>
 
       <div class="form-group">
-        <label for="password" class="form-label form-label-required">Password</label>
+        <label for="password" class="form-label form-label-required"><%= t('auth.password') %></label>
         <div class="input-icon-wrap" style="position: relative;">
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="input"
-            placeholder="Enter your password"
-            required
-            autocomplete="current-password"
-            style="padding-right: 44px;"
-          >
-          <button
-            type="button"
-            id="togglePassword"
-            aria-label="Show password"
-            style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-muted);"
-          >
+          <input type="password" id="password" name="password" class="input" placeholder="<%= t('auth.enter_password', 'Enter your password') %>" required autocomplete="current-password" style="padding-right: 44px;">
+          <button type="button" id="togglePassword" aria-label="Show password" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--color-text-muted);">
             <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
@@ -62,16 +43,16 @@
       <div class="flex items-center justify-between" style="margin-bottom: var(--space-6);">
         <label class="checkbox-group" for="remember">
           <input type="checkbox" id="remember" name="remember" class="checkbox">
-          <span class="checkbox-label">Remember me</span>
+          <span class="checkbox-label"><%= t('auth.remember_me', 'Remember me') %></span>
         </label>
-        <a href="/auth/forgot-password" style="font: var(--font-label-sm); color: var(--color-primary); font-weight: 600;">Forgot Password?</a>
+        <a href="/auth/forgot-password" style="font: var(--font-label-sm); color: var(--color-primary); font-weight: 600;"><%= t('auth.forgot_password') %></a>
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+      <button type="submit" class="btn btn-primary" style="width: 100%;"><%= t('auth.login') %></button>
     </form>
 
     <div class="auth-card-footer">
-      Don't have an account? <a href="/auth/register">Register</a>
+      <%= t('auth.no_account') %> <a href="/auth/register"><%= t('auth.register') %></a>
     </div>
   </div>
 </main>
@@ -90,7 +71,6 @@
     eye.innerHTML = show
       ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
       : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-    toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
   });
 })();
 </script>

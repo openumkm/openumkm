@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#6366F1">
 
-  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Swift Commerce' %></title>
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : (typeof storeName !== 'undefined' ? storeName : 'OpenUMKM') %></title>
 
   <% if (typeof metaDescription !== 'undefined' && metaDescription) { %>
   <meta name="description" content="<%= metaDescription %>">
@@ -38,7 +38,7 @@
   <meta property="og:type" content="website">
   <% } %>
 
-  <meta property="og:site_name" content="Swift Commerce">
+  <meta property="og:site_name" content="<%= typeof storeName !== 'undefined' ? storeName : 'OpenUMKM' %>">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

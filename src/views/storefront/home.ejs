@@ -1,14 +1,10 @@
-<%#
-  Home / Product Listing Page — storefront
-  Variables: pageTitle, products[], search, cartCount, isLoggedIn, metaDescription
-%>
 <%
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
 }
 %>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= typeof currentLang !== 'undefined' ? currentLang : 'en' %>">
 <%- include('../partials/head.ejs', { pageTitle, metaDescription, ogImage: '/static/img/og-home.jpg' }) %>
 <body>
 <%- include('../partials/header.ejs', { isLoggedIn, isAdmin: false, cartCount, currentPage: 'home' }) %>
@@ -18,16 +14,16 @@ function formatRp(amount) {
     <div class="hero-content">
       <div class="hero-badge">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-        New Collection 2026
+        <%= t('storefront.new_collection', 'New Collection 2026') %>
       </div>
-      <h1>Discover Curated Essentials</h1>
-      <p>Premium products handpicked for your lifestyle. From fashion to electronics, find everything you need in one place.</p>
+      <h1><%= t('storefront.hero_title', 'Discover Curated Essentials') %></h1>
+      <p><%= t('storefront.hero_subtitle', 'Premium products handpicked for your lifestyle. From fashion to electronics, find everything you need in one place.') %></p>
       <form action="/" method="get" class="hero-actions" role="search">
         <div class="input-icon-wrap" style="flex:1;min-width:260px">
-          <input type="search" name="search" class="input input-search" placeholder="Search products..." value="<%= typeof search !== 'undefined' ? search : '' %>" aria-label="Search products">
+          <input type="search" name="search" class="input input-search" placeholder="<%= t('storefront.search_placeholder') %>" value="<%= typeof search !== 'undefined' ? search : '' %>" aria-label="<%= t('storefront.search') %>">
         </div>
-        <button type="submit" class="btn btn-primary btn-lg">Explore</button>
-        <a href="#products" class="btn btn-secondary btn-lg">Browse All</a>
+        <button type="submit" class="btn btn-primary btn-lg"><%= t('storefront.explore', 'Explore') %></button>
+        <a href="#products" class="btn btn-secondary btn-lg"><%= t('storefront.browse_all', 'Browse All') %></a>
       </form>
     </div>
   </div>
@@ -36,9 +32,9 @@ function formatRp(amount) {
 <section id="products" class="section" aria-labelledby="products-heading">
   <div class="container">
     <div class="flex items-center justify-between mb-8">
-      <h2 id="products-heading"><%= typeof search !== 'undefined' && search ? 'Search Results' : 'All Products' %></h2>
+      <h2 id="products-heading"><%= typeof search !== 'undefined' && search ? t('storefront.search_results') : t('storefront.all_products', 'All Products') %></h2>
       <% if (typeof search !== 'undefined' && search) { %>
-      <a href="/" class="btn btn-ghost btn-sm">Clear Search</a>
+      <a href="/" class="btn btn-ghost btn-sm"><%= t('storefront.clear_search', 'Clear Search') %></a>
       <% } %>
     </div>
 
@@ -50,15 +46,15 @@ function formatRp(amount) {
           <img src="<%= product.image %>" alt="<%= product.name %>" loading="<%= index < 4 ? 'eager' : 'lazy' %>">
           <div class="product-card-badge flex flex-col gap-1">
             <% if (product.stock <= 0) { %>
-            <span class="badge badge-danger">Out of Stock</span>
+            <span class="badge badge-danger"><%= t('storefront.out_of_stock') %></span>
             <% } %>
             <% if (index < 3 && product.stock > 0) { %>
-            <span class="badge badge-success">Featured</span>
+            <span class="badge badge-success"><%= t('storefront.featured', 'Featured') %></span>
             <% } %>
           </div>
         </div>
         <div class="product-card-body">
-          <p class="product-card-category"><%= product.category %></p>
+          <% if (product.category) { %><p class="product-card-category"><%= product.category %></p><% } %>
           <h3 class="product-card-name"><%= product.name %></h3>
           <p class="product-card-price"><%= formatRp(product.price) %></p>
         </div>
@@ -70,9 +66,11 @@ function formatRp(amount) {
       <div class="empty-state-icon">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </div>
-      <h3>No products found</h3>
-      <p>We couldn't find any products matching "<strong><%= typeof search !== 'undefined' ? search : '' %></strong>". Try a different keyword or browse all categories.</p>
-      <a href="/" class="btn btn-primary">View All Products</a>
+      <h3><%= t('storefront.no_products') %></h3>
+      <% if (typeof search !== 'undefined' && search) { %>
+      <p><%= t('storefront.no_products_search', "We couldn't find anything matching") %> "<strong><%= search %></strong>". <%= t('storefront.try_different', 'Try a different keyword.') %></p>
+      <% } %>
+      <a href="/" class="btn btn-primary"><%= t('storefront.view_all_products', 'View All Products') %></a>
     </div>
     <% } %>
   </div>

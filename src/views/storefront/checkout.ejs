@@ -1,7 +1,3 @@
-<%#
-  Checkout Page — storefront
-  Variables: pageTitle, cartItems[], subtotal, shipping, tax, total, couriers[], bankAccounts[], cartCount, isLoggedIn
-%>
 <%
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
@@ -9,20 +5,19 @@ function formatRp(amount) {
 var shippingCost = typeof shipping !== 'undefined' ? shipping : 0;
 var taxAmount = typeof tax !== 'undefined' ? tax : 0;
 var totalAmount = typeof total !== 'undefined' ? total : ((typeof subtotal !== 'undefined' ? subtotal : 0) + shippingCost + taxAmount);
-var courierList = typeof couriers !== 'undefined' ? couriers : [];
 var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
 var savedAddrs = typeof savedAddresses !== 'undefined' ? savedAddresses : [];
 var hasSavedAddrs = savedAddrs.length > 0;
 %>
 <!DOCTYPE html>
-<html lang="en">
-<%- include('../partials/head.ejs', { pageTitle, metaDescription: 'Complete your order securely.' }) %>
+<html lang="<%= typeof currentLang !== 'undefined' ? currentLang : 'en' %>">
+<%- include('../partials/head.ejs', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : t('storefront.checkout_title') }) %>
 <body>
 <%- include('../partials/header.ejs', { isLoggedIn, isAdmin: false, cartCount, currentPage: 'checkout' }) %>
 
 <main class="checkout-page">
   <div class="container">
-    <h1 class="mb-8">Checkout</h1>
+    <h1 class="mb-8"><%= t('storefront.checkout_title') %></h1>
 
     <div class="grid">
       <div class="col-8 md:col-6">
@@ -31,7 +26,7 @@ var hasSavedAddrs = savedAddrs.length > 0;
 
             <% if (hasSavedAddrs) { %>
             <section class="mb-12">
-              <h3>0. Saved Addresses</h3>
+              <h3><%= t('storefront.saved_addresses', 'Saved Addresses') %></h3>
               <div class="flex flex-col gap-3">
                 <% savedAddrs.forEach(function(addr, idx) { %>
                 <label class="shipping-method<%= idx === 0 ? ' selected' : '' %>">
@@ -45,7 +40,7 @@ var hasSavedAddrs = savedAddrs.length > 0;
                 <label class="shipping-method">
                   <input type="radio" name="savedAddressId" value="">
                   <div class="shipping-method-content" style="width:100%">
-                    <p class="shipping-method-name">Enter a new address</p>
+                    <p class="shipping-method-name"><%= t('storefront.enter_new_address', 'Enter a new address') %></p>
                   </div>
                 </label>
               </div>
@@ -53,31 +48,30 @@ var hasSavedAddrs = savedAddrs.length > 0;
             <% } %>
 
             <section class="mb-12">
-              <h3>1. Contact Information</h3>
+              <h3>1. <%= t('storefront.contact_info', 'Contact Information') %></h3>
               <div class="form-group">
-                <label for="name" class="form-label form-label-required">Full Name</label>
-                <input type="text" id="name" name="name" class="input" required placeholder="Enter your full name">
+                <label for="name" class="form-label form-label-required"><%= t('storefront.checkout_recipient') %></label>
+                <input type="text" id="name" name="name" class="input" required>
               </div>
               <div class="form-group">
-                <label for="email" class="form-label">Email Address <span class="text-muted">(optional)</span></label>
+                <label for="email" class="form-label"><%= t('storefront.checkout_email') %> <span class="text-muted">(<%= t('storefront.optional', 'optional') %>)</span></label>
                 <input type="email" id="email" name="email" class="input" placeholder="you@example.com">
               </div>
               <div class="form-group">
-                <label for="phone" class="form-label form-label-required">Phone Number</label>
+                <label for="phone" class="form-label form-label-required"><%= t('storefront.checkout_phone') %></label>
                 <input type="tel" id="phone" name="phone" class="input" required placeholder="+62 812-3456-7890">
-                <span class="form-hint">Used for delivery updates and order confirmations.</span>
               </div>
             </section>
 
             <section class="mb-12">
-              <h3>2. Shipping Address</h3>
+              <h3>2. <%= t('storefront.checkout_shipping') %></h3>
               <div class="form-group">
-                <label for="address" class="form-label form-label-required">Address</label>
-                <textarea id="address" name="addressLine" class="textarea" required placeholder="Street name, building, house number"></textarea>
+                <label for="address" class="form-label form-label-required"><%= t('storefront.checkout_address') %></label>
+                <textarea id="address" name="addressLine" class="textarea" required></textarea>
               </div>
               <div class="form-group">
-                <label for="destinationSearch" class="form-label form-label-required">City / District</label>
-                <input type="text" id="destinationSearch" class="input" placeholder="Type to search city or district..." autocomplete="off">
+                <label for="destinationSearch" class="form-label form-label-required"><%= t('storefront.checkout_city') %> / <%= t('storefront.district', 'District') %></label>
+                <input type="text" id="destinationSearch" class="input" placeholder="<%= t('storefront.city_search_ph', 'Type to search city...') %>" autocomplete="off">
                 <input type="hidden" id="destinationId" name="destinationId" value="">
                 <input type="hidden" id="city" name="city" value="">
                 <input type="hidden" id="province" name="province" value="">
@@ -86,18 +80,18 @@ var hasSavedAddrs = savedAddrs.length > 0;
               </div>
               <div class="grid" style="grid-template-columns:1fr 1fr;gap:var(--space-4)">
                 <div class="form-group">
-                  <label for="postalCode" class="form-label form-label-required">Postal Code</label>
+                  <label for="postalCode" class="form-label form-label-required"><%= t('storefront.checkout_postal') %></label>
                   <input type="text" id="postalCode" name="postalCode" class="input" required placeholder="12345">
                 </div>
                 <div class="form-group">
-                  <label for="recipientName" class="form-label form-label-required">Recipient Name</label>
-                  <input type="text" id="recipientName" name="recipientName" class="input" required placeholder="Recipient name">
+                  <label for="recipientName" class="form-label form-label-required"><%= t('storefront.checkout_recipient') %></label>
+                  <input type="text" id="recipientName" name="recipientName" class="input" required>
                 </div>
               </div>
             </section>
 
             <section class="mb-12">
-              <h3>3. Shipping Method</h3>
+              <h3>3. <%= t('storefront.shipping_method', 'Shipping Method') %></h3>
               <div class="shipping-methods" id="shippingMethods">
                 <% if (typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0) { %>
                 <% customShippingMethods.forEach(function(m, idx) { %>
@@ -107,11 +101,11 @@ var hasSavedAddrs = savedAddrs.length > 0;
                     <p class="shipping-method-name"><%= m.name %></p>
                     <p class="shipping-method-desc"><%= m.description || '' %></p>
                   </div>
-                  <span class="shipping-method-price"><%= m.cost === 0 ? 'Free' : formatRp(m.cost) %></span>
+                  <span class="shipping-method-price"><%= m.cost === 0 ? t('admin.free', 'Free') : formatRp(m.cost) %></span>
                 </label>
                 <% }); %>
                 <% } else { %>
-                <div class="text-muted p-4" id="shippingPlaceholder">Select a city above to see available shipping options.</div>
+                <div class="text-muted p-4" id="shippingPlaceholder"><%= t('storefront.select_city_first', 'Select a city above to see shipping options.') %></div>
                 <% } %>
               </div>
               <input type="hidden" name="shippingCost" id="shippingCostInput" value="<%= typeof customShippingMethods !== 'undefined' && customShippingMethods.length > 0 ? customShippingMethods[0].cost : 0 %>">
@@ -120,36 +114,36 @@ var hasSavedAddrs = savedAddrs.length > 0;
             </section>
 
             <section class="mb-12">
-              <h3>4. Payment Method</h3>
+              <h3>4. <%= t('storefront.checkout_payment') %></h3>
               <div class="payment-tabs" role="tablist">
-                <button type="button" class="payment-tab active" role="tab" aria-selected="true" data-tab="pay-xendit">Online Payment (Xendit)</button>
-                <button type="button" class="payment-tab" role="tab" aria-selected="false" data-tab="pay-transfer">Manual Bank Transfer</button>
+                <button type="button" class="payment-tab active" role="tab" data-tab="pay-xendit"><%= t('storefront.checkout_payment_xendit') %></button>
+                <button type="button" class="payment-tab" role="tab" data-tab="pay-transfer"><%= t('storefront.checkout_payment_manual') %></button>
               </div>
 
               <div class="payment-tab-content active" id="pay-xendit" role="tabpanel">
                 <div class="alert alert-info mb-4">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                  <span>After placing your order, you will be redirected to the Xendit payment page to complete payment via bank transfer, virtual account, QRIS, or e-wallet.</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <span><%= t('storefront.xendit_hint', 'After placing your order, you will be redirected to Xendit to complete payment.') %></span>
                 </div>
                 <input type="hidden" name="paymentMethod" value="xendit" id="paymentMethodInput">
               </div>
 
               <div class="payment-tab-content" id="pay-transfer" role="tabpanel">
-                <p class="text-secondary mb-4">Transfer the exact amount to one of the following bank accounts:</p>
+                <p class="text-secondary mb-4"><%= t('storefront.transfer_to') %></p>
                 <div class="bank-list">
                   <% if (banks.length > 0) { %>
                   <% banks.forEach(function(bank, idx) { %>
                   <label class="bank-account<%= idx === 0 ? ' selected' : '' %>">
                     <input type="radio" name="bankAccount" value="<%= bank.id %>" <%= idx === 0 ? 'checked' : '' %>>
-                    <div class="bank-logo"><%= bank.name.substring(0, 3).toUpperCase() %></div>
+                    <div class="bank-logo"><%= (bank.name || bank.bankName || '').substring(0, 3).toUpperCase() %></div>
                     <div class="bank-info">
-                      <p class="bank-name"><%= bank.name %></p>
-                      <p class="bank-number"><%= bank.number %> &middot; a/n <%= bank.holder %></p>
+                      <p class="bank-name"><%= bank.name || bank.bankName %></p>
+                      <p class="bank-number"><%= bank.number || bank.accountNumber %> &middot; a/n <%= bank.holder || bank.accountHolder %></p>
                     </div>
                   </label>
                   <% }); %>
                   <% } else { %>
-                  <div class="text-muted p-4">No bank accounts configured yet.</div>
+                  <div class="text-muted p-4"><%= t('storefront.no_banks', 'No bank accounts configured yet.') %></div>
                   <% } %>
                 </div>
                 <input type="hidden" name="paymentMethodManual" value="manual_transfer">
@@ -162,7 +156,7 @@ var hasSavedAddrs = savedAddrs.length > 0;
 
       <aside class="col-4 md:col-6">
         <div class="checkout-summary">
-          <h3>Order Summary</h3>
+          <h3><%= t('storefront.checkout_summary') %></h3>
           <% if (typeof cartItems !== 'undefined' && cartItems.length > 0) { %>
           <div class="flex flex-col gap-4 mb-6">
             <% cartItems.forEach(function(item) { %>
@@ -171,40 +165,36 @@ var hasSavedAddrs = savedAddrs.length > 0;
                 <img src="<%= item.image %>" alt="<%= item.name %>" style="width:100%;height:100%;object-fit:cover">
               </div>
               <div style="flex:1;min-width:0">
-                <p class="truncate" style="font:500 14px/1.3 var(--font-family);color:var(--color-text)"><%= item.name %></p>
-                <p class="text-muted" style="font:var(--font-label-xs)">Qty: <%= item.qty %></p>
+                <p class="truncate" style="font:500 14px/1.3 var(--font-family)"><%= item.name %></p>
+                <p class="text-muted" style="font:var(--font-label-xs)"><%= t('admin.qty', 'Qty') %>: <%= item.qty %></p>
               </div>
-              <span style="font:600 14px/1.3 var(--font-family);color:var(--color-text);white-space:nowrap"><%= formatRp(item.price * (item.qty || 1)) %></span>
+              <span style="font:600 14px/1.3 var(--font-family);white-space:nowrap"><%= formatRp(item.price * (item.qty || 1)) %></span>
             </div>
             <% }); %>
           </div>
           <% } %>
 
           <div class="cart-summary-row">
-            <span>Subtotal</span>
+            <span><%= t('storefront.checkout_subtotal') %></span>
             <span class="font-semibold"><%= formatRp(typeof subtotal !== 'undefined' ? subtotal : 0) %></span>
           </div>
           <div class="cart-summary-row">
-            <span>Tax (11%)</span>
+            <span><%= t('storefront.checkout_tax') %></span>
             <span><%= formatRp(taxAmount) %></span>
           </div>
           <div class="cart-summary-row">
-            <span>Shipping</span>
-            <span id="shippingSummary"><%= shippingCost > 0 ? formatRp(shippingCost) : 'Select destination' %></span>
+            <span><%= t('storefront.checkout_shipping_cost') %></span>
+            <span id="shippingSummary"><%= shippingCost > 0 ? formatRp(shippingCost) : t('storefront.select_destination', 'Select destination') %></span>
           </div>
           <div class="cart-summary-row total">
-            <span>Total</span>
+            <span><%= t('storefront.checkout_total') %></span>
             <span id="totalSummary"><%= formatRp(totalAmount) %></span>
           </div>
 
           <button type="submit" form="checkoutForm" class="btn btn-primary btn-lg w-full">
-            Place Order
+            <%= t('storefront.checkout_submit') %>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
-
-          <p class="text-muted text-center mt-4" style="font:var(--font-label-xs)">
-            By placing this order you agree to our <a href="/terms" style="color:var(--color-primary)">Terms &amp; Conditions</a>.
-          </p>
         </div>
       </aside>
     </div>

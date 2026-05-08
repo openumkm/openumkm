@@ -17,8 +17,18 @@ export class XenditWebhookController {
     const callbackToken = (req.headers as any)['x-callback-token'];
     const storedToken = await this.settingsService.get('xendit_callback_token');
 
-    // Verify callback token
-    if (storedToken && callbackToken !== storedToken) {
+    // Fail closed: refuse all requests if callback token is not configured.
+    // Without this, anyone could POST to /xendit/webhook and mark orders as paid.
+    if (!storedToken) {
+      console.error(
+        '[Xendit Webhook] Rejected: xendit_callback_token is not configured in settings. Set it at /admin/settings to enable webhooks.',
+      );
+      return res.status(503).send({
+        error: 'Webhook disabled: callback token not configured',
+      });
+    }
+
+    if (callbackToken !== storedToken) {
       return res.status(403).send({ error: 'Invalid callback token' });
     }
 

@@ -4,14 +4,13 @@ var courierList = typeof couriers !== 'undefined' ? couriers : [];
 var sho = typeof s !== 'undefined' && s !== null ? s : {};
 %>
 <div class="admin-card mb-6">
-  <h3 class="admin-card-title">Shipping</h3>
-  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);">Configure shipping mode and enable couriers.</p>
+  <h3 class="admin-card-title"><%= t('admin.shipping', 'Shipping') %></h3>
+  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);"><%= t('admin.shipping_hint', 'Configure shipping mode and enable couriers.') %></p>
 
-  <!-- RajaOngkir Toggle -->
   <div class="flex items-center justify-between mb-4" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md);">
     <div>
       <p style="font: var(--font-label-sm); margin-bottom: 0;">RajaOngkir</p>
-      <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;">Enable real-time shipping cost calculation via RajaOngkir API</p>
+      <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;"><%= t('admin.f_rajaongkir_toggle_hint', 'Enable real-time shipping cost calculation via RajaOngkir API') %></p>
     </div>
     <label class="toggle">
       <input type="checkbox" name="rajaOngkirEnabled" <%= sho.rajaOngkirEnabled ? 'checked' : '' %>>
@@ -19,26 +18,25 @@ var sho = typeof s !== 'undefined' && s !== null ? s : {};
     </label>
   </div>
 
-  <!-- Shipping Mode -->
   <div class="form-group mb-4">
-    <label for="shippingMode" class="form-label">Shipping Mode</label>
+    <label for="shippingMode" class="form-label"><%= t('admin.f_shipping_mode', 'Shipping Mode') %></label>
     <select id="shippingMode" name="shippingMode" class="select">
-      <option value="custom" <%= sho.shippingMode === 'custom' ? 'selected' : '' %>>Custom Methods Only</option>
-      <option value="rajaongkir" <%= sho.shippingMode === 'rajaongkir' ? 'selected' : '' %>>RajaOngkir Only</option>
-      <option value="both" <%= sho.shippingMode === 'both' ? 'selected' : '' %>>Both (Custom + RajaOngkir)</option>
+      <option value="custom" <%= sho.shippingMode === 'custom' ? 'selected' : '' %>><%= t('admin.sm_custom', 'Custom Methods Only') %></option>
+      <option value="rajaongkir" <%= sho.shippingMode === 'rajaongkir' ? 'selected' : '' %>><%= t('admin.sm_rajaongkir', 'RajaOngkir Only') %></option>
+      <option value="both" <%= sho.shippingMode === 'both' ? 'selected' : '' %>><%= t('admin.sm_both', 'Both (Custom + RajaOngkir)') %></option>
     </select>
   </div>
 </div>
 
 <div class="admin-card mb-6">
-  <h3 class="admin-card-title">Couriers</h3>
-  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);">Enable the couriers you want to offer at checkout (used when RajaOngkir is enabled).</p>
+  <h3 class="admin-card-title"><%= t('admin.couriers', 'Couriers') %></h3>
+  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);"><%= t('admin.couriers_hint', 'Enable the couriers you want to offer at checkout (used when RajaOngkir is enabled).') %></p>
   <div class="flex flex-col gap-3">
     <% courierList.forEach(function(c) { %>
     <div class="flex items-center justify-between" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md);">
       <div>
         <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= c.name %></p>
-        <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;">Code: <%= c.code %></p>
+        <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;"><%= t('admin.code', 'Code') %>: <%= c.code %></p>
       </div>
       <label class="toggle">
         <input type="checkbox" name="couriers[]" value="<%= c.code %>" <%= c.enabled ? 'checked' : '' %>>

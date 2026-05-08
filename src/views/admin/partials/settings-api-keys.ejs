@@ -1,26 +1,26 @@
 <%# Settings: API Keys Section %>
 <div class="admin-card mb-6">
-  <h3 class="admin-card-title">API Keys</h3>
+  <h3 class="admin-card-title"><%= t('admin.api_keys') %></h3>
   <div class="form-group">
-    <label for="xenditSecretKey" class="form-label">Xendit Secret Key</label>
+    <label for="xenditSecretKey" class="form-label"><%= t('admin.f_xendit_key', 'Xendit Secret Key') %></label>
     <input type="password" id="xenditSecretKey" name="xenditSecretKey" class="input" value="<%= s.xenditSecretKey || '' %>" placeholder="xnd_development_xxxxx">
-    <span class="form-hint">Required for online payment processing via Xendit.</span>
+    <span class="form-hint"><%= t('admin.f_xendit_key_hint', 'Required for online payment processing via Xendit.') %></span>
   </div>
   <div class="form-group">
-    <label for="xenditCallbackToken" class="form-label">Xendit Webhook Token</label>
+    <label for="xenditCallbackToken" class="form-label"><%= t('admin.f_xendit_token', 'Xendit Webhook Token') %></label>
     <input type="password" id="xenditCallbackToken" name="xenditCallbackToken" class="input" value="<%= s.xenditCallbackToken || '' %>" placeholder="Your webhook verification token">
-    <span class="form-hint">Set in Xendit Dashboard → Webhooks. Used to verify incoming webhook requests.</span>
+    <span class="form-hint"><%= t('admin.f_xendit_token_hint', 'Set in Xendit Dashboard → Webhooks. Used to verify incoming webhook requests.') %></span>
   </div>
   <div class="form-group">
-    <label for="rajaOngkirApiKey" class="form-label">RajaOngkir API Key</label>
+    <label for="rajaOngkirApiKey" class="form-label"><%= t('admin.f_rajaongkir_key', 'RajaOngkir API Key') %></label>
     <input type="password" id="rajaOngkirApiKey" name="rajaOngkirApiKey" class="input" value="<%= s.rajaOngkirApiKey || '' %>" placeholder="Your RajaOngkir API key">
-    <span class="form-hint">Required for shipping cost calculation.</span>
+    <span class="form-hint"><%= t('admin.f_rajaongkir_hint', 'Required for shipping cost calculation.') %></span>
   </div>
   <div class="form-group">
-    <label for="originCity" class="form-label">Origin City (Shipping)</label>
-    <input type="text" id="originCity" name="originCity" class="input" value="<%= s.originCity || '' %>" placeholder="Type to search city..." autocomplete="off">
+    <label for="originCity" class="form-label"><%= t('admin.f_origin_city', 'Origin City (Shipping)') %></label>
+    <input type="text" id="originCity" name="originCity" class="input" value="<%= s.originCity || '' %>" placeholder="<%= t('admin.f_origin_city_ph', 'Type to search city...') %>" autocomplete="off">
     <div id="originCityResults" class="autocomplete-dropdown" style="display:none;"></div>
-    <span class="form-hint">City where your products ship from. Start typing to search.</span>
+    <span class="form-hint"><%= t('admin.f_origin_city_hint', 'City where your products ship from. Start typing to search.') %></span>
   </div>
 </div>
 
@@ -42,7 +42,7 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
           if (!data.results || data.results.length === 0) {
-            resultsDiv.innerHTML = '<div class="autocomplete-item text-muted">No results</div>';
+            resultsDiv.innerHTML = '<div class="autocomplete-item text-muted"><%= t('admin.no_results', 'No results') %></div>';
             resultsDiv.style.display = 'block';
             return;
           }

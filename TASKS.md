@@ -289,7 +289,8 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | 18.3 | `@fastify/formbody` untuk parse POST body | ✅ | Registered di `main.ts` |
 | 18.4 | Uploads volume serving | ✅ | Static route `/uploads/` di `main.ts` |
 | 18.5 | Error handling / 404 page | ✅ | 404 view + global error handler di `main.ts` |
-| 18.6 | CSRF protection | ✅ | Double Submit Cookie: token in cookie + hidden input, validated via preHandler |
+| 18.6 | CSRF protection | ✅ | Double Submit Cookie: token in cookie + hidden input, validated via preHandler. Multipart uploads fallback ke same-origin check (Origin/Referer) |
+| 18.7 | Xendit webhook fail-closed | ✅ | Webhook tolak semua request jika `xendit_callback_token` belum di-set di settings (cegah unauthenticated order tampering) |
 
 ---
 
@@ -359,8 +360,8 @@ Jika `shipping_mode = 'rajaongkir'` dan API key belum diisi → fallback ke cust
 | Email (SMTP) | 10 | 0 | 0 | 10 |
 | AI Generation | 4 | 0 | 0 | 4 |
 | i18n | 4 | 0 | 0 | 4 |
-| Misc / Polish | 6 | 0 | 0 | 6 |
-| **TOTAL** | **136** | **0** | **0** | **136** |
+| Misc / Polish | 7 | 0 | 0 | 7 |
+| **TOTAL** | **137** | **0** | **0** | **137** |
 
 **Progress: ~100% done, semua task selesai.**
 

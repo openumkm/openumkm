@@ -8,7 +8,7 @@ var items = o.items || [];
 var addr = o.shippingAddress || {};
 var statuses = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shipped', 'completed', 'cancelled'];
 %>
-<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Order Detail' }) %>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : t('admin.order_detail_title', 'Order Detail') }) %>
 <body>
 <div class="dashboard-layout">
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'orders' }) %>
@@ -16,15 +16,15 @@ var statuses = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shippe
   <main class="dashboard-main">
     <div class="dashboard-header">
       <div class="flex items-center gap-3">
-        <a href="/admin/orders" style="color: var(--color-text-muted); display: flex;" title="Back to orders">
+        <a href="/admin/orders" style="color: var(--color-text-muted); display: flex;" title="<%= t('admin.back_to_orders', 'Back to orders') %>">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </a>
         <div>
           <div class="flex items-center gap-3">
-            <h2>Order #<%= o.orderNumber || o.id %></h2>
-            <span class="status status-<%= o.status || 'pending' %>"><%= (o.status || 'pending').replace(/_/g, ' ') %></span>
+            <h2><%= t('admin.order', 'Order') %> #<%= o.orderNumber || o.id %></h2>
+            <span class="status status-<%= o.status || 'pending' %>"><%= t('admin.' + (o.status || 'pending'), (o.status || 'pending').replace(/_/g, ' ')) %></span>
           </div>
-          <p style="color: var(--color-text-secondary); margin-bottom: 0;">Created <%= o.createdAt || '—' %></p>
+          <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.created_on', 'Created') %> <%= o.createdAt || '—' %></p>
         </div>
       </div>
     </div>
@@ -38,17 +38,16 @@ var statuses = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shippe
 
     <div class="grid" style="margin-bottom: var(--space-6);">
       <div class="col-8">
-        <!-- Order Items -->
         <div class="admin-card mb-6">
-          <h3 class="admin-card-title">Items</h3>
+          <h3 class="admin-card-title"><%= t('admin.items', 'Items') %></h3>
           <table class="data-table">
             <thead>
               <tr>
-                <th>Product</th>
-                <th>Variant</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th>Subtotal</th>
+                <th><%= t('admin.product', 'Product') %></th>
+                <th><%= t('admin.variant', 'Variant') %></th>
+                <th><%= t('admin.qty', 'Qty') %></th>
+                <th><%= t('admin.product_price') %></th>
+                <th><%= t('admin.subtotal', 'Subtotal') %></th>
               </tr>
             </thead>
             <tbody>
@@ -73,27 +72,26 @@ var statuses = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shippe
 
           <div style="border-top: 1px solid var(--color-border-light); padding-top: var(--space-4); margin-top: var(--space-4);">
             <div class="flex justify-between mb-2" style="font: var(--font-body-md);">
-              <span style="color: var(--color-text-muted);">Subtotal</span>
+              <span style="color: var(--color-text-muted);"><%= t('admin.subtotal', 'Subtotal') %></span>
               <span><%= formatRp(o.subtotal) %></span>
             </div>
             <div class="flex justify-between mb-2" style="font: var(--font-body-md);">
-              <span style="color: var(--color-text-muted);">Tax</span>
+              <span style="color: var(--color-text-muted);"><%= t('admin.tax', 'Tax') %></span>
               <span><%= formatRp(o.taxTotal || 0) %></span>
             </div>
             <div class="flex justify-between mb-2" style="font: var(--font-body-md);">
-              <span style="color: var(--color-text-muted);">Shipping (<%= o.courier || '—' %>)</span>
+              <span style="color: var(--color-text-muted);"><%= t('admin.shipping', 'Shipping') %> (<%= o.courier || '—' %>)</span>
               <span><%= formatRp(o.shippingCost || 0) %></span>
             </div>
             <div class="flex justify-between" style="font: 600 18px/1.3 var(--font-family); padding-top: var(--space-3); border-top: 1px solid var(--color-border-light);">
-              <span>Total</span>
+              <span><%= t('admin.total') %></span>
               <span style="color: var(--color-primary);"><%= formatRp(o.total) %></span>
             </div>
           </div>
         </div>
 
-        <!-- Shipping Address -->
         <div class="admin-card mb-6">
-          <h3 class="admin-card-title">Shipping Address</h3>
+          <h3 class="admin-card-title"><%= t('admin.shipping_address', 'Shipping Address') %></h3>
           <div style="font: var(--font-body-md); color: var(--color-text-secondary);">
             <p style="font-weight: 600; color: var(--color-text); margin-bottom: var(--space-1);"><%= addr.recipientName || addr.name || '—' %></p>
             <p style="margin-bottom: var(--space-1);"><%= addr.phone || '' %></p>
@@ -104,64 +102,60 @@ var statuses = ['pending', 'waiting_confirmation', 'paid', 'processing', 'shippe
       </div>
 
       <div class="col-4">
-        <!-- Update Status -->
         <div class="admin-card mb-6">
-          <h3 class="admin-card-title">Update Status</h3>
+          <h3 class="admin-card-title"><%= t('admin.update_status') %></h3>
           <form action="/admin/orders/<%= o.id %>/status" method="post">
             <div class="form-group">
-              <label for="status" class="form-label">Order Status</label>
+              <label for="status" class="form-label"><%= t('admin.order_status', 'Order Status') %></label>
               <select id="status" name="status" class="select">
                 <% statuses.forEach(function(s) { %>
-                <option value="<%= s %>" <%= o.status === s ? 'selected' : '' %>><%= s.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); }) %></option>
+                <option value="<%= s %>" <%= o.status === s ? 'selected' : '' %>><%= t('admin.' + s, s.replace(/_/g, ' ')) %></option>
                 <% }); %>
               </select>
             </div>
-            <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">Update Status</button>
+            <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;"><%= t('admin.update_status') %></button>
           </form>
         </div>
 
-        <!-- Tracking -->
         <div class="admin-card mb-6">
-          <h3 class="admin-card-title">Tracking</h3>
+          <h3 class="admin-card-title"><%= t('admin.tracking', 'Tracking') %></h3>
           <form action="/admin/orders/<%= o.id %>/tracking" method="post">
             <div class="form-group">
-              <label for="trackingNumber" class="form-label">Tracking Number</label>
-              <input type="text" id="trackingNumber" name="trackingNumber" class="input" value="<%= o.trackingNumber || '' %>" placeholder="Enter tracking number">
+              <label for="trackingNumber" class="form-label"><%= t('admin.tracking_number') %></label>
+              <input type="text" id="trackingNumber" name="trackingNumber" class="input" value="<%= o.trackingNumber || '' %>" placeholder="<%= t('admin.tracking_ph', 'Enter tracking number') %>">
             </div>
-            <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;">Save Tracking</button>
+            <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;"><%= t('admin.save_tracking', 'Save Tracking') %></button>
           </form>
         </div>
 
-        <!-- Order Info -->
         <div class="admin-card mb-6">
-          <h3 class="admin-card-title">Order Info</h3>
+          <h3 class="admin-card-title"><%= t('admin.order_info', 'Order Info') %></h3>
           <div class="flex flex-col gap-3" style="font: var(--font-body-md);">
             <div class="flex justify-between">
-              <span style="color: var(--color-text-muted);">Payment</span>
-              <span class="badge <%= o.paymentMethod === 'xendit' ? 'badge-info' : 'badge-neutral' %>"><%= o.paymentMethod === 'xendit' ? 'Xendit' : 'Manual Transfer' %></span>
+              <span style="color: var(--color-text-muted);"><%= t('admin.payment_method') %></span>
+              <span class="badge <%= o.paymentMethod === 'xendit' ? 'badge-info' : 'badge-neutral' %>"><%= o.paymentMethod === 'xendit' ? 'Xendit' : t('admin.manual_transfer', 'Manual Transfer') %></span>
             </div>
             <div class="flex justify-between">
-              <span style="color: var(--color-text-muted);">Currency</span>
+              <span style="color: var(--color-text-muted);"><%= t('admin.currency_label', 'Currency') %></span>
               <span><%= o.currency || 'IDR' %></span>
             </div>
             <div class="flex justify-between">
-              <span style="color: var(--color-text-muted);">Courier</span>
+              <span style="color: var(--color-text-muted);"><%= t('admin.courier', 'Courier') %></span>
               <span><%= o.courier || '—' %> <%= o.courierService || '' %></span>
             </div>
             <div class="flex justify-between">
-              <span style="color: var(--color-text-muted);">Expires</span>
+              <span style="color: var(--color-text-muted);"><%= t('admin.expires', 'Expires') %></span>
               <span><%= o.expiresAt || '—' %></span>
             </div>
           </div>
         </div>
 
-        <!-- Customer -->
         <div class="admin-card">
-          <h3 class="admin-card-title">Customer</h3>
+          <h3 class="admin-card-title"><%= t('admin.customer') %></h3>
           <div class="flex items-center gap-3">
             <div class="avatar" style="width: 40px; height: 40px;"><%= o.customerName ? o.customerName.charAt(0).toUpperCase() : 'G' %></div>
             <div>
-              <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= o.customerName || 'Guest Checkout' %></p>
+              <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= o.customerName || t('admin.guest_checkout', 'Guest Checkout') %></p>
               <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;"><%= o.customerEmail || '' %></p>
             </div>
           </div>

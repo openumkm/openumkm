@@ -3,13 +3,13 @@
 var sho = typeof s !== 'undefined' && s !== null ? s : {};
 %>
 <div class="admin-card mb-6">
-  <h3 class="admin-card-title">S3 / Object Storage</h3>
-  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);">Configure S3-compatible storage for file uploads. Leave disabled to use local disk storage.</p>
+  <h3 class="admin-card-title"><%= t('admin.s3_title', 'S3 / Object Storage') %></h3>
+  <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);"><%= t('admin.s3_hint', 'Configure S3-compatible storage for file uploads. Leave disabled to use local disk storage.') %></p>
 
   <div class="flex items-center justify-between mb-4" style="padding: var(--space-3); background: var(--color-gray-50); border-radius: var(--radius-md);">
     <div>
-      <p style="font: var(--font-label-sm); margin-bottom: 0;">Enable S3 Storage</p>
-      <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;">Upload files to S3-compatible storage (AWS S3, Cloudflare R2, MinIO, etc.)</p>
+      <p style="font: var(--font-label-sm); margin-bottom: 0;"><%= t('admin.s3_enable', 'Enable S3 Storage') %></p>
+      <p style="font: var(--font-label-xs); color: var(--color-text-muted); margin-bottom: 0;"><%= t('admin.s3_enable_hint', 'Upload files to S3-compatible storage (AWS S3, Cloudflare R2, MinIO, etc.)') %></p>
     </div>
     <label class="toggle">
       <input type="checkbox" name="s3Enabled" <%= sho.s3Enabled ? 'checked' : '' %>>
@@ -19,28 +19,28 @@ var sho = typeof s !== 'undefined' && s !== null ? s : {};
 
   <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
     <div class="form-group">
-      <label for="s3Endpoint" class="form-label">Endpoint URL</label>
+      <label for="s3Endpoint" class="form-label"><%= t('admin.f_s3_endpoint', 'Endpoint URL') %></label>
       <input type="url" id="s3Endpoint" name="s3Endpoint" class="input" value="<%= sho.s3Endpoint || '' %>" placeholder="https://s3.amazonaws.com">
-      <span class="form-hint">Full S3 endpoint URL (e.g. https://s3.amazonaws.com or https://<account>.r2.cloudflarestorage.com)</span>
+      <span class="form-hint"><%= t('admin.f_s3_endpoint_hint', 'Full S3 endpoint URL') %></span>
     </div>
     <div class="form-group">
-      <label for="s3Region" class="form-label">Region</label>
+      <label for="s3Region" class="form-label"><%= t('admin.f_s3_region', 'Region') %></label>
       <input type="text" id="s3Region" name="s3Region" class="input" value="<%= sho.s3Region || 'us-east-1' %>" placeholder="us-east-1">
     </div>
   </div>
   <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
     <div class="form-group">
-      <label for="s3Bucket" class="form-label">Bucket Name</label>
+      <label for="s3Bucket" class="form-label"><%= t('admin.f_s3_bucket', 'Bucket Name') %></label>
       <input type="text" id="s3Bucket" name="s3Bucket" class="input" value="<%= sho.s3Bucket || '' %>" placeholder="my-bucket">
     </div>
   </div>
   <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
     <div class="form-group">
-      <label for="s3AccessKey" class="form-label">Access Key</label>
+      <label for="s3AccessKey" class="form-label"><%= t('admin.f_s3_access', 'Access Key') %></label>
       <input type="text" id="s3AccessKey" name="s3AccessKey" class="input" value="<%= sho.s3AccessKey || '' %>" placeholder="AKIA...">
     </div>
     <div class="form-group">
-      <label for="s3SecretKey" class="form-label">Secret Key</label>
+      <label for="s3SecretKey" class="form-label"><%= t('admin.f_s3_secret', 'Secret Key') %></label>
       <input type="password" id="s3SecretKey" name="s3SecretKey" class="input" value="<%= sho.s3SecretKey || '' %>" placeholder="••••••••">
     </div>
   </div>

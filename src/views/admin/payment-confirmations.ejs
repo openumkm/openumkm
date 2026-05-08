@@ -6,7 +6,7 @@ function formatRp(amount) {
 var confirmations = typeof paymentConfirmations !== 'undefined' ? paymentConfirmations : [];
 var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
 %>
-<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Payment Confirmations' }) %>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : t('admin.payment_confirmations') }) %>
 <body>
 <div class="dashboard-layout">
   <%- include('./partials/sidebar', { userName: typeof userName !== 'undefined' ? userName : 'Admin', adminPage: 'payments' }) %>
@@ -14,17 +14,17 @@ var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
   <main class="dashboard-main">
     <div class="dashboard-header">
       <div>
-        <h2>Payment Confirmations</h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Review manual transfer payment proofs.</p>
+        <h2><%= t('admin.payment_confirmations') %></h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.payments_subtitle', 'Review manual transfer payment proofs.') %></p>
       </div>
     </div>
 
     <div class="dashboard-toolbar">
       <div class="flex items-center gap-2">
-        <a href="/admin/payments/confirmations" class="btn btn-ghost btn-sm<%= !statusFilter ? ' active' : '' %>">All</a>
-        <a href="/admin/payments/confirmations?status=pending" class="btn btn-ghost btn-sm<%= statusFilter === 'pending' ? ' active' : '' %>">Pending</a>
-        <a href="/admin/payments/confirmations?status=approved" class="btn btn-ghost btn-sm<%= statusFilter === 'approved' ? ' active' : '' %>">Approved</a>
-        <a href="/admin/payments/confirmations?status=rejected" class="btn btn-ghost btn-sm<%= statusFilter === 'rejected' ? ' active' : '' %>">Rejected</a>
+        <a href="/admin/payments/confirmations" class="btn btn-ghost btn-sm<%= !statusFilter ? ' active' : '' %>"><%= t('admin.all', 'All') %></a>
+        <a href="/admin/payments/confirmations?status=pending" class="btn btn-ghost btn-sm<%= statusFilter === 'pending' ? ' active' : '' %>"><%= t('admin.pending') %></a>
+        <a href="/admin/payments/confirmations?status=approved" class="btn btn-ghost btn-sm<%= statusFilter === 'approved' ? ' active' : '' %>"><%= t('admin.approved', 'Approved') %></a>
+        <a href="/admin/payments/confirmations?status=rejected" class="btn btn-ghost btn-sm<%= statusFilter === 'rejected' ? ' active' : '' %>"><%= t('admin.rejected', 'Rejected') %></a>
       </div>
     </div>
 
@@ -36,32 +36,32 @@ var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
           <div>
             <div class="flex items-center gap-2 mb-3">
               <strong style="color: var(--color-primary);">#<%= pc.orderNumber %></strong>
-              <span class="status status-<%= pc.status === 'approved' ? 'completed' : pc.status === 'rejected' ? 'cancelled' : 'waiting_confirmation' %>"><%= pc.status %></span>
+              <span class="status status-<%= pc.status === 'approved' ? 'completed' : pc.status === 'rejected' ? 'cancelled' : 'waiting_confirmation' %>"><%= t('admin.' + pc.status, pc.status) %></span>
             </div>
             <div class="flex flex-col gap-2" style="font: var(--font-body-md); color: var(--color-text-secondary);">
               <div class="flex gap-6">
                 <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);">Sender Bank</span>
+                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.sender_bank', 'Sender Bank') %></span>
                   <p style="margin-bottom: 0; font-weight: 500; color: var(--color-text);"><%= pc.senderBank %></p>
                 </div>
                 <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);">Sender Name</span>
+                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.sender_name', 'Sender Name') %></span>
                   <p style="margin-bottom: 0; font-weight: 500; color: var(--color-text);"><%= pc.senderName %></p>
                 </div>
               </div>
               <div class="flex gap-6">
                 <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);">Amount</span>
+                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.amount', 'Amount') %></span>
                   <p style="margin-bottom: 0; font: 600 16px/1.3 var(--font-family); color: var(--color-text);"><%= formatRp(pc.amount) %></p>
                 </div>
                 <div>
-                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);">Transfer Date</span>
+                  <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.transfer_date', 'Transfer Date') %></span>
                   <p style="margin-bottom: 0; font-weight: 500; color: var(--color-text);"><%= pc.transferDate %></p>
                 </div>
               </div>
               <% if (pc.notes) { %>
               <div>
-                <span style="color: var(--color-text-muted); font: var(--font-label-xs);">Notes</span>
+                <span style="color: var(--color-text-muted); font: var(--font-label-xs);"><%= t('admin.notes', 'Notes') %></span>
                 <p style="margin-bottom: 0; color: var(--color-text-secondary);"><%= pc.notes %></p>
               </div>
               <% } %>
@@ -69,7 +69,7 @@ var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
           </div>
 
           <div>
-            <span style="color: var(--color-text-muted); font: var(--font-label-xs); display: block; margin-bottom: var(--space-2);">Receipt Image</span>
+            <span style="color: var(--color-text-muted); font: var(--font-label-xs); display: block; margin-bottom: var(--space-2);"><%= t('admin.receipt_image', 'Receipt Image') %></span>
             <% if (pc.receiptImage) { %>
             <a href="<%= pc.receiptImage %>" target="_blank" style="display: block; width: 160px; height: 120px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border-light);">
               <img src="<%= pc.receiptImage %>" alt="Payment receipt" style="width: 100%; height: 100%; object-fit: cover;">
@@ -86,20 +86,20 @@ var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
             <form action="/admin/payments/<%= pc.id %>/approve" method="post">
               <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Approve
+                <%= t('admin.approve') %>
               </button>
             </form>
-            <form action="/admin/payments/<%= pc.id %>/reject" method="post" onsubmit="var r=prompt('Rejection reason:'); if(!r){return false;} this.querySelector('[name=reason]').value=r;">
+            <form action="/admin/payments/<%= pc.id %>/reject" method="post" onsubmit="var r=prompt('<%= t('admin.rejection_reason') %>:'); if(!r){return false;} this.querySelector('[name=reason]').value=r;">
               <input type="hidden" name="reason" value="">
               <button type="submit" class="btn btn-ghost btn-sm" style="width: 100%; color: var(--color-danger);">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                Reject
+                <%= t('admin.reject') %>
               </button>
             </form>
           </div>
           <% } else if (pc.status === 'rejected' && pc.rejectionReason) { %>
           <div>
-            <span style="color: var(--color-text-muted); font: var(--font-label-xs); display: block; margin-bottom: var(--space-1);">Rejection Reason</span>
+            <span style="color: var(--color-text-muted); font: var(--font-label-xs); display: block; margin-bottom: var(--space-1);"><%= t('admin.rejection_reason') %></span>
             <p style="font: var(--font-body-md); color: var(--color-danger); margin-bottom: 0;"><%= pc.rejectionReason %></p>
           </div>
           <% } %>
@@ -114,8 +114,8 @@ var statusFilter = typeof filterStatus !== 'undefined' ? filterStatus : '';
         <div class="empty-state-icon">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         </div>
-        <h3>No payment confirmations</h3>
-        <p><%= statusFilter ? 'No ' + statusFilter + ' confirmations found.' : 'Payment confirmations from manual transfers will appear here.' %></p>
+        <h3><%= t('admin.no_payments', 'No payment confirmations') %></h3>
+        <p><%= statusFilter ? t('admin.no_status_confirmations', 'No confirmations with that status.') : t('admin.payments_empty_hint', 'Payment confirmations from manual transfers will appear here.') %></p>
       </div>
     </div>
     <% } %>

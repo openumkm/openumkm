@@ -11,18 +11,12 @@ var courierList = typeof couriers !== 'undefined' ? couriers : [];
   <main class="dashboard-main">
     <div class="dashboard-header">
       <div>
-        <h2>Settings</h2>
-        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Configure your store settings.</p>
+        <h2><%= t('admin.settings') %></h2>
+        <p style="color: var(--color-text-secondary); margin-bottom: 0;"><%= t('admin.settings_subtitle', 'Configure your store settings.') %></p>
       </div>
     </div>
 
-    <div class="settings-nav mb-6">
-      <a href="/admin/settings" class="btn btn-ghost btn-sm active">General</a>
-      <a href="/admin/settings/bank-accounts" class="btn btn-ghost btn-sm">Bank Accounts</a>
-      <a href="/admin/settings/taxes" class="btn btn-ghost btn-sm">Tax Rates</a>
-      <a href="/admin/settings/currencies" class="btn btn-ghost btn-sm">Currencies</a>
-      <a href="/admin/settings/shipping-methods" class="btn btn-ghost btn-sm">Shipping Methods</a>
-    </div>
+    <%- include('./partials/settings-nav', { settingsActive: 'general' }) %>
 
     <form action="/admin/settings" method="post" enctype="multipart/form-data">
       <%- include('./partials/settings-store', { s: s }) %>
@@ -35,7 +29,7 @@ var courierList = typeof couriers !== 'undefined' ? couriers : [];
       <%- include('./partials/settings-ai', { s: s }) %>
 
       <div style="padding-top: var(--space-6); border-top: 1px solid var(--color-border-light);">
-        <button type="submit" class="btn btn-primary btn-lg">Save All Settings</button>
+        <button type="submit" class="btn btn-primary btn-lg"><%= t('admin.save_all_settings', 'Save All Settings') %></button>
       </div>
     </form>
   </main>

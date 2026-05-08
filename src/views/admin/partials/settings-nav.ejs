@@ -1,0 +1,12 @@
+<%# Settings subsection nav. Set `settingsActive` to one of:
+     general, bank_accounts, taxes, currencies, shipping_methods %>
+<%
+var sa = typeof settingsActive !== 'undefined' ? settingsActive : '';
+%>
+<div class="settings-nav mb-6">
+  <a href="/admin/settings" class="btn btn-ghost btn-sm<%= sa === 'general' ? ' active' : '' %>"><%= t('admin.general') %></a>
+  <a href="/admin/settings/bank-accounts" class="btn btn-ghost btn-sm<%= sa === 'bank_accounts' ? ' active' : '' %>"><%= t('admin.bank_accounts') %></a>
+  <a href="/admin/settings/taxes" class="btn btn-ghost btn-sm<%= sa === 'taxes' ? ' active' : '' %>"><%= t('admin.tax_rates') %></a>
+  <a href="/admin/settings/currencies" class="btn btn-ghost btn-sm<%= sa === 'currencies' ? ' active' : '' %>"><%= t('admin.currencies') %></a>
+  <a href="/admin/settings/shipping-methods" class="btn btn-ghost btn-sm<%= sa === 'shipping_methods' ? ' active' : '' %>"><%= t('admin.shipping_methods') %></a>
+</div>

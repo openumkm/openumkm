@@ -1,16 +1,20 @@
-<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Create Account' }) %>
-
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : t('auth.register') }) %>
 <body>
-<%- include('../partials/header', { isLoggedIn: typeof isLoggedIn !== 'undefined' ? isLoggedIn : false, cartCount: typeof cartCount !== 'undefined' ? cartCount : 0 }) %>
+<%- include('../partials/header', { isLoggedIn: false, cartCount: typeof cartCount !== 'undefined' ? cartCount : 0 }) %>
+
+<%
+const brandName = typeof storeName !== 'undefined' && storeName ? storeName : 'OpenUMKM';
+const brandInitial = (brandName.trim()[0] || 'O').toUpperCase();
+%>
 
 <main class="auth-page">
   <div class="auth-card">
     <div class="auth-card-header">
       <div class="logo">
-        <span>S</span>wift Commerce
+        <span><%= brandInitial %></span><%= brandName.trim().slice(1) %>
       </div>
-      <h2>Create Account</h2>
-      <p>Join Swift Commerce today</p>
+      <h2><%= t('auth.create_account', 'Create Account') %></h2>
+      <p><%= t('auth.join_today', 'Join') %> <%= brandName %> <%= t('auth.today_suffix', 'today') %></p>
     </div>
 
     <% if (typeof error !== 'undefined' && error) { %>
@@ -22,78 +26,36 @@
 
     <form action="/auth/register" method="POST" novalidate>
       <div class="form-group">
-        <label for="fullName" class="form-label form-label-required">Full Name</label>
-        <input
-          type="text"
-          id="fullName"
-          name="fullName"
-          class="input"
-          placeholder="Jane Doe"
-          required
-          autocomplete="name"
-          autofocus
-        >
+        <label for="fullName" class="form-label form-label-required"><%= t('auth.full_name') %></label>
+        <input type="text" id="fullName" name="fullName" class="input" placeholder="Jane Doe" required autocomplete="name" autofocus>
       </div>
 
       <div class="form-group">
-        <label for="email" class="form-label form-label-required">Email Address</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          class="input"
-          placeholder="you@example.com"
-          required
-          autocomplete="email"
-        >
+        <label for="email" class="form-label form-label-required"><%= t('auth.email') %></label>
+        <input type="email" id="email" name="email" class="input" placeholder="you@example.com" required autocomplete="email">
       </div>
 
       <div class="form-group">
-        <label for="phone" class="form-label form-label-required">Phone Number</label>
-        <input
-          type="tel"
-          id="phone"
-          name="phone"
-          class="input"
-          placeholder="+62 812 3456 7890"
-          required
-          autocomplete="tel"
-        >
+        <label for="phone" class="form-label form-label-required"><%= t('auth.phone') %></label>
+        <input type="tel" id="phone" name="phone" class="input" placeholder="+62 812 3456 7890" required autocomplete="tel">
       </div>
 
       <div class="form-group">
-        <label for="password" class="form-label form-label-required">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          class="input"
-          placeholder="Min. 8 characters"
-          required
-          minlength="8"
-          autocomplete="new-password"
-        >
-        <span class="form-hint">Must be at least 8 characters</span>
+        <label for="password" class="form-label form-label-required"><%= t('auth.password') %></label>
+        <input type="password" id="password" name="password" class="input" placeholder="<%= t('auth.password_min') %>" required minlength="8" autocomplete="new-password">
+        <span class="form-hint"><%= t('auth.password_min') %></span>
       </div>
 
       <div class="form-group">
-        <label for="confirmPassword" class="form-label form-label-required">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          class="input"
-          placeholder="Re-enter your password"
-          required
-          autocomplete="new-password"
-        >
+        <label for="confirmPassword" class="form-label form-label-required"><%= t('auth.confirm_password') %></label>
+        <input type="password" id="confirmPassword" name="confirmPassword" class="input" placeholder="<%= t('auth.confirm_password_ph', 'Re-enter your password') %>" required autocomplete="new-password">
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+      <button type="submit" class="btn btn-primary" style="width: 100%;"><%= t('auth.create_account', 'Create Account') %></button>
     </form>
 
     <div class="auth-card-footer">
-      Already have an account? <a href="/auth/login">Sign in</a>
+      <%= t('auth.has_account') %> <a href="/auth/login"><%= t('auth.login') %></a>
     </div>
   </div>
 </main>

@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import fastifyView from '@fastify/view';
@@ -13,13 +14,15 @@ import { AppModule } from './app.module';
 import { AuthService } from './services/auth.service';
 import { SettingsService } from './services/settings.service';
 import { preloadTranslations, createTranslator, detectLanguage } from './common/i18n';
-import { generateToken, setCsrfCookie, validateCsrf } from './common/csrf';
+import { generateToken, setCsrfCookie, validateCsrf, checkSameOrigin } from './common/csrf';
 import { UploadService } from './services/upload.service';
+import { AllExceptionsFilter } from './common/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: false }),
+    { bodyParser: false },
   );
 
   const fastify = app.getHttpAdapter().getInstance() as any;
@@ -73,7 +76,12 @@ async function bootstrap() {
   // Setup guard + i18n language detection
   let setupComplete: boolean | null = null;
   let defaultLang: string | null = null;
+  let defaultLangFetchedAt = 0;
   let activeCurrencies: any[] | null = null;
+  let activeCurrenciesFetchedAt = 0;
+  let cachedStoreName: string | null = null;
+  let storeNameFetchedAt = 0;
+  const SETTINGS_TTL = 5_000; // re-fetch at most every 5s (fast enough for post-save UX)
   const authService = app.get(AuthService);
   const settingsService = app.get(SettingsService);
   const uploadService = app.get(UploadService);
@@ -98,8 +106,10 @@ async function bootstrap() {
     }
 
     // i18n: detect language and set cookie + inject t() into view context
-    if (defaultLang === null) {
+    const nowMs = Date.now();
+    if (defaultLang === null || nowMs - defaultLangFetchedAt > SETTINGS_TTL) {
       defaultLang = (await settingsService.get('default_language')) || 'en';
+      defaultLangFetchedAt = nowMs;
     }
 
     const lang = detectLanguage(request, defaultLang);
@@ -119,8 +129,9 @@ async function bootstrap() {
     (request as any).t = createTranslator(lang);
 
     // Currency detection
-    if (activeCurrencies === null) {
+    if (activeCurrencies === null || nowMs - activeCurrenciesFetchedAt > SETTINGS_TTL) {
       activeCurrencies = await settingsService.getCurrencies();
+      activeCurrenciesFetchedAt = nowMs;
     }
 
     const currencies = activeCurrencies.filter((c: any) => c.isActive);
@@ -158,52 +169,75 @@ async function bootstrap() {
     } else {
       (request as any).csrfToken = csrfToken;
     }
+
+    // Fetch store name (cached, TTL 5s). Falls back to "OpenUMKM"
+    // during initial setup when the setting does not exist yet.
+    if (cachedStoreName === null || nowMs - storeNameFetchedAt > SETTINGS_TTL) {
+      cachedStoreName = (await settingsService.get('store_name')) || 'OpenUMKM';
+      storeNameFetchedAt = nowMs;
+    }
+    (request as any).storeName = cachedStoreName;
+
+    // Monkey-patch reply.view to auto-inject shared context into every view
+    // render, so controllers don't have to repeat storeName / csrf / t / etc.
+    const origView = (reply as any).view?.bind(reply);
+    if (origView) {
+      (reply as any).view = (template: string, data: any = {}, opts?: any) => {
+        const merged = {
+          storeName: cachedStoreName,
+          csrfToken: (request as any).csrfToken || '',
+          currentLang: (request as any).lang || 'en',
+          currentCurrency: (request as any).currency || 'IDR',
+          currencies: (request as any).currencies || [],
+          t: (request as any).t || ((k: string) => k),
+          ...(data || {}),
+        };
+        return origView(template, merged, opts);
+      };
+    }
   });
+
+  // Expose a helper to invalidate the store name cache (called after
+  // admin saves settings so the new brand shows up immediately).
+  // NestJS wraps `app` in a Proxy that rejects arbitrary property writes,
+  // so we attach it to fastify instance instead (not that it's used right
+  // now — the 5s cache TTL is fast enough for post-save UX).
+  (fastify as any).invalidateStoreNameCache = () => {
+    cachedStoreName = null;
+    storeNameFetchedAt = 0;
+  };
 
   // CSRF validation for POST/PUT/PATCH/DELETE
   fastify.addHook('preHandler', async (request: any, reply: any) => {
     if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return;
 
-    // Skip for multipart forms (CSRF token checked via header or relied on SOP)
+    const url = request.url as string;
     const contentType = (request.headers['content-type'] || '').toLowerCase();
-    if (contentType.includes('multipart/form-data')) return;
+
+    // Multipart uploads (files) cannot carry a CSRF cookie+body token cleanly
+    // because body parsing is stream-based. Fall back to Origin/Referer check
+    // to still block cross-site POSTs.
+    if (contentType.includes('multipart/form-data')) {
+      if (!checkSameOrigin(request)) {
+        if (url.startsWith('/api/')) {
+          return reply.status(403).send({ error: 'Cross-origin request blocked' });
+        }
+        return reply.status(403).send('Cross-origin upload blocked.');
+      }
+      return;
+    }
 
     if (!validateCsrf(request, reply)) {
-      if (request.url.startsWith('/api/') || request.url.startsWith('/health')) {
+      if (url.startsWith('/api/') || url.startsWith('/health')) {
         return reply.status(403).send({ error: 'Invalid CSRF token' });
       }
       return reply.status(403).send('Invalid or missing CSRF token. Please go back and try again.');
     }
   });
 
-  // 404 handler
-  fastify.setNotFoundHandler(async (_request: any, reply: any) => {
-    if (_request.url.startsWith('/api/') || _request.url.startsWith('/health')) {
-      return reply.status(404).send({ error: 'Not found' });
-    }
-    return reply.status(404).view('404.ejs', {
-      pageTitle: '404 — Page Not Found',
-      isLoggedIn: false,
-      cartCount: 0,
-    });
-  });
-
-  // Global error handler
-  fastify.setErrorHandler(async (error: any, _request: any, reply: any) => {
-    console.error('[Error]', error.message || error);
-    if (_request.url.startsWith('/api/') || _request.url.startsWith('/health')) {
-      return reply.status(error.statusCode || 500).send({
-        error: error.message || 'Internal Server Error',
-        statusCode: error.statusCode || 500,
-      });
-    }
-    return reply.status(error.statusCode || 500).view('404.ejs', {
-      pageTitle: error.statusCode ? `${error.statusCode} — Error` : 'Error',
-      error: error.message || 'Something went wrong.',
-      isLoggedIn: false,
-      cartCount: 0,
-    });
-  });
+  // 404 + error handling via Nest exception filter (avoids Fastify
+  // "already set" conflicts with Nest's built-in handlers)
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const port = parseInt(process.env.PORT || '3000', 10);
   await app.listen(port, '0.0.0.0');

@@ -1,4 +1,3 @@
-<%# Checkout Success Page %>
 <%
 function formatRp(amount) {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount || 0);
@@ -7,7 +6,7 @@ var o = typeof order !== 'undefined' ? order : {};
 var isManual = o.paymentMethod === 'manual_transfer';
 var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
 %>
-<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : 'Order Confirmed' }) %>
+<%- include('../partials/head', { pageTitle: typeof pageTitle !== 'undefined' ? pageTitle : t('storefront.checkout_success_title') }) %>
 <body>
 <%- include('../partials/header', { isLoggedIn: typeof isLoggedIn !== 'undefined' ? isLoggedIn : false, cartCount: 0 }) %>
 
@@ -17,36 +16,36 @@ var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
       <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--color-success-bg); display: inline-flex; align-items: center; justify-content: center; margin-bottom: var(--space-4);">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       </div>
-      <h1>Order Confirmed!</h1>
+      <h1><%= t('storefront.checkout_success_title') %></h1>
       <p style="font: var(--font-body-lg); color: var(--color-text-secondary);">
-        Your order <strong>#<%= o.orderNumber || '' %></strong> has been placed successfully.
+        <%= t('storefront.checkout_success_msg') %> <strong>#<%= o.orderNumber || '' %></strong>
       </p>
     </div>
 
     <div class="admin-card mb-6">
       <div class="flex justify-between mb-3" style="font: var(--font-body-md);">
-        <span style="color: var(--color-text-muted);">Order Number</span>
+        <span style="color: var(--color-text-muted);"><%= t('storefront.order_number') %></span>
         <strong><%= o.orderNumber || '—' %></strong>
       </div>
       <div class="flex justify-between mb-3" style="font: var(--font-body-md);">
-        <span style="color: var(--color-text-muted);">Total</span>
+        <span style="color: var(--color-text-muted);"><%= t('storefront.checkout_total') %></span>
         <strong style="color: var(--color-primary);"><%= formatRp(o.total) %></strong>
       </div>
       <div class="flex justify-between mb-3" style="font: var(--font-body-md);">
-        <span style="color: var(--color-text-muted);">Payment Method</span>
-        <span><%= isManual ? 'Manual Bank Transfer' : 'Xendit (Online)' %></span>
+        <span style="color: var(--color-text-muted);"><%= t('storefront.payment_method') %></span>
+        <span><%= isManual ? t('storefront.bank_transfer') : t('storefront.online_payment') %></span>
       </div>
       <div class="flex justify-between" style="font: var(--font-body-md);">
-        <span style="color: var(--color-text-muted);">Status</span>
-        <span class="status status-pending">Pending Payment</span>
+        <span style="color: var(--color-text-muted);"><%= t('admin.status') %></span>
+        <span class="status status-pending"><%= t('admin.pending') %></span>
       </div>
     </div>
 
     <% if (isManual && banks.length > 0) { %>
     <div class="admin-card mb-6">
-      <h3 class="admin-card-title">Transfer Instructions</h3>
+      <h3 class="admin-card-title"><%= t('storefront.transfer_instructions', 'Transfer Instructions') %></h3>
       <p style="font: var(--font-body-md); color: var(--color-text-secondary); margin-bottom: var(--space-4);">
-        Please transfer the exact amount to one of the following accounts:
+        <%= t('storefront.transfer_to') %>
       </p>
       <div class="flex flex-col gap-3">
         <% banks.forEach(function(bank) { %>
@@ -64,21 +63,21 @@ var banks = typeof bankAccounts !== 'undefined' ? bankAccounts : [];
       </div>
       <div class="payment-timer mt-4">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        <span>Complete payment within <strong>24 hours</strong>. After transferring, <a href="/payment/confirm/<%= o.id %>" style="color: var(--color-primary); font-weight: 600;">upload your proof of payment</a>.</span>
+        <span><%= t('storefront.transfer_deadline') %> <strong>24 <%= t('storefront.hours', 'hours') %></strong>. <a href="/payment/confirm/<%= o.id %>" style="color: var(--color-primary); font-weight: 600;"><%= t('storefront.upload_proof_link', 'Upload proof of payment') %></a>.</span>
       </div>
     </div>
-    <% } else if (!isManual) { %>
+    <% } else if (!isManual && o.paymentUrl) { %>
     <div class="admin-card mb-6">
       <div class="alert alert-info">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span>You will be redirected to the Xendit payment page. If not redirected automatically, <a href="<%= o.paymentUrl || '#' %>" style="color: var(--color-primary); font-weight: 600;">click here</a>.</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span><%= t('storefront.xendit_redirect', 'You will be redirected to the Xendit payment page.') %> <a href="<%= o.paymentUrl %>" style="color: var(--color-primary); font-weight: 600;"><%= t('storefront.click_here', 'Click here') %></a>.</span>
       </div>
     </div>
     <% } %>
 
     <div class="flex justify-center gap-3 mt-8">
-      <a href="/dashboard/orders" class="btn btn-primary">View My Orders</a>
-      <a href="/" class="btn btn-ghost">Continue Shopping</a>
+      <a href="/dashboard/orders" class="btn btn-primary"><%= t('dashboard.my_orders') %></a>
+      <a href="/" class="btn btn-ghost"><%= t('storefront.cart_continue') %></a>
     </div>
   </div>
 </main>

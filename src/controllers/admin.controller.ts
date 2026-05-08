@@ -27,7 +27,7 @@ export class AdminController {
     const breakdown = await this.revenueService.getRevenueBreakdown('monthly');
 
     return res.view('admin/dashboard.ejs', {
-      pageTitle: 'Admin Dashboard — Swift Commerce',
+      pageTitle: 'Admin Dashboard',
       userName: user?.name || 'Admin',
       adminPage: 'dashboard',
       stats: {

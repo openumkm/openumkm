@@ -1,41 +1,41 @@
 <%# Settings: Store Info Section %>
 <div class="admin-card mb-6">
-  <h3 class="admin-card-title">Store Information</h3>
+  <h3 class="admin-card-title"><%= t('admin.store_info') %></h3>
   <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
     <div class="form-group">
-      <label for="storeName" class="form-label form-label-required">Store Name</label>
+      <label for="storeName" class="form-label form-label-required"><%= t('admin.f_store_name', 'Store Name') %></label>
       <input type="text" id="storeName" name="storeName" class="input" value="<%= s.storeName || '' %>" required>
     </div>
     <div class="form-group">
-      <label for="storeEmail" class="form-label">Store Email</label>
+      <label for="storeEmail" class="form-label"><%= t('admin.f_store_email', 'Store Email') %></label>
       <input type="email" id="storeEmail" name="storeEmail" class="input" value="<%= s.storeEmail || '' %>">
     </div>
   </div>
   <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
     <div class="form-group">
-      <label for="storePhone" class="form-label">Phone</label>
+      <label for="storePhone" class="form-label"><%= t('admin.f_phone', 'Phone') %></label>
       <input type="tel" id="storePhone" name="storePhone" class="input" value="<%= s.storePhone || '' %>">
     </div>
     <div class="form-group">
-      <label for="invoicePrefix" class="form-label">Invoice Prefix</label>
+      <label for="invoicePrefix" class="form-label"><%= t('admin.f_invoice_prefix', 'Invoice Prefix') %></label>
       <input type="text" id="invoicePrefix" name="invoicePrefix" class="input" value="<%= s.invoicePrefix || 'INV' %>" placeholder="INV">
     </div>
   </div>
   <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
     <div class="form-group">
-      <label for="defaultLanguage" class="form-label">Default Language</label>
+      <label for="defaultLanguage" class="form-label"><%= t('admin.f_default_language', 'Default Language') %></label>
       <select id="defaultLanguage" name="defaultLanguage" class="select">
         <option value="id" <%= s.defaultLanguage === 'id' ? 'selected' : '' %>>Bahasa Indonesia</option>
         <option value="en" <%= s.defaultLanguage === 'en' ? 'selected' : '' %>>English</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Store Logo</label>
+      <label class="form-label"><%= t('admin.f_store_logo', 'Store Logo') %></label>
       <% if (s.storeLogo) { %>
       <div class="mb-2"><img src="<%= s.storeLogo %>" alt="Store Logo" style="max-height:60px;border-radius:var(--radius-md);"></div>
       <% } %>
       <input type="file" name="logo" class="input" accept="image/*">
-      <span class="form-hint">Max 5MB. JPG, PNG, or SVG. Leave empty to keep current.</span>
+      <span class="form-hint"><%= t('admin.f_logo_hint', 'Max 5MB. JPG, PNG, or SVG. Leave empty to keep current.') %></span>
     </div>
   </div>
 </div>

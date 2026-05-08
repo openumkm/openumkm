@@ -7,12 +7,13 @@
       <div style="font: 700 28px/1.2 var(--font-family); color: var(--color-text); margin-bottom: var(--space-2);">
         <span style="color: var(--color-primary);">Open</span>UMKM
       </div>
-      <p style="color: var(--color-text-secondary); font: var(--font-body-md);">Set up your store in a few steps</p>
+      <p style="color: var(--color-text-secondary); font: var(--font-body-md);" data-i18n="tagline">Set up your store in a few steps</p>
     </div>
 
     <!-- Step Indicator -->
     <div style="display:flex;gap:8px;margin-bottom:var(--space-6);">
-      <div class="setup-step-indicator active" id="ind-1" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-primary);transition:background .2s;"></div>
+      <div class="setup-step-indicator active" id="ind-0" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-primary);transition:background .2s;"></div>
+      <div class="setup-step-indicator" id="ind-1" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-border-light);transition:background .2s;"></div>
       <div class="setup-step-indicator" id="ind-2" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-border-light);transition:background .2s;"></div>
       <div class="setup-step-indicator" id="ind-3" style="flex:1;height:4px;border-radius:var(--radius-full);background:var(--color-border-light);transition:background .2s;"></div>
     </div>
@@ -26,121 +27,140 @@
 
     <form action="/setup" method="POST" id="setupForm" novalidate>
 
+      <!-- ═══ Step 0: Language Picker ═══ -->
+      <div class="setup-step-panel" id="step-0">
+        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);" data-i18n="lang_title">Choose your language</h3>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);" data-i18n="lang_subtitle">Pick your preferred language for the rest of the setup</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-6);">
+          <button type="button" class="lang-option" data-lang="id" style="cursor:pointer;padding:var(--space-6);border:2px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);display:flex;flex-direction:column;align-items:center;gap:var(--space-3);transition:all .2s;font-family:var(--font-family);">
+            <span style="font-size:56px;line-height:1;">🇮🇩</span>
+            <span style="font-weight:600;font-size:15px;color:var(--color-text);">Bahasa Indonesia</span>
+            <span style="font-size:12px;color:var(--color-text-muted);">ID</span>
+          </button>
+          <button type="button" class="lang-option" data-lang="en" style="cursor:pointer;padding:var(--space-6);border:2px solid var(--color-border);border-radius:var(--radius-lg);background:var(--color-surface);display:flex;flex-direction:column;align-items:center;gap:var(--space-3);transition:all .2s;font-family:var(--font-family);">
+            <span style="font-size:56px;line-height:1;">🇬🇧</span>
+            <span style="font-weight:600;font-size:15px;color:var(--color-text);">English</span>
+            <span style="font-size:12px;color:var(--color-text-muted);">EN</span>
+          </button>
+        </div>
+
+        <input type="hidden" id="defaultLanguage" name="defaultLanguage" value="id">
+
+        <div style="display:flex;justify-content:flex-end;margin-top:var(--space-6);">
+          <button type="button" class="btn btn-primary" onclick="goStep(1)" data-i18n="next">Next &rarr;</button>
+        </div>
+      </div>
+
       <!-- ═══ Step 1: Store Info ═══ -->
-      <div class="setup-step" id="step-1">
-        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);">Store Information</h3>
-        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);">Tell us about your store</p>
+      <div class="setup-step-panel" id="step-1" style="display:none;">
+        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);" data-i18n="store_title">Store Information</h3>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);" data-i18n="store_subtitle">Tell us about your store</p>
 
         <div class="form-group">
-          <label for="storeName" class="form-label form-label-required">Store Name</label>
-          <input type="text" id="storeName" name="storeName" class="input" placeholder="My Awesome Store" required autofocus>
+          <label for="storeName" class="form-label form-label-required" data-i18n="store_name">Store Name</label>
+          <input type="text" id="storeName" name="storeName" class="input" data-i18n-ph="store_name_ph" placeholder="My Awesome Store" required autofocus>
         </div>
 
         <div class="form-group">
-          <label for="storeEmail" class="form-label">Store Email</label>
-          <input type="email" id="storeEmail" name="storeEmail" class="input" placeholder="hello@mystore.com">
-          <span class="form-hint">Used as sender for customer notifications</span>
+          <label for="storeEmail" class="form-label" data-i18n="store_email">Store Email</label>
+          <input type="email" id="storeEmail" name="storeEmail" class="input" data-i18n-ph="store_email_ph" placeholder="hello@mystore.com">
+          <span class="form-hint" data-i18n="store_email_hint">Used as sender for customer notifications</span>
         </div>
 
         <div class="form-group">
-          <label for="storePhone" class="form-label">Store Phone</label>
+          <label for="storePhone" class="form-label" data-i18n="store_phone">Store Phone</label>
           <input type="tel" id="storePhone" name="storePhone" class="input" placeholder="+62 812 3456 7890">
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
-          <div class="form-group">
-            <label for="defaultLanguage" class="form-label">Default Language</label>
-            <select id="defaultLanguage" name="defaultLanguage" class="input">
-              <option value="id">Bahasa Indonesia</option>
-              <option value="en">English</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="defaultCurrency" class="form-label">Default Currency</label>
-            <select id="defaultCurrency" name="defaultCurrency" class="input">
-              <option value="IDR">IDR — Rupiah</option>
-              <option value="USD">USD — Dollar</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label for="defaultCurrency" class="form-label" data-i18n="default_currency">Default Currency</label>
+          <select id="defaultCurrency" name="defaultCurrency" class="input" style="max-width:240px;">
+            <option value="IDR">IDR — Rupiah</option>
+            <option value="USD">USD — Dollar</option>
+          </select>
         </div>
 
         <div class="form-group">
-          <label for="invoicePrefix" class="form-label">Invoice Prefix</label>
-          <input type="text" id="invoicePrefix" name="invoicePrefix" class="input" placeholder="INV" value="INV" maxlength="10">
-          <span class="form-hint">Order numbers will look like: INV/20260430/001</span>
+          <label for="invoicePrefix" class="form-label" data-i18n="invoice_prefix">Invoice Prefix</label>
+          <input type="text" id="invoicePrefix" name="invoicePrefix" class="input" placeholder="INV" value="INV" maxlength="10" style="max-width:200px;">
+          <span class="form-hint" data-i18n="invoice_hint">Order numbers will look like: INV/20260430/001</span>
         </div>
 
-        <div style="display:flex;justify-content:flex-end;margin-top:var(--space-6);">
-          <button type="button" class="btn btn-primary" onclick="goStep(2)">Next &rarr;</button>
+        <div style="display:flex;justify-content:space-between;margin-top:var(--space-6);">
+          <button type="button" class="btn btn-secondary" onclick="goStep(0)" data-i18n="back">&larr; Back</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(2)" data-i18n="next">Next &rarr;</button>
         </div>
       </div>
 
       <!-- ═══ Step 2: Payment Setup ═══ -->
-      <div class="setup-step" id="step-2" style="display:none;">
-        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);">Payment Setup</h3>
-        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);">Choose how customers will pay</p>
+      <div class="setup-step-panel" id="step-2" style="display:none;">
+        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);" data-i18n="payment_title">Payment Setup</h3>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);" data-i18n="payment_subtitle">Choose how customers will pay</p>
 
         <div style="display:flex;flex-direction:column;gap:var(--space-3);margin-bottom:var(--space-5);">
           <label style="display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);cursor:pointer;transition:border-color .2s;" id="lbl-manual">
             <input type="checkbox" name="manualTransferEnabled" value="1" checked style="margin-top:2px;">
             <div>
-              <div style="font-weight:600;font-size:14px;color:var(--color-text);">Manual Bank Transfer</div>
-              <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Customers transfer to your bank account and upload proof</div>
+              <div style="font-weight:600;font-size:14px;color:var(--color-text);" data-i18n="pay_manual">Manual Bank Transfer</div>
+              <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;" data-i18n="pay_manual_desc">Customers transfer to your bank account and upload proof</div>
             </div>
           </label>
           <label style="display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-4);border:1px solid var(--color-border);border-radius:var(--radius-lg);cursor:pointer;transition:border-color .2s;" id="lbl-xendit">
             <input type="checkbox" name="xenditEnabled" value="1" style="margin-top:2px;">
             <div>
-              <div style="font-weight:600;font-size:14px;color:var(--color-text);">Xendit Online Payment</div>
-              <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;">Accept credit cards, e-wallets, VA, and more via Xendit</div>
+              <div style="font-weight:600;font-size:14px;color:var(--color-text);" data-i18n="pay_xendit">Xendit Online Payment</div>
+              <div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px;" data-i18n="pay_xendit_desc">Accept credit cards, e-wallets, VA, and more via Xendit</div>
             </div>
           </label>
         </div>
 
-        <!-- Bank Account (optional first one) -->
         <div id="bankSection">
-          <h4 style="margin:0 0 var(--space-3);font-size:14px;color:var(--color-text);">Add a Bank Account <span style="font-weight:400;color:var(--color-text-muted);font-size:12px;">(optional, can add later)</span></h4>
+          <h4 style="margin:0 0 var(--space-3);font-size:14px;color:var(--color-text);">
+            <span data-i18n="bank_title">Add a Bank Account</span>
+            <span style="font-weight:400;color:var(--color-text-muted);font-size:12px;" data-i18n="bank_optional">(optional, can add later)</span>
+          </h4>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);">
             <div class="form-group">
-              <label class="form-label">Bank Name</label>
+              <label class="form-label" data-i18n="bank_name">Bank Name</label>
               <input type="text" name="bankName" class="input" placeholder="BCA">
             </div>
             <div class="form-group">
-              <label class="form-label">Account Number</label>
+              <label class="form-label" data-i18n="account_number">Account Number</label>
               <input type="text" name="bankAccountNumber" class="input" placeholder="1234567890">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Account Holder Name</label>
+            <label class="form-label" data-i18n="account_holder">Account Holder Name</label>
             <input type="text" name="bankAccountHolder" class="input" placeholder="John Doe">
           </div>
         </div>
 
         <div class="form-group">
-          <label for="autoExpireHours" class="form-label">Payment Deadline (hours)</label>
+          <label for="autoExpireHours" class="form-label" data-i18n="payment_deadline">Payment Deadline (hours)</label>
           <input type="number" id="autoExpireHours" name="autoExpireHours" class="input" value="24" min="1" max="168" style="max-width:120px;">
-          <span class="form-hint">Orders auto-expire after this many hours without payment</span>
+          <span class="form-hint" data-i18n="payment_deadline_hint">Orders auto-expire after this many hours without payment</span>
         </div>
 
         <div style="display:flex;justify-content:space-between;margin-top:var(--space-6);">
-          <button type="button" class="btn btn-secondary" onclick="goStep(1)">&larr; Back</button>
-          <button type="button" class="btn btn-primary" onclick="goStep(3)">Next &rarr;</button>
+          <button type="button" class="btn btn-secondary" onclick="goStep(1)" data-i18n="back">&larr; Back</button>
+          <button type="button" class="btn btn-primary" onclick="goStep(3)" data-i18n="next">Next &rarr;</button>
         </div>
       </div>
 
       <!-- ═══ Step 3: Admin Account ═══ -->
-      <div class="setup-step" id="step-3" style="display:none;">
-        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);">Admin Account</h3>
-        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);">Create your admin login</p>
+      <div class="setup-step-panel" id="step-3" style="display:none;">
+        <h3 style="margin:0 0 var(--space-1);font-size:16px;color:var(--color-text);" data-i18n="admin_title">Admin Account</h3>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin:0 0 var(--space-5);" data-i18n="admin_subtitle">Create your admin login</p>
 
         <div class="form-group">
-          <label for="email" class="form-label form-label-required">Admin Email</label>
-          <input type="email" id="email" name="email" class="input" placeholder="admin@mystore.com" required autocomplete="email">
+          <label for="email" class="form-label form-label-required" data-i18n="admin_email">Admin Email</label>
+          <input type="email" id="email" name="email" class="input" data-i18n-ph="admin_email_ph" placeholder="admin@mystore.com" required autocomplete="email">
         </div>
 
         <div class="form-group">
-          <label for="password" class="form-label form-label-required">Password</label>
-          <input type="password" id="password" name="password" class="input" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password">
+          <label for="password" class="form-label form-label-required" data-i18n="password">Password</label>
+          <input type="password" id="password" name="password" class="input" data-i18n-ph="password_ph" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password">
           <div id="strengthBar" style="height:4px;border-radius:var(--radius-full);background:var(--color-border-light);margin-top:var(--space-2);overflow:hidden;">
             <div id="strengthFill" style="height:100%;width:0%;border-radius:var(--radius-full);transition:width .2s,background .2s;"></div>
           </div>
@@ -148,13 +168,13 @@
         </div>
 
         <div class="form-group">
-          <label for="confirmPassword" class="form-label form-label-required">Confirm Password</label>
-          <input type="password" id="confirmPassword" name="confirmPassword" class="input" placeholder="Re-enter your password" required autocomplete="new-password">
+          <label for="confirmPassword" class="form-label form-label-required" data-i18n="confirm_password">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" class="input" data-i18n-ph="confirm_password_ph" placeholder="Re-enter your password" required autocomplete="new-password">
         </div>
 
         <div style="display:flex;justify-content:space-between;margin-top:var(--space-6);">
-          <button type="button" class="btn btn-secondary" onclick="goStep(2)">&larr; Back</button>
-          <button type="submit" class="btn btn-primary" style="padding-left:var(--space-8);padding-right:var(--space-8);">
+          <button type="button" class="btn btn-secondary" onclick="goStep(2)" data-i18n="back">&larr; Back</button>
+          <button type="submit" class="btn btn-primary" style="padding-left:var(--space-8);padding-right:var(--space-8);" data-i18n="submit">
             Create Your Store &rarr;
           </button>
         </div>
@@ -168,24 +188,167 @@
   </div>
 </main>
 
+<style>
+  .lang-option:hover {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 4px var(--color-primary-subtle);
+  }
+  .lang-option.selected {
+    border-color: var(--color-primary) !important;
+    background: var(--color-primary-subtle) !important;
+  }
+  .setup-step-indicator.completed {
+    background: var(--color-success) !important;
+  }
+</style>
+
 <script>
 (function() {
-  var currentStep = 1;
+  /* ── Translation dictionary ─────────────────────── */
+  var DICT = {
+    id: {
+      tagline: 'Atur toko Anda dalam beberapa langkah',
+      lang_title: 'Pilih bahasa',
+      lang_subtitle: 'Pilih bahasa yang akan digunakan selama setup',
+      store_title: 'Informasi Toko',
+      store_subtitle: 'Ceritakan tentang toko Anda',
+      store_name: 'Nama Toko',
+      store_name_ph: 'Toko Kerennya Saya',
+      store_email: 'Email Toko',
+      store_email_ph: 'hello@tokosaya.com',
+      store_email_hint: 'Digunakan sebagai pengirim notifikasi ke pelanggan',
+      store_phone: 'Telepon Toko',
+      default_currency: 'Mata Uang Default',
+      invoice_prefix: 'Awalan Invoice',
+      invoice_hint: 'Nomor pesanan akan tampil seperti: INV/20260430/001',
+      payment_title: 'Pengaturan Pembayaran',
+      payment_subtitle: 'Pilih cara pembayaran pelanggan',
+      pay_manual: 'Transfer Bank Manual',
+      pay_manual_desc: 'Pelanggan transfer ke rekening Anda lalu upload bukti',
+      pay_xendit: 'Pembayaran Online Xendit',
+      pay_xendit_desc: 'Terima kartu kredit, e-wallet, VA, dan lainnya via Xendit',
+      bank_title: 'Tambah Rekening Bank',
+      bank_optional: '(opsional, bisa ditambah nanti)',
+      bank_name: 'Nama Bank',
+      account_number: 'Nomor Rekening',
+      account_holder: 'Nama Pemilik Rekening',
+      payment_deadline: 'Batas Waktu Pembayaran (jam)',
+      payment_deadline_hint: 'Pesanan kedaluwarsa otomatis setelah waktu ini tanpa pembayaran',
+      admin_title: 'Akun Admin',
+      admin_subtitle: 'Buat login admin Anda',
+      admin_email: 'Email Admin',
+      admin_email_ph: 'admin@tokosaya.com',
+      password: 'Kata Sandi',
+      password_ph: 'Min. 8 karakter',
+      confirm_password: 'Konfirmasi Kata Sandi',
+      confirm_password_ph: 'Masukkan ulang kata sandi',
+      back: '\u2190 Kembali',
+      next: 'Lanjut \u2192',
+      submit: 'Buat Toko Anda \u2192',
+      pw_weak: 'Lemah',
+      pw_fair: 'Cukup',
+      pw_strong: 'Kuat'
+    },
+    en: {
+      tagline: 'Set up your store in a few steps',
+      lang_title: 'Choose your language',
+      lang_subtitle: 'Pick your preferred language for the rest of the setup',
+      store_title: 'Store Information',
+      store_subtitle: 'Tell us about your store',
+      store_name: 'Store Name',
+      store_name_ph: 'My Awesome Store',
+      store_email: 'Store Email',
+      store_email_ph: 'hello@mystore.com',
+      store_email_hint: 'Used as sender for customer notifications',
+      store_phone: 'Store Phone',
+      default_currency: 'Default Currency',
+      invoice_prefix: 'Invoice Prefix',
+      invoice_hint: 'Order numbers will look like: INV/20260430/001',
+      payment_title: 'Payment Setup',
+      payment_subtitle: 'Choose how customers will pay',
+      pay_manual: 'Manual Bank Transfer',
+      pay_manual_desc: 'Customers transfer to your bank account and upload proof',
+      pay_xendit: 'Xendit Online Payment',
+      pay_xendit_desc: 'Accept credit cards, e-wallets, VA, and more via Xendit',
+      bank_title: 'Add a Bank Account',
+      bank_optional: '(optional, can add later)',
+      bank_name: 'Bank Name',
+      account_number: 'Account Number',
+      account_holder: 'Account Holder Name',
+      payment_deadline: 'Payment Deadline (hours)',
+      payment_deadline_hint: 'Orders auto-expire after this many hours without payment',
+      admin_title: 'Admin Account',
+      admin_subtitle: 'Create your admin login',
+      admin_email: 'Admin Email',
+      admin_email_ph: 'admin@mystore.com',
+      password: 'Password',
+      password_ph: 'Min. 8 characters',
+      confirm_password: 'Confirm Password',
+      confirm_password_ph: 'Re-enter your password',
+      back: '\u2190 Back',
+      next: 'Next \u2192',
+      submit: 'Create Your Store \u2192',
+      pw_weak: 'Weak',
+      pw_fair: 'Fair',
+      pw_strong: 'Strong'
+    }
+  };
+
+  var currentStep = 0;
+  var totalSteps = 4;
+  var currentLang = 'id';
+
+  function applyLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    var d = DICT[lang] || DICT.en;
+
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n');
+      if (d[key]) el.textContent = d[key];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+      var key = el.getAttribute('data-i18n-ph');
+      if (d[key]) el.setAttribute('placeholder', d[key]);
+    });
+
+    document.getElementById('defaultLanguage').value = lang;
+
+    // Highlight selected card
+    document.querySelectorAll('.lang-option').forEach(function(btn) {
+      btn.classList.toggle('selected', btn.getAttribute('data-lang') === lang);
+    });
+  }
+
+  // Wire up language option cards (select only, no auto-advance)
+  document.querySelectorAll('.lang-option').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var lang = btn.getAttribute('data-lang');
+      applyLang(lang);
+    });
+  });
 
   window.goStep = function(step) {
     // Basic validation before moving forward
-    if (step > currentStep) {
-      if (currentStep === 1) {
-        var storeName = document.getElementById('storeName');
-        if (!storeName.value.trim()) { storeName.focus(); return; }
-      }
-      if (currentStep === 3) return; // submit via form
+    if (step > currentStep && currentStep === 1) {
+      var storeName = document.getElementById('storeName');
+      if (!storeName.value.trim()) { storeName.focus(); return; }
     }
 
     // Hide all steps, show target
-    for (var i = 1; i <= 3; i++) {
-      document.getElementById('step-' + i).style.display = i === step ? 'block' : 'none';
-      document.getElementById('ind-' + i).style.background = i <= step ? 'var(--color-primary)' : 'var(--color-border-light)';
+    for (var i = 0; i < totalSteps; i++) {
+      var panel = document.getElementById('step-' + i);
+      var ind = document.getElementById('ind-' + i);
+      if (panel) panel.style.display = i === step ? 'block' : 'none';
+      if (ind) {
+        if (i < step) {
+          ind.style.background = 'var(--color-success)';
+        } else if (i === step) {
+          ind.style.background = 'var(--color-primary)';
+        } else {
+          ind.style.background = 'var(--color-border-light)';
+        }
+      }
     }
     currentStep = step;
     window.scrollTo(0, 0);
@@ -205,11 +368,15 @@
       if (/[^A-Za-z0-9]/.test(val)) score++;
       if (val.length >= 12) score++;
       fill.style.width = (score * 20) + '%';
-      if (score <= 1) { fill.style.background = 'var(--color-danger)'; text.textContent = 'Weak'; text.style.color = 'var(--color-danger)'; }
-      else if (score <= 3) { fill.style.background = 'var(--color-warning)'; text.textContent = 'Fair'; text.style.color = 'var(--color-warning)'; }
-      else { fill.style.background = 'var(--color-success)'; text.textContent = 'Strong'; text.style.color = 'var(--color-success)'; }
+      var d = DICT[currentLang] || DICT.en;
+      if (score <= 1) { fill.style.background = 'var(--color-danger)'; text.textContent = d.pw_weak; text.style.color = 'var(--color-danger)'; }
+      else if (score <= 3) { fill.style.background = 'var(--color-warning)'; text.textContent = d.pw_fair; text.style.color = 'var(--color-warning)'; }
+      else { fill.style.background = 'var(--color-success)'; text.textContent = d.pw_strong; text.style.color = 'var(--color-success)'; }
     });
   }
+
+  // Initial language (default: Bahasa Indonesia)
+  applyLang('id');
 })();
 </script>
 </body>
