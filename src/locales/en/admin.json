@@ -200,6 +200,7 @@
   "ai_name_required": "Please enter a product name first.",
   "ai_failed": "AI generation failed.",
   "ai_connect_failed": "Failed to connect to AI service.",
+  "ai_not_configured": "AI is not configured. Enable it in Settings → AI Configuration.",
   "ai_fetch_models": "Fetch Models",
   "ai_fetching": "Fetching...",
   "ai_fetch_need_creds": "Enter Base URL and API Key first.",

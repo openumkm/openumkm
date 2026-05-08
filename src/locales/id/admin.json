@@ -201,6 +201,7 @@
   "ai_name_required": "Masukkan nama produk dulu.",
   "ai_failed": "Pembuatan AI gagal.",
   "ai_connect_failed": "Gagal terhubung ke layanan AI.",
+  "ai_not_configured": "AI belum dikonfigurasi. Aktifkan di Pengaturan → Konfigurasi AI.",
   "ai_fetch_models": "Ambil Model",
   "ai_fetching": "Mengambil...",
   "ai_fetch_need_creds": "Masukkan Base URL dan API Key dulu.",

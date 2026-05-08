@@ -210,10 +210,55 @@ var variants = p.variants || [];
 
 <%- include('./partials/product-form-scripts', { variants: variants }) %>
 
+<%
+var ai = typeof aiConfig !== 'undefined' && aiConfig ? aiConfig : { enabled: false, baseUrl: '', apiKey: '', model: '', lang: 'en' };
+%>
 <script>
 (function() {
+  var AI = {
+    enabled: <%= ai.enabled ? 'true' : 'false' %>,
+    baseUrl: <%- JSON.stringify(ai.baseUrl) %>,
+    apiKey: <%- JSON.stringify(ai.apiKey) %>,
+    model: <%- JSON.stringify(ai.model) %>,
+    lang: <%- JSON.stringify(ai.lang) %>
+  };
+
+  var langLabel = AI.lang === 'id' ? 'Bahasa Indonesia' : 'English';
+
+  // Build the system + user prompts for each generation type.
+  function buildPrompts(type, productName, description) {
+    switch (type) {
+      case 'product_description':
+        return {
+          system: 'You are a copywriter for an online store. Write compelling product descriptions that are concise, highlight key features, and encourage purchase. Write in ' + langLabel + '. Output only the description text, no markdown formatting.',
+          user: 'Write a product description for "' + productName + '".'
+        };
+      case 'meta_title':
+        return {
+          system: 'You are an SEO specialist. Generate a concise, keyword-rich meta title (max 60 characters) for a product page. Write in ' + langLabel + '. Output only the title text.',
+          user: description
+            ? 'Generate a meta title for the product "' + productName + '". Description: ' + description
+            : 'Generate a meta title for the product "' + productName + '".'
+        };
+      case 'meta_description':
+        return {
+          system: 'You are an SEO specialist. Generate a compelling meta description (max 160 characters) for a product page. Write in ' + langLabel + '. Output only the description text.',
+          user: description
+            ? 'Generate a meta description for the product "' + productName + '". Description: ' + description
+            : 'Generate a meta description for the product "' + productName + '".'
+        };
+      default:
+        return null;
+    }
+  }
+
   document.querySelectorAll('.ai-gen-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
+      if (!AI.enabled) {
+        alert('<%= t('admin.ai_not_configured', 'AI is not configured. Enable it in Settings → AI Configuration.') %>');
+        return;
+      }
+
       var type = btn.getAttribute('data-type');
       var targetId = btn.getAttribute('data-target');
       var target = document.getElementById(targetId);
@@ -227,26 +272,54 @@ var variants = p.variants || [];
       }
 
       var description = document.getElementById('description').value.trim();
+      var prompts = buildPrompts(type, productName, description);
+      if (!prompts) return;
+
       var originalText = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"/></svg> <%= t('admin.generating', 'Generating...') %>';
 
-      fetch('/admin/ai/generate', {
+      fetch(AI.baseUrl + '/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: type, productName: productName, description: description })
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + AI.apiKey
+        },
+        body: JSON.stringify({
+          model: AI.model,
+          messages: [
+            { role: 'system', content: prompts.system },
+            { role: 'user', content: prompts.user }
+          ],
+          max_tokens: 1024,
+          temperature: 0.7
+        })
       })
-      .then(function(res) { return res.json(); })
+      .then(function(r) {
+        return r.text().then(function(text) {
+          if (!r.ok) {
+            var msg = 'HTTP ' + r.status;
+            try {
+              var j = JSON.parse(text);
+              var detail = (j && j.error && (j.error.message || j.error)) || (j && j.message);
+              if (detail) msg += ': ' + (typeof detail === 'string' ? detail : JSON.stringify(detail));
+            } catch (e) { if (text) msg += ': ' + text.slice(0, 300); }
+            throw new Error(msg);
+          }
+          try { return JSON.parse(text); } catch (e) { throw new Error('Invalid JSON response from AI'); }
+        });
+      })
       .then(function(data) {
-        if (data.success && data.text) {
-          target.value = data.text;
-          target.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-          alert(data.error || '<%= t('admin.ai_failed', 'AI generation failed.') %>');
+        var content = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!content || !content.trim()) {
+          alert('<%= t('admin.ai_failed', 'AI generation failed.') %>');
+          return;
         }
+        target.value = content.trim();
+        target.dispatchEvent(new Event('input', { bubbles: true }));
       })
-      .catch(function() {
-        alert('<%= t('admin.ai_connect_failed', 'Failed to connect to AI service.') %>');
+      .catch(function(err) {
+        alert((err && err.message) ? err.message : '<%= t('admin.ai_connect_failed', 'Failed to connect to AI service.') %>');
       })
       .finally(function() {
         btn.disabled = false;

@@ -11,7 +11,6 @@ import { AdminSettingsController } from './controllers/admin-settings.controller
 import { AdminSettingsBankController } from './controllers/admin-settings-bank.controller';
 import { AdminSettingsTaxController } from './controllers/admin-settings-tax.controller';
 import { AdminSettingsShippingController } from './controllers/admin-settings-shipping.controller';
-import { AdminAiController } from './controllers/admin-ai.controller';
 import { DashboardController } from './controllers/dashboard.controller';
 import { SetupController } from './controllers/setup.controller';
 import { HealthController } from './controllers/health.controller';
@@ -26,7 +25,6 @@ import { SessionService } from './services/session.service';
 import { UploadService } from './services/upload.service';
 import { AddressService } from './services/address.service';
 import { EmailService } from './services/email.service';
-import { AiService } from './services/ai.service';
 import { ShippingService } from './services/shipping.service';
 import { XenditService } from './services/xendit.service';
 import { PaymentConfirmationService } from './services/payment-confirmation.service';
@@ -48,7 +46,6 @@ import { PaymentConfirmationService } from './services/payment-confirmation.serv
     AdminSettingsBankController,
     AdminSettingsTaxController,
     AdminSettingsShippingController,
-    AdminAiController,
     XenditWebhookController,
   ],
   providers: [
@@ -62,7 +59,6 @@ import { PaymentConfirmationService } from './services/payment-confirmation.serv
     UploadService,
     AddressService,
     EmailService,
-    AiService,
     ShippingService,
     XenditService,
     PaymentConfirmationService,

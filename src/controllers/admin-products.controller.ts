@@ -3,6 +3,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from '../services/auth.service';
 import { ProductService } from '../services/product.service';
 import { UploadService } from '../services/upload.service';
+import { SettingsService } from '../services/settings.service';
 import { getAuthFromRequest } from '../common/auth.helper';
 
 @Controller('/admin/products')
@@ -11,12 +12,32 @@ export class AdminProductsController {
     private readonly authService: AuthService,
     private readonly productService: ProductService,
     private readonly uploadService: UploadService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
     if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
     return auth;
+  }
+
+  /**
+   * Load AI config for direct browser-side calls from the product form.
+   * API key is returned to the admin's own browser (same-origin, admin-only
+   * page) and used client-side; that's the simplest way to avoid CSRF
+   * round-trips through our own server.
+   */
+  private async getAiConfig() {
+    const s = await this.settingsService.getMany([
+      'ai_enabled', 'ai_base_url', 'ai_api_key', 'ai_model', 'default_language',
+    ]);
+    return {
+      enabled: s.ai_enabled === 'true' && !!s.ai_base_url && !!s.ai_api_key && !!s.ai_model,
+      baseUrl: (s.ai_base_url || '').replace(/\/+$/, ''),
+      apiKey: s.ai_api_key || '',
+      model: s.ai_model || '',
+      lang: s.default_language || 'en',
+    };
   }
 
   @Get()
@@ -61,6 +82,7 @@ export class AdminProductsController {
       adminPage: 'products',
       product: null,
       error: null,
+      aiConfig: await this.getAiConfig(),
     });
   }
 
@@ -98,6 +120,7 @@ export class AdminProductsController {
         adminPage: 'products',
         product: null,
         error: 'Name, price, and weight are required.',
+        aiConfig: await this.getAiConfig(),
       });
     }
 
@@ -138,6 +161,7 @@ export class AdminProductsController {
       adminPage: 'products',
       product,
       error: null,
+      aiConfig: await this.getAiConfig(),
     });
   }
 
