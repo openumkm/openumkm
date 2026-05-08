@@ -1,13 +1,13 @@
 # Contributing to OpenUMKM
 
-Terima kasih sudah tertarik berkontribusi! 🙏
+Thanks for your interest in contributing! 🙏
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 20+
-- PostgreSQL 15+ (atau pakai Docker)
+- PostgreSQL 15+ (or use Docker)
 - Git
 
 ### Setup Development
@@ -22,9 +22,9 @@ npm install
 
 # Copy environment file
 cp .env.example .env
-# Edit .env sesuai kebutuhan (minimal DATABASE_URL)
+# Edit .env as needed (at minimum DATABASE_URL)
 
-# Jalankan database (via Docker)
+# Start database (via Docker)
 docker compose up db -d
 
 # Apply migrations
@@ -35,51 +35,51 @@ npm run build
 node dist/main.js
 ```
 
-Buka `http://localhost:3000` — akan redirect ke `/setup` untuk konfigurasi awal.
+Open `http://localhost:3000` — it will redirect to `/setup` for initial configuration.
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-1. Cek [Issues](https://github.com/jipraks/openumkm-app/issues) — mungkin sudah ada yang report
-2. Buat issue baru dengan informasi:
-   - Langkah reproduksi
+1. Check [Issues](https://github.com/jipraks/openumkm-app/issues) — someone may have already reported it
+2. Create a new issue with:
+   - Steps to reproduce
    - Expected vs actual behavior
    - Environment (OS, Node version, browser)
-   - Screenshot jika relevan
+   - Screenshots if relevant
 
 ### Suggesting Features
 
-Buat issue dengan label `enhancement` dan jelaskan:
-- Use case / masalah yang ingin diselesaikan
-- Solusi yang diusulkan
-- Alternatif yang sudah dipertimbangkan
+Create an issue with the `enhancement` label and describe:
+- Use case / problem you want to solve
+- Proposed solution
+- Alternatives you've considered
 
 ### Pull Requests
 
-1. Fork repo
-2. Buat branch dari `main`: `git checkout -b feat/nama-fitur`
-3. Lakukan perubahan
-4. Pastikan build berhasil: `npm run build`
-5. Commit dengan format: `type(scope): description`
-6. Push dan buat Pull Request
+1. Fork the repo
+2. Create a branch from `main`: `git checkout -b feat/feature-name`
+3. Make your changes
+4. Ensure the build passes: `npm run build`
+5. Commit using the format: `type(scope): description`
+6. Push and create a Pull Request
 
 ### Commit Convention
 
 Format: `type(scope): description`
 
 **Types:**
-- `feat` — fitur baru
+- `feat` — new feature
 - `fix` — bug fix
-- `docs` — perubahan dokumentasi
-- `style` — formatting, tanpa perubahan logic
-- `refactor` — refactoring tanpa perubahan behavior
+- `docs` — documentation changes
+- `style` — formatting, no logic changes
+- `refactor` — refactoring without behavior changes
 - `perf` — performance improvement
 - `chore` — maintenance (dependencies, config)
 
 **Scopes:** `admin`, `storefront`, `auth`, `checkout`, `shipping`, `payment`, `db`, `email`, `ui`
 
-**Contoh:**
+**Examples:**
 ```
 feat(admin): add bulk product import
 fix(checkout): calculate tax correctly for multiple items
@@ -103,16 +103,16 @@ src/
 ## Code Style
 
 - TypeScript strict mode
-- Gunakan Drizzle ORM query builder (bukan raw SQL)
-- Server-side rendering dengan EJS — minimal client-side JS
-- Ikuti pattern yang sudah ada di codebase
-- Nama file: `kebab-case` (contoh: `admin-orders.controller.ts`)
+- Use Drizzle ORM query builder (not raw SQL)
+- Server-side rendering with EJS — minimal client-side JS
+- Follow existing patterns in the codebase
+- File naming: `kebab-case` (e.g. `admin-orders.controller.ts`)
 
 ### File Size Guidelines
 
-Jaga agar setiap file tetap fokus pada satu responsibility. Berikut batas line-of-code per tipe file:
+Keep each file focused on a single responsibility. Here are the line-of-code limits per file type:
 
-| Tipe file | Ideal | Maks |
+| File type | Ideal | Max |
 |---|---|---|
 | Controller (`.controller.ts`) | <200 | 300 |
 | Service (`.service.ts`) | <250 | 400 |
@@ -120,28 +120,28 @@ Jaga agar setiap file tetap fokus pada satu responsibility. Berikut batas line-o
 | View (`.ejs`) | <200 | 350 |
 | Helper / utility | <100 | 150 |
 
-**Kalau file mulai melebihi batas "Maks":**
-- Controller → split per resource atau per action group
-- Service → extract helper functions atau sub-service
-- View → extract ke partials (`partials/` folder)
-- Helper → split per concern
+**When a file exceeds the "Max" limit:**
+- Controller → split by resource or action group
+- Service → extract helper functions or sub-service
+- View → extract into partials (`partials/` folder)
+- Helper → split by concern
 
-> Contoh: `admin-products.controller.ts` (293 lines) mendekati batas karena menangani CRUD + image + variant + AI config. Jika bertambah, pertimbangkan split ke `admin-product-images.controller.ts`.
+> Example: `admin-products.controller.ts` (293 lines) is near the limit because it handles CRUD + images + variants + AI config. If it grows further, consider splitting into `admin-product-images.controller.ts`.
 
 ## Design Principles
 
-- **Simplicity first** — hindari over-engineering
+- **Simplicity first** — avoid over-engineering
 - **Single-node friendly** — no Redis, no workers, no microservices
 - **Low resource** — target <800MB RAM
-- **Server-rendered** — minimal JavaScript di browser
+- **Server-rendered** — minimal JavaScript in the browser
 
 ## Security
 
-- Jangan commit secrets, API keys, atau credentials
-- Gunakan parameterized queries (Drizzle handles this)
-- Validasi semua user input
-- Jika menemukan security vulnerability, **jangan buat public issue** — kirim email langsung ke maintainer
+- Never commit secrets, API keys, or credentials
+- Use parameterized queries (Drizzle handles this)
+- Validate all user input
+- If you find a security vulnerability, **do not create a public issue** — email the maintainer directly
 
 ## License
 
-Dengan berkontribusi, kamu setuju bahwa kontribusimu akan dilisensikan di bawah [MIT License](LICENSE).
+By contributing, you agree that your contributions will be licensed under the [MIT License](LICENSE).
