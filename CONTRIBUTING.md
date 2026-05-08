@@ -14,8 +14,8 @@ Thanks for your interest in contributing! 🙏
 
 ```bash
 # Clone repo
-git clone https://github.com/jipraks/openumkm-app.git
-cd openumkm-app
+git clone https://github.com/openumkm/openumkm.git
+cd openumkm
 
 # Install dependencies
 npm install
@@ -41,7 +41,7 @@ Open `http://localhost:3000` — it will redirect to `/setup` for initial config
 
 ### Reporting Bugs
 
-1. Check [Issues](https://github.com/jipraks/openumkm-app/issues) — someone may have already reported it
+1. Check [Issues](https://github.com/openumkm/openumkm/issues) — someone may have already reported it
 2. Create a new issue with:
    - Steps to reproduce
    - Expected vs actual behavior
