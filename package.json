@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.0",
+    "@nestjs/testing": "^10.4.22",
     "@types/bcrypt": "^5.0.2",
     "@types/ejs": "^3.1.5",
     "@types/jsonwebtoken": "^9.0.6",
