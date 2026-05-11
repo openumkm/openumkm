@@ -34,7 +34,7 @@ export class AdminSettingsController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login', 302); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login'); return null; }
     return auth;
   }
 
@@ -134,6 +134,6 @@ export class AdminSettingsController {
     if (logoUrl) pairs.store_logo = logoUrl;
 
     await this.settingsService.setMany(pairs);
-    return res.redirect('/admin/settings', 302);
+    return res.redirect('/admin/settings');
   }
 }

@@ -13,7 +13,7 @@ export class AdminSettingsShippingController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login'); return null; }
     return auth;
   }
 
@@ -41,7 +41,7 @@ export class AdminSettingsShippingController {
     if (!auth) return;
     const { code } = req.body as Record<string, string>;
     if (code) await this.settingsService.toggleCurrency(code);
-    return res.redirect(302, '/admin/settings/currencies');
+    return res.redirect('/admin/settings/currencies');
   }
 
   @Post('/currencies/:code/rate')
@@ -50,7 +50,7 @@ export class AdminSettingsShippingController {
     if (!auth) return;
     const { exchangeRate } = req.body as Record<string, string>;
     if (exchangeRate) await this.settingsService.updateExchangeRate(code, exchangeRate);
-    return res.redirect(302, '/admin/settings/currencies');
+    return res.redirect('/admin/settings/currencies');
   }
 
   /* ── Custom Shipping Methods ─────────────────── */
@@ -84,7 +84,7 @@ export class AdminSettingsShippingController {
         description: description || null,
       });
     }
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods');
   }
 
   @Post('/shipping-methods/:id')
@@ -100,7 +100,7 @@ export class AdminSettingsShippingController {
         description: description || null,
       });
     }
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods');
   }
 
   @Post('/shipping-methods/:id/toggle')
@@ -108,7 +108,7 @@ export class AdminSettingsShippingController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.toggleShippingMethod(id);
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods');
   }
 
   @Post('/shipping-methods/:id/delete')
@@ -116,6 +116,6 @@ export class AdminSettingsShippingController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.deleteShippingMethod(id);
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods');
   }
 }

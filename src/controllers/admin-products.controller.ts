@@ -17,7 +17,7 @@ export class AdminProductsController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login'); return null; }
     return auth;
   }
 
@@ -144,7 +144,7 @@ export class AdminProductsController {
       await this.productService.addImage(product.id, imageUrls[i], i === 0);
     }
 
-    return res.redirect(302, '/admin/products');
+    return res.redirect('/admin/products');
   }
 
   @Get('/:id/edit')
@@ -211,7 +211,7 @@ export class AdminProductsController {
       await this.productService.addImage(id, url, false);
     }
 
-    return res.redirect(302, '/admin/products');
+    return res.redirect('/admin/products');
   }
 
   @Post('/:id/delete')
@@ -220,7 +220,7 @@ export class AdminProductsController {
     if (!auth) return;
 
     await this.productService.delete(id);
-    return res.redirect(302, '/admin/products');
+    return res.redirect('/admin/products');
   }
 
   /* ── Image Management ────────────────────────── */
@@ -238,7 +238,7 @@ export class AdminProductsController {
     const img = await this.productService.deleteImage(imageId);
     if (img) this.uploadService.deleteFile(img.url);
 
-    return res.redirect(302, `/admin/products/${id}/edit`);
+    return res.redirect(`/admin/products/${id}/edit`);
   }
 
   @Post('/:id/images/:imageId/primary')
@@ -252,7 +252,7 @@ export class AdminProductsController {
     if (!auth) return;
 
     await this.productService.setPrimaryImage(id, imageId);
-    return res.redirect(302, `/admin/products/${id}/edit`);
+    return res.redirect(`/admin/products/${id}/edit`);
   }
 
   /* ── Variant Management ──────────────────────── */
@@ -274,7 +274,7 @@ export class AdminProductsController {
       });
     }
 
-    return res.redirect(302, `/admin/products/${id}/edit`);
+    return res.redirect(`/admin/products/${id}/edit`);
   }
 
   @Post('/:id/variants/:variantId/delete')
@@ -288,6 +288,6 @@ export class AdminProductsController {
     if (!auth) return;
 
     await this.productService.deleteVariant(variantId);
-    return res.redirect(302, `/admin/products/${id}/edit`);
+    return res.redirect(`/admin/products/${id}/edit`);
   }
 }
