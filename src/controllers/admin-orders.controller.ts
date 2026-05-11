@@ -17,7 +17,7 @@ export class AdminOrdersController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
     return auth;
   }
 
@@ -87,7 +87,7 @@ export class AdminOrdersController {
       }
     }
 
-    return res.redirect(`/admin/orders/${id}`);
+    return res.redirect(302, `/admin/orders/${id}`);
   }
 
   @Post('/orders/:id/tracking')
@@ -107,7 +107,7 @@ export class AdminOrdersController {
       );
     }
 
-    return res.redirect(`/admin/orders/${id}`);
+    return res.redirect(302, `/admin/orders/${id}`);
   }
 
   @Get('/payments/confirmations')
@@ -145,7 +145,7 @@ export class AdminOrdersController {
       }
     }
 
-    return res.redirect('/admin/payments/confirmations');
+    return res.redirect(302, '/admin/payments/confirmations');
   }
 
   @Post('/payments/:id/reject')
@@ -166,6 +166,6 @@ export class AdminOrdersController {
       );
     }
 
-    return res.redirect('/admin/payments/confirmations');
+    return res.redirect(302, '/admin/payments/confirmations');
   }
 }

@@ -101,7 +101,7 @@ async function bootstrap() {
         setupComplete = count > 0;
       }
       if (!setupComplete) {
-        return reply.redirect('/setup');
+        return reply.redirect(302, '/setup');
       }
     }
 

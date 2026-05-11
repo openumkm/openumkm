@@ -92,6 +92,6 @@ export class SetupController {
       setAuthCookie(res, loginResult.token);
     }
 
-    return res.redirect('/admin');
+    return res.redirect(302, '/admin');
   }
 }

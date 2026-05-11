@@ -33,7 +33,7 @@ export class CheckoutController {
     const auth = this.getAuth(req);
     const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
-    if (cart.length === 0) return res.redirect('/cart');
+    if (cart.length === 0) return res.redirect('/cart', 302);
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
@@ -95,7 +95,7 @@ export class CheckoutController {
     const body = req.body as Record<string, string>;
     const { sessionId, cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
-    if (cart.length === 0) return res.redirect('/cart');
+    if (cart.length === 0) return res.redirect('/cart', 302);
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
@@ -111,7 +111,7 @@ export class CheckoutController {
     const total = subtotal + taxTotal + shippingCost;
 
     const paymentMethod = body.paymentMethod as 'xendit' | 'manual_transfer';
-    if (!paymentMethod) return res.redirect('/checkout');
+    if (!paymentMethod) return res.redirect('/checkout', 302);
 
     const expireHours = parseInt((await this.settingsService.get('auto_expire_hours')) || '24', 10);
     const currencies = await this.settingsService.getCurrencies();
@@ -159,7 +159,7 @@ export class CheckoutController {
 
     await this.sendOrderEmail(paymentMethod, order, currency, items, shippingAddress, paymentUrl);
 
-    return res.redirect(`/checkout/success/${order.id}`);
+    return res.redirect(`/checkout/success/${order.id}`, 302);
   }
 
   @Get('/checkout/success/:id')

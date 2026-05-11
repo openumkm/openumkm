@@ -13,7 +13,7 @@ export class AdminSettingsTaxController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
     return auth;
   }
 
@@ -44,7 +44,7 @@ export class AdminSettingsTaxController {
     if (name && rate) {
       await this.settingsService.addTaxRate({ name, rate, applyTo: (applyTo as any) || 'subtotal' });
     }
-    return res.redirect('/admin/settings/taxes');
+    return res.redirect(302, '/admin/settings/taxes');
   }
 
   @Post('/taxes/:id')
@@ -55,7 +55,7 @@ export class AdminSettingsTaxController {
     if (name && rate) {
       await this.settingsService.editTaxRate(id, { name, rate, applyTo: (applyTo as any) || 'subtotal' });
     }
-    return res.redirect('/admin/settings/taxes');
+    return res.redirect(302, '/admin/settings/taxes');
   }
 
   @Post('/taxes/:id/toggle')
@@ -63,7 +63,7 @@ export class AdminSettingsTaxController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.toggleTaxRate(id);
-    return res.redirect('/admin/settings/taxes');
+    return res.redirect(302, '/admin/settings/taxes');
   }
 
   @Post('/taxes/:id/delete')
@@ -71,6 +71,6 @@ export class AdminSettingsTaxController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.deleteTaxRate(id);
-    return res.redirect('/admin/settings/taxes');
+    return res.redirect(302, '/admin/settings/taxes');
   }
 }

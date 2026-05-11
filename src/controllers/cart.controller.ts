@@ -31,7 +31,7 @@ export class CartController {
     const qty = Math.max(1, parseInt(body.qty || '1', 10));
 
     const product = await this.productService.getById(productId);
-    if (!product) return res.redirect('/');
+    if (!product) return res.redirect(302, '/');
 
     let price = product.price;
     let stock = product.stock;
@@ -48,7 +48,7 @@ export class CartController {
       }
     }
 
-    if (stock <= 0) return res.redirect(`/product/${product.slug}`);
+    if (stock <= 0) return res.redirect(302, `/product/${product.slug}`);
 
     const primaryImage = product.images.find((i) => i.isPrimary) || product.images[0];
 
@@ -65,7 +65,7 @@ export class CartController {
       stock,
     });
 
-    return res.redirect('/cart');
+    return res.redirect(302, '/cart');
   }
 
   @Get('/cart')
@@ -111,7 +111,7 @@ export class CartController {
       Math.max(0, parseInt(body.qty || '1', 10)),
     );
 
-    return res.redirect('/cart');
+    return res.redirect(302, '/cart');
   }
 
   @Post('/cart/remove')
@@ -121,7 +121,7 @@ export class CartController {
     const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
 
     await this.sessionService.removeFromCart(sessionId, body.productId, body.variantId || undefined);
-    return res.redirect('/cart');
+    return res.redirect(302, '/cart');
   }
 
   /* ── Shipping AJAX ─────────────────────────────── */

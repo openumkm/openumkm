@@ -15,7 +15,7 @@ export class AdminSettingsBankController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
     return auth;
   }
 
@@ -57,7 +57,7 @@ export class AdminSettingsBankController {
     if (bankName && accountNumber && accountHolder) {
       await this.settingsService.addBankAccount({ bankName, accountNumber, accountHolder, logoUrl });
     }
-    return res.redirect('/admin/settings/bank-accounts');
+    return res.redirect(302, '/admin/settings/bank-accounts');
   }
 
   @Post('/bank-accounts/:id')
@@ -84,7 +84,7 @@ export class AdminSettingsBankController {
       if (logoUrl) data.logoUrl = logoUrl;
       await this.settingsService.editBankAccount(id, data);
     }
-    return res.redirect('/admin/settings/bank-accounts');
+    return res.redirect(302, '/admin/settings/bank-accounts');
   }
 
   @Post('/bank-accounts/:id/toggle')
@@ -92,7 +92,7 @@ export class AdminSettingsBankController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.toggleBankAccount(id);
-    return res.redirect('/admin/settings/bank-accounts');
+    return res.redirect(302, '/admin/settings/bank-accounts');
   }
 
   @Post('/bank-accounts/:id/delete')
@@ -100,6 +100,6 @@ export class AdminSettingsBankController {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.deleteBankAccount(id);
-    return res.redirect('/admin/settings/bank-accounts');
+    return res.redirect(302, '/admin/settings/bank-accounts');
   }
 }

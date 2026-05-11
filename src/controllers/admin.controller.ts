@@ -16,7 +16,7 @@ export class AdminController {
   @Get()
   async adminDashboard(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') return res.redirect('/auth/login');
+    if (!auth || auth.role !== 'seller') return res.redirect(302, '/auth/login');
 
     const user = await this.authService.getUserById(auth.sub);
     const daily = await this.revenueService.getRevenueStats('daily');
