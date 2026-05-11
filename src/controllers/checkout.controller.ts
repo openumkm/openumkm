@@ -218,9 +218,9 @@ export class CheckoutController {
     };
   }
 
-  private async createXenditInvoice(req: any, order: any, total: number, shippingAddress: Record<string, unknown>, currency: string, items: any[]) {
+  private async createXenditInvoice(req: FastifyRequest, order: any, total: number, shippingAddress: Record<string, unknown>, currency: string, items: any[]) {
     const proto = req.protocol || 'https';
-    const host = req.hostname || 'localhost:3000';
+    const host = req.host || 'localhost:3000';
     const baseUrl = `${proto}://${host}`;
 
     const invoice = await this.xenditService.createInvoice({
