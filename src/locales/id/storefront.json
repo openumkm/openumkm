@@ -121,6 +121,8 @@
   "track_order": "Lacak Pesanan",
   "footer_tagline": "Toko online modern dengan produk pilihan dan pengalaman belanja yang mulus.",
   "rights_reserved": "Seluruh hak dilindungi.",
+  "shipping_unavailable_title": "Informasi Pengiriman Belum Tersedia",
+  "shipping_unavailable_msg": "Penjual belum mengatur API RajaOngkir. Silakan hubungi penjual untuk mengaktifkan layanan pengiriman dengan mengatur API Key RajaOngkir dan memilih lokasi asal pengiriman di pengaturan toko.",
   "page_not_found": "Halaman Tidak Ditemukan",
   "page_not_found_msg": "Halaman yang Anda cari tidak ada atau telah dipindahkan.",
   "back_to_home": "Kembali ke Beranda"
