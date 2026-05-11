@@ -39,7 +39,7 @@ export class AdminSettingsController {
   }
 
   @Get()
-  async settingsPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async settingsPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -80,7 +80,7 @@ export class AdminSettingsController {
   }
 
   @Post()
-  async saveSettings(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async saveSettings(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 

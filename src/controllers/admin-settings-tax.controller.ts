@@ -18,7 +18,7 @@ export class AdminSettingsTaxController {
   }
 
   @Get('/taxes')
-  async taxRatesPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async taxRatesPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -36,7 +36,7 @@ export class AdminSettingsTaxController {
   }
 
   @Post('/taxes')
-  async addTaxRate(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addTaxRate(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -48,7 +48,7 @@ export class AdminSettingsTaxController {
   }
 
   @Post('/taxes/:id')
-  async editTaxRate(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async editTaxRate(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     const { name, rate, applyTo } = req.body as Record<string, string>;
@@ -59,7 +59,7 @@ export class AdminSettingsTaxController {
   }
 
   @Post('/taxes/:id/toggle')
-  async toggleTaxRate(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async toggleTaxRate(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.toggleTaxRate(id);
@@ -67,7 +67,7 @@ export class AdminSettingsTaxController {
   }
 
   @Post('/taxes/:id/delete')
-  async deleteTaxRate(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async deleteTaxRate(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.deleteTaxRate(id);

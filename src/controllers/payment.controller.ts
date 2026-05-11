@@ -27,7 +27,7 @@ export class PaymentController {
   }
 
   @Get('/payment/confirm/:id')
-  async paymentConfirmPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async paymentConfirmPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const order = await this.orderService.getById(id);
     if (!order) return res.status(404).send('Order not found');
@@ -51,7 +51,7 @@ export class PaymentController {
   }
 
   @Post('/payment/confirm/:id')
-  async paymentConfirmSubmit(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async paymentConfirmSubmit(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const order = await this.orderService.getById(id);
     if (!order) return res.status(404).send('Order not found');

@@ -20,7 +20,7 @@ export class AdminSettingsBankController {
   }
 
   @Get('/bank-accounts')
-  async bankAccountsPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async bankAccountsPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -36,7 +36,7 @@ export class AdminSettingsBankController {
   }
 
   @Post('/bank-accounts')
-  async addBankAccount(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addBankAccount(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -61,7 +61,7 @@ export class AdminSettingsBankController {
   }
 
   @Post('/bank-accounts/:id')
-  async editBankAccount(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async editBankAccount(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -88,7 +88,7 @@ export class AdminSettingsBankController {
   }
 
   @Post('/bank-accounts/:id/toggle')
-  async toggleBankAccount(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async toggleBankAccount(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.toggleBankAccount(id);
@@ -96,7 +96,7 @@ export class AdminSettingsBankController {
   }
 
   @Post('/bank-accounts/:id/delete')
-  async deleteBankAccount(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async deleteBankAccount(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.deleteBankAccount(id);

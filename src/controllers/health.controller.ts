@@ -4,7 +4,7 @@ import type { FastifyReply } from 'fastify';
 @Controller()
 export class HealthController {
   @Get('/health')
-  health(@Res() res: FastifyReply) {
+  health(@Res({ passthrough: true }) res: FastifyReply) {
     return res.send({ status: 'ok', uptime: process.uptime() });
   }
 }

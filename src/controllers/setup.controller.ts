@@ -12,7 +12,7 @@ export class SetupController {
   ) {}
 
   @Get()
-  async setupPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async setupPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const done = await this.setupService.isSetupComplete();
     if (done) return res.status(404).send('Not found');
 
@@ -30,7 +30,7 @@ export class SetupController {
   }
 
   @Post()
-  async setupSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async setupSubmit(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const done = await this.setupService.isSetupComplete();
     if (done) return res.status(404).send('Not found');
 

@@ -14,7 +14,7 @@ export class AdminController {
   ) {}
 
   @Get()
-  async adminDashboard(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async adminDashboard(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
     if (!auth || auth.role !== 'seller') return res.redirect(302, '/auth/login');
 
@@ -55,7 +55,7 @@ export class AdminController {
   }
 
   @Get('/revenue')
-  async revenueEndpoint(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async revenueEndpoint(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
     if (!auth || auth.role !== 'seller') return res.status(401).send({ error: 'Unauthorized' });
 

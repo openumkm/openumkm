@@ -42,7 +42,7 @@ export class AdminProductsController {
   }
 
   @Get()
-  async productList(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async productList(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -72,7 +72,7 @@ export class AdminProductsController {
   }
 
   @Get('/new')
-  async newProductForm(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async newProductForm(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     const user = await this.authService.getUserById(auth.sub);
@@ -88,7 +88,7 @@ export class AdminProductsController {
   }
 
   @Post()
-  async createProduct(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async createProduct(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -148,7 +148,7 @@ export class AdminProductsController {
   }
 
   @Get('/:id/edit')
-  async editProductForm(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async editProductForm(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -167,7 +167,7 @@ export class AdminProductsController {
   }
 
   @Post('/:id')
-  async updateProduct(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async updateProduct(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -215,7 +215,7 @@ export class AdminProductsController {
   }
 
   @Post('/:id/delete')
-  async deleteProduct(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async deleteProduct(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -230,7 +230,7 @@ export class AdminProductsController {
     @Param('id') id: string,
     @Param('imageId') imageId: string,
     @Req() req: FastifyRequest,
-    @Res() res: FastifyReply,
+    @Res({ passthrough: true }) res: FastifyReply,
   ) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
@@ -246,7 +246,7 @@ export class AdminProductsController {
     @Param('id') id: string,
     @Param('imageId') imageId: string,
     @Req() req: FastifyRequest,
-    @Res() res: FastifyReply,
+    @Res({ passthrough: true }) res: FastifyReply,
   ) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
@@ -258,7 +258,7 @@ export class AdminProductsController {
   /* ── Variant Management ──────────────────────── */
 
   @Post('/:id/variants')
-  async addVariant(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addVariant(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -282,7 +282,7 @@ export class AdminProductsController {
     @Param('id') id: string,
     @Param('variantId') variantId: string,
     @Req() req: FastifyRequest,
-    @Res() res: FastifyReply,
+    @Res({ passthrough: true }) res: FastifyReply,
   ) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;

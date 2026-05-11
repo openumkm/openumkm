@@ -23,7 +23,7 @@ export class CartController {
   }
 
   @Post('/cart/add')
-  async cartAdd(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartAdd(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const productId = body.productId;
@@ -69,7 +69,7 @@ export class CartController {
   }
 
   @Get('/cart')
-  async cartPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
@@ -99,7 +99,7 @@ export class CartController {
   }
 
   @Post('/cart/update')
-  async cartUpdate(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartUpdate(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
@@ -115,7 +115,7 @@ export class CartController {
   }
 
   @Post('/cart/remove')
-  async cartRemove(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartRemove(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
@@ -127,7 +127,7 @@ export class CartController {
   /* ── Shipping AJAX ─────────────────────────────── */
 
   @Get('/api/shipping/search')
-  async shippingSearch(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async shippingSearch(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const query = (req.query as any).q || '';
     if (!query || query.length < 2) return res.send({ results: [] });
 
@@ -136,7 +136,7 @@ export class CartController {
   }
 
   @Post('/api/shipping/calculate')
-  async shippingCalculate(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async shippingCalculate(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const body = req.body as Record<string, string>;
     const { destination } = body;
 
