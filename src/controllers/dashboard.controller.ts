@@ -18,7 +18,7 @@ export class DashboardController {
 
   private async guard(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth) { res.redirect(302, '/auth/login'); return null; }
+    if (!auth) { res.redirect('/auth/login', 302); return null; }
     return auth;
   }
 
@@ -152,7 +152,7 @@ export class DashboardController {
       });
     }
 
-    return res.redirect(302, '/dashboard/addresses');
+    return res.redirect('/dashboard/addresses', 302);
   }
 
   @Post('/addresses/:id')
@@ -172,7 +172,7 @@ export class DashboardController {
       isDefault: body.isDefault === '1',
     });
 
-    return res.redirect(302, '/dashboard/addresses');
+    return res.redirect('/dashboard/addresses', 302);
   }
 
   @Post('/addresses/:id/delete')
@@ -181,6 +181,6 @@ export class DashboardController {
     if (!auth) return;
 
     await this.addressService.delete(id, auth.sub);
-    return res.redirect(302, '/dashboard/addresses');
+    return res.redirect('/dashboard/addresses', 302);
   }
 }
