@@ -10,6 +10,7 @@
     "start:prod": "node dist/main",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate:prod": "node dist/db/migrate.js",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
