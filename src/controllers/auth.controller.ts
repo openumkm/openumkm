@@ -44,7 +44,7 @@ export class AuthController {
     }
 
     setAuthCookie(req, res, result.token);
-    return res.redirect(302, result.user.role === 'seller' ? '/admin' : '/dashboard');
+    return res.redirect(result.user.role === 'seller' ? '/admin' : '/dashboard', 302);
   }
 
   @Get('/register')
@@ -93,7 +93,7 @@ export class AuthController {
       setAuthCookie(req, res, loginResult.token);
     }
 
-    return res.redirect(302, '/dashboard');
+    return res.redirect('/dashboard', 302);
   }
 
   @Get('/forgot-password')
@@ -155,12 +155,12 @@ export class AuthController {
       });
     }
 
-    return res.redirect(302, '/auth/login');
+    return res.redirect('/auth/login', 302);
   }
 
   @Get('/logout')
   logout(@Res({ passthrough: true }) res: FastifyReply) {
     clearAuthCookie(res);
-    return res.redirect(302, '/');
+    return res.redirect('/', 302);
   }
 }
