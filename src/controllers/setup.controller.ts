@@ -89,7 +89,7 @@ export class SetupController {
     // Auto-login as admin
     const loginResult = await this.authService.login(body.email, body.password);
     if ('token' in loginResult && loginResult.token) {
-      setAuthCookie(res, loginResult.token);
+      setAuthCookie(req, res, loginResult.token);
     }
 
     return res.redirect(302, '/admin');

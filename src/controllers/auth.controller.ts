@@ -43,7 +43,7 @@ export class AuthController {
       });
     }
 
-    setAuthCookie(res, result.token);
+    setAuthCookie(req, res, result.token);
     return res.redirect(302, result.user.role === 'seller' ? '/admin' : '/dashboard');
   }
 
@@ -90,7 +90,7 @@ export class AuthController {
 
     const loginResult = await this.authService.login(email, password);
     if ('token' in loginResult && loginResult.token) {
-      setAuthCookie(res, loginResult.token);
+      setAuthCookie(req, res, loginResult.token);
     }
 
     return res.redirect(302, '/dashboard');
