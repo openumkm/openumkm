@@ -17,7 +17,7 @@ export class AuthController {
   }
 
   @Get('/login')
-  loginPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  loginPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     return res.view('auth/login.ejs', {
       pageTitle: 'Login',
       error: null, ...this.ctx(req),
@@ -25,7 +25,7 @@ export class AuthController {
   }
 
   @Post('/login')
-  async loginSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async loginSubmit(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const { email, password } = req.body as Record<string, string>;
 
     if (!email || !password) {
@@ -48,7 +48,7 @@ export class AuthController {
   }
 
   @Get('/register')
-  registerPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  registerPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     return res.view('auth/register.ejs', {
       pageTitle: 'Register',
       error: null, ...this.ctx(req),
@@ -56,7 +56,7 @@ export class AuthController {
   }
 
   @Post('/register')
-  async registerSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async registerSubmit(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const { fullName, email, phone, password, confirmPassword } = req.body as Record<string, string>;
 
     if (!fullName || !email || !password) {
@@ -90,14 +90,14 @@ export class AuthController {
 
     const loginResult = await this.authService.login(email, password);
     if ('token' in loginResult && loginResult.token) {
-      setAuthCookie(res, loginResult.token);
+      setAuthCookie(req, res, loginResult.token);
     }
 
     return res.redirect('/dashboard', 302);
   }
 
   @Get('/forgot-password')
-  forgotPasswordPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  forgotPasswordPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     return res.view('auth/forgot-password.ejs', {
       pageTitle: 'Forgot Password',
       message: null, error: null, ...this.ctx(req),
@@ -105,7 +105,7 @@ export class AuthController {
   }
 
   @Post('/forgot-password')
-  async forgotPasswordSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async forgotPasswordSubmit(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const { email } = req.body as Record<string, string>;
     if (email) {
       const token = await this.authService.createResetToken(email);
@@ -122,7 +122,7 @@ export class AuthController {
   }
 
   @Get('/reset-password/:token')
-  resetPasswordPage(@Param('token') token: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  resetPasswordPage(@Param('token') token: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     return res.view('auth/reset-password.ejs', {
       pageTitle: 'Reset Password',
       token, error: null, ...this.ctx(req),
@@ -130,7 +130,7 @@ export class AuthController {
   }
 
   @Post('/reset-password/:token')
-  async resetPasswordSubmit(@Param('token') token: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async resetPasswordSubmit(@Param('token') token: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const { password, confirmPassword } = req.body as Record<string, string>;
 
     if (!password || password.length < 8) {
@@ -159,7 +159,7 @@ export class AuthController {
   }
 
   @Get('/logout')
-  logout(@Res() res: FastifyReply) {
+  logout(@Res({ passthrough: true }) res: FastifyReply) {
     clearAuthCookie(res);
     return res.redirect('/', 302);
   }

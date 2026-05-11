@@ -23,7 +23,7 @@ export class DashboardController {
   }
 
   @Get()
-  async dashboardPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async dashboardPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -54,7 +54,7 @@ export class DashboardController {
   }
 
   @Get('/orders')
-  async ordersPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async ordersPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -83,7 +83,7 @@ export class DashboardController {
   }
 
   @Get('/orders/:id')
-  async orderDetailPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async orderDetailPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -115,7 +115,7 @@ export class DashboardController {
   /* ── Addresses ───────────────────────────────── */
 
   @Get('/addresses')
-  async addressesPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addressesPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -134,7 +134,7 @@ export class DashboardController {
   }
 
   @Post('/addresses')
-  async addAddress(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addAddress(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -156,7 +156,7 @@ export class DashboardController {
   }
 
   @Post('/addresses/:id')
-  async editAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async editAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -176,7 +176,7 @@ export class DashboardController {
   }
 
   @Post('/addresses/:id/delete')
-  async deleteAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async deleteAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 

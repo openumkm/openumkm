@@ -21,7 +21,7 @@ export class StorefrontController {
   }
 
   @Get('/')
-  async homePage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async homePage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const query = req.query as Record<string, string>;
     const search = query.q || '';
@@ -65,7 +65,7 @@ export class StorefrontController {
   }
 
   @Get('/product/:slug')
-  async productDetailPage(@Param('slug') slug: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async productDetailPage(@Param('slug') slug: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const product = await this.productService.getBySlug(slug);
     if (!product) return res.status(404).send('Product not found');

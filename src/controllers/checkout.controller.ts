@@ -29,7 +29,7 @@ export class CheckoutController {
   }
 
   @Get('/checkout')
-  async checkoutPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async checkoutPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
@@ -90,7 +90,7 @@ export class CheckoutController {
   }
 
   @Post('/checkout/submit')
-  async checkoutSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async checkoutSubmit(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const { sessionId, cart } = await this.sessionService.getCart(req, res, auth?.sub);
@@ -163,7 +163,7 @@ export class CheckoutController {
   }
 
   @Get('/checkout/success/:id')
-  async checkoutSuccessPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async checkoutSuccessPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const order = await this.orderService.getById(id);
     if (!order) return res.status(404).send('Order not found');
