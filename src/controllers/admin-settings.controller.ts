@@ -7,7 +7,7 @@ import { getAuthFromRequest } from '../common/auth.helper';
 
 const SETTING_KEYS = [
   'store_name', 'store_email', 'store_phone', 'invoice_prefix', 'default_language',
-  'xendit_secret_key', 'rajaongkir_api_key', 'origin_city',
+  'xendit_secret_key', 'rajaongkir_api_key', 'origin_city', 'origin_city_label',
   'smtp_host', 'smtp_port', 'smtp_username', 'smtp_password', 'smtp_from_address', 'smtp_enabled',
   'xendit_enabled', 'manual_transfer_enabled', 'auto_expire_hours', 'tax_enabled',
   'xendit_callback_token',
@@ -56,7 +56,8 @@ export class AdminSettingsController {
         storeLogo: s.store_logo || null,
         invoicePrefix: s.invoice_prefix, defaultLanguage: s.default_language,
         xenditSecretKey: s.xendit_secret_key, rajaOngkirApiKey: s.rajaongkir_api_key,
-        originCity: s.origin_city,
+        originCityId: s.origin_city,
+        originCity: s.origin_city_label || s.origin_city,
         smtpHost: s.smtp_host, smtpPort: s.smtp_port, smtpUsername: s.smtp_username,
         smtpPassword: s.smtp_password, smtpFromAddress: s.smtp_from_address,
         smtpEnabled: s.smtp_enabled === 'true',
@@ -106,7 +107,8 @@ export class AdminSettingsController {
       store_phone: fields.storePhone || '', invoice_prefix: fields.invoicePrefix || 'INV',
       default_language: fields.defaultLanguage || 'id',
       xendit_secret_key: fields.xenditSecretKey || '', rajaongkir_api_key: fields.rajaOngkirApiKey || '',
-      origin_city: fields.originCity || '',
+      origin_city: fields.originCityId || '',
+      origin_city_label: fields.originCity || '',
       smtp_host: fields.smtpHost || '', smtp_port: fields.smtpPort || '587',
       smtp_username: fields.smtpUsername || '', smtp_password: fields.smtpPassword || '',
       smtp_from_address: fields.smtpFromAddress || '',

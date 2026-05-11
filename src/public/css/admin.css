@@ -400,7 +400,10 @@
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-6);
   overflow: hidden;
-  transition: box-shadow 300ms ease;
+}
+
+.admin-card--overflow-visible {
+  overflow: visible;
 }
 
 .admin-card:hover {
@@ -2049,6 +2052,10 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
+}
+
+.settings-panel .admin-card--overflow-visible {
+  overflow: visible;
 }
 
 .settings-panel .admin-card-title {

@@ -5,12 +5,14 @@ var _tax = typeof tax !== 'undefined' ? tax : 0;
 var _savedAddresses = typeof savedAddresses !== 'undefined' ? savedAddresses : [];
 var _hasSavedAddrs = _savedAddresses.length > 0;
 var _customShippingMethods = typeof customShippingMethods !== 'undefined' ? customShippingMethods : [];
+var _shippingReady = typeof rajaOngkirReady !== 'undefined' ? rajaOngkirReady : true;
 %>
 <script>
 (function() {
   var subtotal = <%= _subtotal %>;
   var taxAmount = <%= _tax %>;
-  var selectedShipping = <%= (_customShippingMethods.length > 0) ? _customShippingMethods[0].cost : 0 %>;
+  var shippingReady = <%= _shippingReady %>;
+  var selectedShipping = <% if (_shippingReady && _customShippingMethods.length > 0) { %><%= _customShippingMethods[0].cost %><% } else { %>0<% } %>;
 
   // ── Saved Addresses ──
   <% if (_hasSavedAddrs) { %>
@@ -27,7 +29,6 @@ var _customShippingMethods = typeof customShippingMethods !== 'undefined' ? cust
 
   addrRadios.forEach(function(radio) {
     radio.addEventListener('change', function() {
-      // Update visual selection
       document.querySelectorAll('.address-card').forEach(function(c) { c.classList.remove('selected'); });
       radio.closest('.address-card').classList.add('selected');
 
@@ -66,6 +67,7 @@ var _customShippingMethods = typeof customShippingMethods !== 'undefined' ? cust
     document.getElementById('shippingCostInput').value = selectedShipping;
   }
 
+  if (shippingReady) {
   // ── Destination Search (autocomplete) ──
   var searchInput = document.getElementById('destinationSearch');
   var resultsDiv = document.getElementById('destinationResults');
@@ -156,6 +158,7 @@ var _customShippingMethods = typeof customShippingMethods !== 'undefined' ? cust
       methodsDiv.innerHTML = '<div class="text-muted p-4">Failed to calculate shipping.</div>';
     });
   }
+  } // end if shippingReady
 
   // ── Payment Tabs ──
   document.querySelectorAll('.payment-tab-modern').forEach(function(tab) {

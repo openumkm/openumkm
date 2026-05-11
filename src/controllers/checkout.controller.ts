@@ -51,6 +51,12 @@ export class CheckoutController {
       ? await this.settingsService.getActiveShippingMethods()
       : [];
 
+    const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
+    const rajaOngkirApiKey = await this.settingsService.get('rajaongkir_api_key');
+    const originCity = await this.settingsService.get('origin_city');
+    const needsRajaOngkir = (shippingMode === 'rajaongkir' || shippingMode === 'both');
+    const rajaOngkirReady = needsRajaOngkir ? !!(rajaOngkirApiKey && originCity) : true;
+
     const bankAccounts = await this.settingsService.getBankAccounts();
     const activeBanks = bankAccounts.filter((b) => b.isActive);
 
@@ -77,6 +83,8 @@ export class CheckoutController {
       manualEnabled,
       savedAddresses,
       customShippingMethods: customMethods,
+      rajaOngkirReady,
+      shippingMode,
       ...i18nContext(req),
     });
   }

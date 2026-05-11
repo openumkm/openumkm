@@ -140,14 +140,20 @@ export class CartController {
     const body = req.body as Record<string, string>;
     const { destination } = body;
 
-    if (!destination) return res.send({ services: [] });
+    if (!destination) {
+      console.log('[checkout:debug] /api/shipping/calculate — no destination');
+      return res.send({ services: [], error: 'Destination not selected.' });
+    }
 
     const shippingMode = (await this.settingsService.get('shipping_mode')) || 'custom';
     const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
 
+    console.log('[checkout:debug] /api/shipping/calculate', { shippingMode, rajaOngkirEnabled, destination });
+
     let customServices: any[] = [];
     if (shippingMode === 'custom' || shippingMode === 'both') {
       const methods = await this.settingsService.getActiveShippingMethods();
+      console.log('[checkout:debug] custom shipping methods loaded:', methods.length);
       customServices = methods.map((m) => ({
         courier: m.name,
         service: m.description || m.name,
@@ -158,27 +164,53 @@ export class CartController {
     }
 
     if (shippingMode === 'custom' || !rajaOngkirEnabled) {
-      return res.send({ services: customServices });
+      console.log('[checkout:debug] returning custom-only, services:', customServices.length);
+      return res.send({
+        services: customServices,
+        error: !customServices.length ? 'No shipping methods available. Please contact the seller.' : undefined,
+      });
     }
 
     const rajaOngkirServices: any[] = [];
     if (shippingMode === 'rajaongkir' || shippingMode === 'both') {
       const origin = await this.settingsService.get('origin_city');
+      console.log('[checkout:debug] origin city:', origin || '<not set>');
+
       if (!origin) {
-        return res.send({ services: customServices, error: !customServices.length ? 'Origin city not configured.' : undefined });
+        console.log('[checkout:debug] no origin, returning custom with error');
+        return res.send({
+          services: customServices,
+          error: customServices.length ? 'RajaOngkir shipping unavailable — origin city not configured.' : 'Origin city not configured. Please contact the seller.',
+        });
       }
 
       const auth = this.getAuth(req);
       const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
       const totalWeight = cart.reduce((sum, item) => sum + (item.weight * item.qty), 0);
 
-      if (totalWeight > 0) {
-        const services = await this.shippingService.calculateCost(origin, destination, totalWeight);
+      console.log('[checkout:debug] cart items:', cart.length, 'total weight (grams):', totalWeight);
+
+      if (totalWeight <= 0) {
+        console.log('[checkout:debug] total weight is 0, returning custom-only');
+        return res.send({
+          services: customServices,
+          error: !customServices.length ? 'Unable to calculate shipping — cart has no weight.' : undefined,
+        });
+      }
+
+      console.log('[checkout:debug] calling shippingService.calculateCost with', { origin, destination, totalWeight });
+      const services = await this.shippingService.calculateCost(origin, destination, totalWeight);
+      console.log('[checkout:debug] rajaongkir returned', services.length, 'services');
+      if (services.length > 0) {
         rajaOngkirServices.push(...services);
+      } else if (!customServices.length) {
+        console.log('[checkout:debug] no rajaongkir services and no custom, returning error');
+        return res.send({ services: [], error: 'No shipping services available for this destination. Please try a different location.' });
       }
     }
 
     const allServices = [...customServices, ...rajaOngkirServices];
+    console.log('[checkout:debug] final services:', allServices.length);
     return res.send({ services: allServices });
   }
 }
