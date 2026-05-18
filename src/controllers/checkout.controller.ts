@@ -29,11 +29,11 @@ export class CheckoutController {
   }
 
   @Get('/checkout')
-  async checkoutPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async checkoutPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
-    if (cart.length === 0) return res.redirect(302, '/cart');
+    if (cart.length === 0) return res.redirect('/cart', 302);
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
@@ -50,6 +50,12 @@ export class CheckoutController {
     const customMethods = (shippingMode === 'custom' || shippingMode === 'both')
       ? await this.settingsService.getActiveShippingMethods()
       : [];
+
+    const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
+    const rajaOngkirApiKey = await this.settingsService.get('rajaongkir_api_key');
+    const originCity = await this.settingsService.get('origin_city');
+    const needsRajaOngkir = (shippingMode === 'rajaongkir' || shippingMode === 'both');
+    const rajaOngkirReady = needsRajaOngkir ? !!(rajaOngkirApiKey && originCity) : true;
 
     const bankAccounts = await this.settingsService.getBankAccounts();
     const activeBanks = bankAccounts.filter((b) => b.isActive);
@@ -77,17 +83,19 @@ export class CheckoutController {
       manualEnabled,
       savedAddresses,
       customShippingMethods: customMethods,
+      rajaOngkirReady,
+      shippingMode,
       ...i18nContext(req),
     });
   }
 
   @Post('/checkout/submit')
-  async checkoutSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async checkoutSubmit(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const { sessionId, cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
-    if (cart.length === 0) return res.redirect(302, '/cart');
+    if (cart.length === 0) return res.redirect('/cart', 302);
 
     const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
@@ -103,7 +111,7 @@ export class CheckoutController {
     const total = subtotal + taxTotal + shippingCost;
 
     const paymentMethod = body.paymentMethod as 'xendit' | 'manual_transfer';
-    if (!paymentMethod) return res.redirect(302, '/checkout');
+    if (!paymentMethod) return res.redirect('/checkout', 302);
 
     const expireHours = parseInt((await this.settingsService.get('auto_expire_hours')) || '24', 10);
     const currencies = await this.settingsService.getCurrencies();
@@ -151,11 +159,11 @@ export class CheckoutController {
 
     await this.sendOrderEmail(paymentMethod, order, currency, items, shippingAddress, paymentUrl);
 
-    return res.redirect(302, `/checkout/success/${order.id}`);
+    return res.redirect(`/checkout/success/${order.id}`, 302);
   }
 
   @Get('/checkout/success/:id')
-  async checkoutSuccessPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async checkoutSuccessPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const order = await this.orderService.getById(id);
     if (!order) return res.status(404).send('Order not found');
@@ -210,9 +218,9 @@ export class CheckoutController {
     };
   }
 
-  private async createXenditInvoice(req: any, order: any, total: number, shippingAddress: Record<string, unknown>, currency: string, items: any[]) {
+  private async createXenditInvoice(req: FastifyRequest, order: any, total: number, shippingAddress: Record<string, unknown>, currency: string, items: any[]) {
     const proto = req.protocol || 'https';
-    const host = req.hostname || 'localhost:3000';
+    const host = req.host || 'localhost:3000';
     const baseUrl = `${proto}://${host}`;
 
     const invoice = await this.xenditService.createInvoice({

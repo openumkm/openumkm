@@ -23,7 +23,7 @@ export class CartController {
   }
 
   @Post('/cart/add')
-  async cartAdd(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartAdd(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const productId = body.productId;
@@ -31,7 +31,7 @@ export class CartController {
     const qty = Math.max(1, parseInt(body.qty || '1', 10));
 
     const product = await this.productService.getById(productId);
-    if (!product) return res.redirect(302, '/');
+    if (!product) return res.redirect('/', 302);
 
     let price = product.price;
     let stock = product.stock;
@@ -48,7 +48,7 @@ export class CartController {
       }
     }
 
-    if (stock <= 0) return res.redirect(302, `/product/${product.slug}`);
+    if (stock <= 0) return res.redirect(`/product/${product.slug}`, 302);
 
     const primaryImage = product.images.find((i) => i.isPrimary) || product.images[0];
 
@@ -65,11 +65,11 @@ export class CartController {
       stock,
     });
 
-    return res.redirect(302, '/cart');
+    return res.redirect('/cart', 302);
   }
 
   @Get('/cart')
-  async cartPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
 
@@ -99,7 +99,7 @@ export class CartController {
   }
 
   @Post('/cart/update')
-  async cartUpdate(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartUpdate(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
@@ -111,23 +111,23 @@ export class CartController {
       Math.max(0, parseInt(body.qty || '1', 10)),
     );
 
-    return res.redirect(302, '/cart');
+    return res.redirect('/cart', 302);
   }
 
   @Post('/cart/remove')
-  async cartRemove(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async cartRemove(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = this.getAuth(req);
     const body = req.body as Record<string, string>;
     const { sessionId } = await this.sessionService.getOrCreate(req, res, auth?.sub);
 
     await this.sessionService.removeFromCart(sessionId, body.productId, body.variantId || undefined);
-    return res.redirect(302, '/cart');
+    return res.redirect('/cart', 302);
   }
 
   /* ── Shipping AJAX ─────────────────────────────── */
 
   @Get('/api/shipping/search')
-  async shippingSearch(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async shippingSearch(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const query = (req.query as any).q || '';
     if (!query || query.length < 2) return res.send({ results: [] });
 
@@ -136,18 +136,24 @@ export class CartController {
   }
 
   @Post('/api/shipping/calculate')
-  async shippingCalculate(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async shippingCalculate(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const body = req.body as Record<string, string>;
     const { destination } = body;
 
-    if (!destination) return res.send({ services: [] });
+    if (!destination) {
+      console.log('[checkout:debug] /api/shipping/calculate — no destination');
+      return res.send({ services: [], error: 'Destination not selected.' });
+    }
 
     const shippingMode = (await this.settingsService.get('shipping_mode')) || 'custom';
     const rajaOngkirEnabled = (await this.settingsService.get('rajaongkir_enabled')) === 'true';
 
+    console.log('[checkout:debug] /api/shipping/calculate', { shippingMode, rajaOngkirEnabled, destination });
+
     let customServices: any[] = [];
     if (shippingMode === 'custom' || shippingMode === 'both') {
       const methods = await this.settingsService.getActiveShippingMethods();
+      console.log('[checkout:debug] custom shipping methods loaded:', methods.length);
       customServices = methods.map((m) => ({
         courier: m.name,
         service: m.description || m.name,
@@ -158,27 +164,53 @@ export class CartController {
     }
 
     if (shippingMode === 'custom' || !rajaOngkirEnabled) {
-      return res.send({ services: customServices });
+      console.log('[checkout:debug] returning custom-only, services:', customServices.length);
+      return res.send({
+        services: customServices,
+        error: !customServices.length ? 'No shipping methods available. Please contact the seller.' : undefined,
+      });
     }
 
     const rajaOngkirServices: any[] = [];
     if (shippingMode === 'rajaongkir' || shippingMode === 'both') {
       const origin = await this.settingsService.get('origin_city');
+      console.log('[checkout:debug] origin city:', origin || '<not set>');
+
       if (!origin) {
-        return res.send({ services: customServices, error: !customServices.length ? 'Origin city not configured.' : undefined });
+        console.log('[checkout:debug] no origin, returning custom with error');
+        return res.send({
+          services: customServices,
+          error: customServices.length ? 'RajaOngkir shipping unavailable — origin city not configured.' : 'Origin city not configured. Please contact the seller.',
+        });
       }
 
       const auth = this.getAuth(req);
       const { cart } = await this.sessionService.getCart(req, res, auth?.sub);
       const totalWeight = cart.reduce((sum, item) => sum + (item.weight * item.qty), 0);
 
-      if (totalWeight > 0) {
-        const services = await this.shippingService.calculateCost(origin, destination, totalWeight);
+      console.log('[checkout:debug] cart items:', cart.length, 'total weight (grams):', totalWeight);
+
+      if (totalWeight <= 0) {
+        console.log('[checkout:debug] total weight is 0, returning custom-only');
+        return res.send({
+          services: customServices,
+          error: !customServices.length ? 'Unable to calculate shipping — cart has no weight.' : undefined,
+        });
+      }
+
+      console.log('[checkout:debug] calling shippingService.calculateCost with', { origin, destination, totalWeight });
+      const services = await this.shippingService.calculateCost(origin, destination, totalWeight);
+      console.log('[checkout:debug] rajaongkir returned', services.length, 'services');
+      if (services.length > 0) {
         rajaOngkirServices.push(...services);
+      } else if (!customServices.length) {
+        console.log('[checkout:debug] no rajaongkir services and no custom, returning error');
+        return res.send({ services: [], error: 'No shipping services available for this destination. Please try a different location.' });
       }
     }
 
     const allServices = [...customServices, ...rajaOngkirServices];
+    console.log('[checkout:debug] final services:', allServices.length);
     return res.send({ services: allServices });
   }
 }

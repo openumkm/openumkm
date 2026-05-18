@@ -12,7 +12,7 @@ export class SetupController {
   ) {}
 
   @Get()
-  async setupPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async setupPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const done = await this.setupService.isSetupComplete();
     if (done) return res.status(404).send('Not found');
 
@@ -30,7 +30,7 @@ export class SetupController {
   }
 
   @Post()
-  async setupSubmit(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async setupSubmit(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const done = await this.setupService.isSetupComplete();
     if (done) return res.status(404).send('Not found');
 
@@ -89,9 +89,9 @@ export class SetupController {
     // Auto-login as admin
     const loginResult = await this.authService.login(body.email, body.password);
     if ('token' in loginResult && loginResult.token) {
-      setAuthCookie(res, loginResult.token);
+      setAuthCookie(req, res, loginResult.token);
     }
 
-    return res.redirect(302, '/admin');
+    return res.redirect('/admin', 302);
   }
 }

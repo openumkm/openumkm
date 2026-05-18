@@ -17,12 +17,12 @@ export class AdminOrdersController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login', 302); return null; }
     return auth;
   }
 
   @Get('/orders')
-  async orderList(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async orderList(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -47,7 +47,7 @@ export class AdminOrdersController {
   }
 
   @Get('/orders/:id')
-  async orderDetail(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async orderDetail(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -67,7 +67,7 @@ export class AdminOrdersController {
   }
 
   @Post('/orders/:id/status')
-  async updateStatus(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async updateStatus(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -87,11 +87,11 @@ export class AdminOrdersController {
       }
     }
 
-    return res.redirect(302, `/admin/orders/${id}`);
+    return res.redirect(`/admin/orders/${id}`, 302);
   }
 
   @Post('/orders/:id/tracking')
-  async setTracking(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async setTracking(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -107,11 +107,11 @@ export class AdminOrdersController {
       );
     }
 
-    return res.redirect(302, `/admin/orders/${id}`);
+    return res.redirect(`/admin/orders/${id}`, 302);
   }
 
   @Get('/payments/confirmations')
-  async paymentConfirmations(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async paymentConfirmations(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -129,7 +129,7 @@ export class AdminOrdersController {
   }
 
   @Post('/payments/:id/approve')
-  async approvePayment(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async approvePayment(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -145,11 +145,11 @@ export class AdminOrdersController {
       }
     }
 
-    return res.redirect(302, '/admin/payments/confirmations');
+    return res.redirect('/admin/payments/confirmations', 302);
   }
 
   @Post('/payments/:id/reject')
-  async rejectPayment(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async rejectPayment(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -166,6 +166,6 @@ export class AdminOrdersController {
       );
     }
 
-    return res.redirect(302, '/admin/payments/confirmations');
+    return res.redirect('/admin/payments/confirmations', 302);
   }
 }

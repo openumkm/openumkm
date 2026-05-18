@@ -18,12 +18,12 @@ export class DashboardController {
 
   private async guard(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth) { res.redirect(302, '/auth/login'); return null; }
+    if (!auth) { res.redirect('/auth/login', 302); return null; }
     return auth;
   }
 
   @Get()
-  async dashboardPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async dashboardPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -54,7 +54,7 @@ export class DashboardController {
   }
 
   @Get('/orders')
-  async ordersPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async ordersPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -83,7 +83,7 @@ export class DashboardController {
   }
 
   @Get('/orders/:id')
-  async orderDetailPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async orderDetailPage(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -115,7 +115,7 @@ export class DashboardController {
   /* ── Addresses ───────────────────────────────── */
 
   @Get('/addresses')
-  async addressesPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addressesPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -134,7 +134,7 @@ export class DashboardController {
   }
 
   @Post('/addresses')
-  async addAddress(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addAddress(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -152,11 +152,11 @@ export class DashboardController {
       });
     }
 
-    return res.redirect(302, '/dashboard/addresses');
+    return res.redirect('/dashboard/addresses', 302);
   }
 
   @Post('/addresses/:id')
-  async editAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async editAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
@@ -172,15 +172,15 @@ export class DashboardController {
       isDefault: body.isDefault === '1',
     });
 
-    return res.redirect(302, '/dashboard/addresses');
+    return res.redirect('/dashboard/addresses', 302);
   }
 
   @Post('/addresses/:id/delete')
-  async deleteAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async deleteAddress(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guard(req, res);
     if (!auth) return;
 
     await this.addressService.delete(id, auth.sub);
-    return res.redirect(302, '/dashboard/addresses');
+    return res.redirect('/dashboard/addresses', 302);
   }
 }

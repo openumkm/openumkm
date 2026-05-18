@@ -1,5 +1,5 @@
 <%# Settings: API Keys Section %>
-<div class="admin-card mb-6">
+<div class="admin-card admin-card--overflow-visible mb-6">
   <h3 class="admin-card-title"><%= t('admin.api_keys') %></h3>
   <div class="form-group">
     <label for="xenditSecretKey" class="form-label"><%= t('admin.f_xendit_key', 'Xendit Secret Key') %></label>
@@ -18,7 +18,8 @@
   </div>
   <div class="form-group">
     <label for="originCity" class="form-label"><%= t('admin.f_origin_city', 'Origin City (Shipping)') %></label>
-    <input type="text" id="originCity" name="originCity" class="input" value="<%= s.originCity || '' %>" placeholder="<%= t('admin.f_origin_city_ph', 'Type to search city...') %>" autocomplete="off">
+    <input type="hidden" id="originCityId" name="originCityId" value="<%= s.originCityId || '' %>">
+    <input type="text" id="originCity" class="input" value="<%= s.originCity || '' %>" placeholder="<%= t('admin.f_origin_city_ph', 'Type to search city...') %>" autocomplete="off">
     <div id="originCityResults" class="autocomplete-dropdown" style="display:none;"></div>
     <span class="form-hint"><%= t('admin.f_origin_city_hint', 'City where your products ship from. Start typing to search.') %></span>
   </div>
@@ -47,13 +48,14 @@
             return;
           }
           resultsDiv.innerHTML = data.results.map(function(r) {
-            var label = r.city + ', ' + r.province;
-            return '<div class="autocomplete-item" data-label="' + label + '">' + label + '</div>';
+            return '<div class="autocomplete-item" data-id="' + r.id + '" data-label="' + r.label + '">' + r.label + '</div>';
           }).join('');
           resultsDiv.style.display = 'block';
 
           resultsDiv.querySelectorAll('.autocomplete-item').forEach(function(item) {
             item.addEventListener('click', function() {
+              var originIdInput = document.getElementById('originCityId');
+              if (originIdInput) originIdInput.value = item.getAttribute('data-id');
               searchInput.value = item.getAttribute('data-label');
               resultsDiv.style.display = 'none';
             });

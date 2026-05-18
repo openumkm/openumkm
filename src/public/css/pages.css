@@ -969,3 +969,44 @@
   height: 1px;
   background: var(--color-border);
 }
+
+/* ── Checkout Blocked Section (RajaOngkir not configured) ── */
+.checkout-section--blocked {
+  opacity: 0.65;
+}
+
+.checkout-section--blocked .checkout-section-header {
+  border-bottom-color: var(--color-border-light);
+}
+
+.checkout-section-icon--muted {
+  background: var(--color-gray-100);
+  color: var(--color-text-muted);
+}
+
+.checkout-blocked-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+}
+
+.checkout-blocked-icon {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+  opacity: 0.5;
+}
+
+.checkout-blocked-title {
+  font: 600 16px/1.4 var(--font-family);
+  color: var(--color-text);
+  margin: 0 0 var(--space-2);
+}
+
+.checkout-blocked-text {
+  font: var(--font-body-md);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 400px;
+}

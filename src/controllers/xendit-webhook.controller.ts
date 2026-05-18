@@ -13,7 +13,7 @@ export class XenditWebhookController {
   ) {}
 
   @Post('/xendit/webhook')
-  async handleWebhook(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async handleWebhook(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const callbackToken = (req.headers as any)['x-callback-token'];
     const storedToken = await this.settingsService.get('xendit_callback_token');
 

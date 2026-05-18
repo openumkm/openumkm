@@ -13,14 +13,14 @@ export class AdminSettingsShippingController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login', 302); return null; }
     return auth;
   }
 
   /* ── Currencies ──────────────────────────────── */
 
   @Get('/currencies')
-  async currenciesPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async currenciesPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -36,27 +36,27 @@ export class AdminSettingsShippingController {
   }
 
   @Post('/currencies/toggle')
-  async toggleCurrency(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async toggleCurrency(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     const { code } = req.body as Record<string, string>;
     if (code) await this.settingsService.toggleCurrency(code);
-    return res.redirect(302, '/admin/settings/currencies');
+    return res.redirect('/admin/settings/currencies', 302);
   }
 
   @Post('/currencies/:code/rate')
-  async updateExchangeRate(@Param('code') code: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async updateExchangeRate(@Param('code') code: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     const { exchangeRate } = req.body as Record<string, string>;
     if (exchangeRate) await this.settingsService.updateExchangeRate(code, exchangeRate);
-    return res.redirect(302, '/admin/settings/currencies');
+    return res.redirect('/admin/settings/currencies', 302);
   }
 
   /* ── Custom Shipping Methods ─────────────────── */
 
   @Get('/shipping-methods')
-  async shippingMethodsPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async shippingMethodsPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -72,7 +72,7 @@ export class AdminSettingsShippingController {
   }
 
   @Post('/shipping-methods')
-  async addShippingMethod(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async addShippingMethod(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -84,11 +84,11 @@ export class AdminSettingsShippingController {
         description: description || null,
       });
     }
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods', 302);
   }
 
   @Post('/shipping-methods/:id')
-  async editShippingMethod(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async editShippingMethod(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -100,22 +100,22 @@ export class AdminSettingsShippingController {
         description: description || null,
       });
     }
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods', 302);
   }
 
   @Post('/shipping-methods/:id/toggle')
-  async toggleShippingMethod(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async toggleShippingMethod(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.toggleShippingMethod(id);
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods', 302);
   }
 
   @Post('/shipping-methods/:id/delete')
-  async deleteShippingMethod(@Param('id') id: string, @Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async deleteShippingMethod(@Param('id') id: string, @Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
     await this.settingsService.deleteShippingMethod(id);
-    return res.redirect(302, '/admin/settings/shipping-methods');
+    return res.redirect('/admin/settings/shipping-methods', 302);
   }
 }

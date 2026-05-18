@@ -7,7 +7,7 @@ import { getAuthFromRequest } from '../common/auth.helper';
 
 const SETTING_KEYS = [
   'store_name', 'store_email', 'store_phone', 'invoice_prefix', 'default_language',
-  'xendit_secret_key', 'rajaongkir_api_key', 'origin_city',
+  'xendit_secret_key', 'rajaongkir_api_key', 'origin_city', 'origin_city_label',
   'smtp_host', 'smtp_port', 'smtp_username', 'smtp_password', 'smtp_from_address', 'smtp_enabled',
   'xendit_enabled', 'manual_transfer_enabled', 'auto_expire_hours', 'tax_enabled',
   'xendit_callback_token',
@@ -34,12 +34,12 @@ export class AdminSettingsController {
 
   private async guardAdmin(req: FastifyRequest, res: FastifyReply) {
     const auth = getAuthFromRequest(req, this.authService);
-    if (!auth || auth.role !== 'seller') { res.redirect(302, '/auth/login'); return null; }
+    if (!auth || auth.role !== 'seller') { res.redirect('/auth/login', 302); return null; }
     return auth;
   }
 
   @Get()
-  async settingsPage(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async settingsPage(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -56,7 +56,8 @@ export class AdminSettingsController {
         storeLogo: s.store_logo || null,
         invoicePrefix: s.invoice_prefix, defaultLanguage: s.default_language,
         xenditSecretKey: s.xendit_secret_key, rajaOngkirApiKey: s.rajaongkir_api_key,
-        originCity: s.origin_city,
+        originCityId: s.origin_city,
+        originCity: s.origin_city_label || s.origin_city,
         smtpHost: s.smtp_host, smtpPort: s.smtp_port, smtpUsername: s.smtp_username,
         smtpPassword: s.smtp_password, smtpFromAddress: s.smtp_from_address,
         smtpEnabled: s.smtp_enabled === 'true',
@@ -79,7 +80,7 @@ export class AdminSettingsController {
   }
 
   @Post()
-  async saveSettings(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
+  async saveSettings(@Req() req: FastifyRequest, @Res({ passthrough: true }) res: FastifyReply) {
     const auth = await this.guardAdmin(req, res);
     if (!auth) return;
 
@@ -106,7 +107,8 @@ export class AdminSettingsController {
       store_phone: fields.storePhone || '', invoice_prefix: fields.invoicePrefix || 'INV',
       default_language: fields.defaultLanguage || 'id',
       xendit_secret_key: fields.xenditSecretKey || '', rajaongkir_api_key: fields.rajaOngkirApiKey || '',
-      origin_city: fields.originCity || '',
+      origin_city: fields.originCityId || '',
+      origin_city_label: fields.originCity || '',
       smtp_host: fields.smtpHost || '', smtp_port: fields.smtpPort || '587',
       smtp_username: fields.smtpUsername || '', smtp_password: fields.smtpPassword || '',
       smtp_from_address: fields.smtpFromAddress || '',
@@ -132,6 +134,6 @@ export class AdminSettingsController {
     if (logoUrl) pairs.store_logo = logoUrl;
 
     await this.settingsService.setMany(pairs);
-    return res.redirect(302, '/admin/settings');
+    return res.redirect('/admin/settings', 302);
   }
 }
