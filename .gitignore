@@ -26,3 +26,7 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+
+# opencode AI config
+.opencode/
+opencode.json
