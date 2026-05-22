@@ -11,7 +11,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:prod": "node dist/db/migrate.js",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1039.0",
@@ -46,6 +49,9 @@
     "@types/pg": "^8.11.6",
     "@types/uuid": "^10.0.0",
     "drizzle-kit": "^0.24.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "@nestjs/testing": "^11.1.23",
+    "@vitest/coverage-v8": "^4.1.7",
+    "vitest": "^4.1.7"
   }
 }
