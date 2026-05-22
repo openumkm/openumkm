@@ -32,12 +32,17 @@ describe('SetupController', () => {
   });
 
   it('setupPage returns 403 when SETUP_SECRET mismatch', async () => {
+    const prev = process.env.SETUP_SECRET;
     process.env.SETUP_SECRET = 'secret123';
-    mockSetupService.isSetupComplete.mockResolvedValue(false);
-    const res = { status: vi.fn().mockReturnValue({ send: vi.fn() }) } as any;
-    await controller.setupPage({ query: { secret: 'wrong' } } as any, res);
-    expect(res.status).toHaveBeenCalledWith(403);
-    delete process.env.SETUP_SECRET;
+    try {
+      mockSetupService.isSetupComplete.mockResolvedValue(false);
+      const res = { status: vi.fn().mockReturnValue({ send: vi.fn() }) } as any;
+      await controller.setupPage({ query: { secret: 'wrong' } } as any, res);
+      expect(res.status).toHaveBeenCalledWith(403);
+    } finally {
+      if (prev === undefined) delete process.env.SETUP_SECRET;
+      else process.env.SETUP_SECRET = prev;
+    }
   });
 
   it('setupPage renders setup page', async () => {

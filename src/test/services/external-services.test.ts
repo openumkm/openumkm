@@ -42,6 +42,10 @@ describe('UploadService', () => {
     service = new UploadService(mockSettings);
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('isS3Configured', () => {
     it('returns false when s3 not enabled', async () => {
       mockSettings.get.mockResolvedValue(null);

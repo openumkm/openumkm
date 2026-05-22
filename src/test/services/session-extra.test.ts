@@ -27,6 +27,7 @@ describe('SessionService - extra coverage', () => {
     it('does nothing when session not found', async () => {
       db.select = vi.fn().mockReturnValue({ from: () => ({ where: () => ({ limit: () => qb([]) }) }) });
       await service.clearCart('invalid');
+      expect(db.update).not.toHaveBeenCalled();
     });
 
     it('clears cart when session found', async () => {
@@ -61,11 +62,13 @@ describe('SessionService - extra coverage', () => {
     it('does nothing when guest session not found', async () => {
       db.select = vi.fn().mockReturnValue({ from: () => ({ where: () => ({ limit: () => qb([]) }) }) });
       await service.mergeGuestCart('guest', 'u1', 'user');
+      expect(db.update).not.toHaveBeenCalled();
     });
 
     it('does nothing when guest cart empty', async () => {
       db.select = vi.fn().mockReturnValue({ from: () => ({ where: () => ({ limit: () => qb([{ id: 'gsid', data: {} }]) }) }) });
       await service.mergeGuestCart('guest', 'u1', 'user');
+      expect(db.update).not.toHaveBeenCalled();
     });
 
     it('merges cart with new items', async () => {

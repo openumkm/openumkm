@@ -100,6 +100,7 @@ describe('SettingsService', () => {
     it('toggleBankAccount does nothing if not found', async () => {
       mockSelect.mockReturnValue({ from: () => ({ where: () => ({ limit: () => qb([]) }) }) });
       await service.toggleBankAccount('1');
+      expect(db.update).not.toHaveBeenCalled();
     });
 
     it('deleteBankAccount deletes', async () => {
@@ -167,6 +168,7 @@ describe('SettingsService', () => {
       const mockUpdate = vi.fn().mockReturnValue({ set: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue(undefined) }) });
       db.update = mockUpdate;
       await service.toggleCurrency('IDR');
+      expect(db.update).not.toHaveBeenCalled();
     });
 
     it('updateExchangeRate updates', async () => {
