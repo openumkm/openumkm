@@ -265,6 +265,20 @@ Before deploying:
 
 Contributions welcome! Lihat [CONTRIBUTING.md](CONTRIBUTING.md) untuk panduan lengkap.
 
+## Sponsors
+
+Thanks to the sponsors supporting OpenUMKM development:
+
+<p align="center">
+  <a href="https://boc.co.id" target="_blank">
+    <img src="docs/assets/boc.png" alt="BOC" width="200">
+  </a>
+</p>
+
+[BOC](https://boc.co.id) — provides the domain and VPS for OpenUMKM infrastructure.
+
+Interested in becoming a sponsor? Reach out via our [Telegram Group](https://t.me/openumkm).
+
 ## License
 
 [MIT License](LICENSE) — free to use, modify, and distribute.
