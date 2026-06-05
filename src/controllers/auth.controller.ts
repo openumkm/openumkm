@@ -10,7 +10,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   private ctx(req: FastifyRequest) {
     return { ...i18nContext(req), isLoggedIn: false, cartCount: 0 };
