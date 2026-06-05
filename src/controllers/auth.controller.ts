@@ -43,7 +43,7 @@ export class AuthController {
       });
     }
 
-    setAuthCookie(res, result.token);
+    setAuthCookie(req, res, result.token);
     return res.redirect(result.user.role === 'seller' ? '/admin' : '/dashboard', 302);
   }
 
