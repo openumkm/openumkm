@@ -214,7 +214,7 @@ describe('EmailService', () => {
 
     it('sendOrderCreatedManual sends email', async () => {
       const spy = vi.spyOn(service as any, 'send').mockResolvedValue(true);
-      await service.sendOrderCreatedManual({ orderNumber: 'INV/001', total: 1000, currency: 'IDR', items: [], expiresAt: new Date(), bankAccounts: [] }, 'a@b.com');
+      await service.sendOrderCreatedManual({ orderNumber: 'INV/001', total: 1000, currency: 'IDR', items: [], expiresAt: new Date() }, 'a@b.com', []);
       expect(spy).toHaveBeenCalled();
     });
 
